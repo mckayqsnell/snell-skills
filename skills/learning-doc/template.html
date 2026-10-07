@@ -1,0 +1,143 @@
+<!doctype html>
+<!--
+  LEARNING-DOC TEMPLATE  (copy this file into the vault, then fill it in)
+  ── Self-contained: inline CSS only, SYSTEM FONTS ONLY (no CDN/web fonts — they
+     won't render in the PDF or offline). Embed any image as a data: URI.
+  ── PDF-safe by construction: the @media print block at the bottom of <style>
+     forces colors on (print-color-adjust:exact), sets page margins, and stops
+     cards/tables from splitting across pages. DO NOT remove it. DO NOT put
+     background images in @page {} (headless Chrome silently drops them).
+  ── Components below: .lede, .toc, numbered <h2> concepts, .vocab, .idea,
+     tables, .flow diagram, .mono code block. Duplicate/remix as needed.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOPIC — Learning Notes</title>
+<style>
+  :root{
+    --paper:#faf8f4; --ink:#2b2722; --muted:#7c7468; --rule:#e7e0d4; --card:#fff;
+    --accent:#e8722a; --accent-soft:#fbeede; --teal:#2f6f6a; --teal-soft:#e6f0ee;
+    --blue:#3a5a8c; --code-bg:#f1ece3; --green:#2f7a43; --red:#b23b30;
+    --shadow:0 1px 2px rgba(43,39,34,.05),0 6px 24px rgba(43,39,34,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:17px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px 120px}
+  header.top{position:sticky;top:0;z-index:20;background:rgba(250,248,244,.86);
+    backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid var(--rule)}
+  .top-inner{max-width:820px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .live{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+  h1{font-family:Georgia,"Times New Roman",serif;font-size:40px;line-height:1.12;margin:48px 0 8px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:18px;margin:0 0 28px}
+  h2{font-family:Georgia,serif;font-size:27px;margin:52px 0 6px;padding-top:14px;letter-spacing:-.01em}
+  h2 .num{color:var(--accent);font-size:15px;font-weight:700;display:block;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;font-family:-apple-system,sans-serif}
+  h3{font-size:19px;margin:30px 0 6px}
+  p{margin:14px 0}
+  a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(58,90,140,.3)}
+  a:hover{border-color:var(--blue)}
+  strong{font-weight:700}
+  code{background:var(--code-bg);padding:1.5px 6px;border-radius:5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .lede{font-size:19px;background:var(--card);border:1px solid var(--rule);border-left:4px solid var(--accent);border-radius:12px;padding:18px 22px;box-shadow:var(--shadow)}
+  .vocab{background:var(--teal-soft);border:1px solid #d3e4e0;border-radius:12px;padding:14px 18px;margin:18px 0}
+  .vocab .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
+  .vocab p{margin:4px 0}
+  .idea{background:linear-gradient(180deg,#fff,#fffdf9);border:1px solid var(--rule);border-left:4px solid var(--teal);border-radius:12px;padding:16px 20px;margin:22px 0;box-shadow:var(--shadow)}
+  .idea .tag{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+  .toc{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:18px 22px;margin:28px 0;box-shadow:var(--shadow)}
+  .toc h4{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:28px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{border:none;color:var(--ink)}
+  .toc a:hover{color:var(--accent)}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:20px 0}
+  .flow .node{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;font-size:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:center;min-width:0}
+  .flow .node b{display:block}
+  .flow .node small{color:var(--muted)}
+  .flow .arrow{align-self:center;color:var(--accent);font-weight:700}
+  .flow .node.edge{border-color:var(--accent);background:var(--accent-soft)}
+  table{border-collapse:collapse;width:100%;margin:18px 0;font-size:15px;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{background:#f3eee5;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  ul.tight li{margin:7px 0}
+  .mono{font:13px/1.6 ui-monospace,Menlo,monospace;background:#2b2722;color:#f5efe4;border-radius:10px;padding:14px 16px;overflow-x:auto;white-space:pre}
+  .foot{color:var(--muted);font-size:14px;margin-top:60px;border-top:1px solid var(--rule);padding-top:20px}
+  @media(max-width:640px){.toc ol{columns:1}h1{font-size:32px}}
+  /* ── PDF / PRINT — REQUIRED, do not remove ──────────────────────────────
+     print-color-adjust:exact keeps backgrounds/cards (browsers drop them by
+     default). break-inside:avoid stops cards splitting across pages. */
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    @page{margin:14mm}                       /* never use url() backgrounds here */
+    body{background:var(--paper);font-size:11.5pt}
+    header.top{position:static;background:var(--paper);backdrop-filter:none;border-bottom:1px solid var(--rule)}
+    .wrap{padding-bottom:0}
+    h1,h2,h3{break-after:avoid;page-break-after:avoid}
+    .lede,.vocab,.idea,.toc,table,.flow,.mono,ul.tight{break-inside:avoid;page-break-inside:avoid}
+    a{color:var(--ink);border:none}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <span class="brand"><span class="dot"></span> TOPIC · Learning Notes</span>
+    <span class="live">Living doc — grows as we work</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Big, plain-English title of what we're learning</h1>
+  <p class="sub">One sentence on why this matters / what the reader will walk away knowing.</p>
+
+  <div class="lede"><strong>The one-sentence story:</strong> the single most important takeaway, in plain words.</div>
+
+  <!-- Table of contents (anchors to each concept's id) -->
+  <div class="toc">
+    <h4>What's in here</h4>
+    <ol>
+      <li><a href="#c1">First concept</a></li>
+      <li><a href="#c2">Second concept</a></li>
+    </ol>
+  </div>
+
+  <!-- ── DUPLICATE THIS BLOCK for each concept ─────────────────────────── -->
+  <h2 id="c1"><span class="num">Concept 01</span>Concept title in plain words</h2>
+  <p>Explain it simply, like a good textbook. Short paragraphs. Define jargon the first time.</p>
+
+  <!-- Vocab callout: define an unintuitive term on the side -->
+  <div class="vocab">
+    <span class="tag">Vocab</span>
+    <p><b>Term</b> — plain-English definition, with a tiny analogy if it helps.</p>
+  </div>
+
+  <!-- "Bigger idea" callout: connect to a broader principle -->
+  <div class="idea">
+    <span class="tag">Bigger idea</span>
+    <p>How this concept ties to a larger pattern worth internalizing.</p>
+  </div>
+
+  <!-- Optional: a before/after flow, a comparison table, or a code block -->
+  <div class="flow">
+    <div class="node"><b>Input</b><small>where it starts</small></div>
+    <div class="arrow">→</div>
+    <div class="node edge"><b>Key step</b><small>what changes</small></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>Result</b><small>where it ends</small></div>
+  </div>
+
+  <h2 id="c2"><span class="num">Concept 02</span>Next concept</h2>
+  <p>…</p>
+
+  <div class="foot">
+    <p>Living document — sections get added as the session progresses.</p>
+  </div>
+</div>
+</body>
+</html>

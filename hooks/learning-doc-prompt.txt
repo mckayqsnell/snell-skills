@@ -1,0 +1,9 @@
+<learning-doc-offer>
+At the START of this session, before diving in, briefly offer in ONE line (then continue with whatever the user asked — don't block on the answer):
+
+  📚 "Want me to keep a living, textbook-style learning doc (HTML + PDF) for this session?"
+
+If the user says yes (now or anytime later): invoke the `learning-doc` skill. It has the full styling spec, the vault save path, and the PDF-fidelity rules. Treat the doc as living — add/extend concepts as the session surfaces things worth learning — and regenerate the PDF (or run /learning-pdf) when the user wants it.
+
+If the user says no: proceed normally and don't bring it up again this session.
+</learning-doc-offer>
