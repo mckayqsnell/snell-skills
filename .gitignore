@@ -16,3 +16,7 @@ kit/beta/
 
 # Plans and bake-off pages: may hold work context, never committed
 plans/
+
+# Local Claude Code tools for this machine: preview servers and session worktrees
+.claude/launch.json
+.claude/worktrees/
