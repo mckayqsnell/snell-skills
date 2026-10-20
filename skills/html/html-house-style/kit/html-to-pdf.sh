@@ -7,7 +7,9 @@ set -euo pipefail
 
 die() { echo "html-to-pdf: $*" >&2; exit 1; }
 
-[ $# -ge 1 ] && [ $# -le 2 ] || die "usage: html-to-pdf.sh <page.html> [out.pdf]"
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+  die "usage: html-to-pdf.sh <page.html> [out.pdf]"
+fi
 IN="$1"
 [ -f "$IN" ] || die "no such file: $IN"
 case "$IN" in *.html|*.htm) ;; *) die "expected an .html file, got: $IN" ;; esac
