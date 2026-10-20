@@ -240,6 +240,10 @@ concurrency:
 - **Why the cooldown.** It waits seven days after a release before
   proposing it. Hijacked releases are usually caught and pulled within
   days.
+- **The same rule for installs.** `pnpm-workspace.yaml` sets
+  `minimumReleaseAge: 10080` (7 days, in minutes). pnpm refuses to install
+  any package version younger than that, even one already in the lockfile.
+  So CI fails on a too-new version instead of running it.
 
 ### The linters that check all this
 
