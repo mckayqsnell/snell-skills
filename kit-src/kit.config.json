@@ -1,0 +1,8 @@
+{
+  "$comment": "Skills that ship a copy of the house-style kit. scripts/sync-kit.mjs builds kit-src/ into <skill>/kit/ for each one. Add a skill here before giving it a kit/ folder.",
+  "targets": [
+    "skills/html/html-house-style",
+    "skills/html/html-plan",
+    "skills/html/html-explain"
+  ]
+}

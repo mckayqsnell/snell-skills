@@ -1,0 +1,59 @@
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="label">Contents</div>
+    <ol id="toc-list"></ol>
+  </nav>
+  <main>
+    <!-- A STARTER, NOT A LAYOUT. Pick the parts the topic needs from PARTS.md and put them in the order that teaches best.
+         Two explain pages should not look the same. Keep only: header, the concept sections, recap, glossary, the unclear box. -->
+    <div class="topbar">
+      <span class="tag">Explain · for {{me / who}} · {{DATE}}</span>
+      {{GEAR: keep the gear block from template.html as it is}}
+    </div>
+
+    <header>
+      <div class="part">Explain</div>
+      <h1>{{TOPIC, 2-6 words}}</h1>
+      <p class="lede">{{The whole idea in one or two sentences. Someone who reads only this line should get the gist.}}</p>
+    </header>
+
+    <!-- A CONCEPT. One idea per section. Lead with the takeaway in the h2. -->
+    <section id="c1" data-toc="{{Short name}}" data-fold="open">
+      <div class="part">{{1 · Concept}}</div>
+      <h2>{{The takeaway, as a plain sentence}}</h2>
+      <!-- ELI5 layers: the picture, the real thing, where the picture breaks. Use them for the core ideas, not for every section. -->
+      <div class="layers">
+        <div class="layer pic"><span class="lk">Picture it</span><p>{{An everyday picture the reader already knows.}}</p></div>
+        <div class="layer real"><span class="lk">The real thing</span><p>{{The real term and what it does, in plain words.}}</p></div>
+        <div class="layer breaks"><span class="lk">Where the picture breaks</span><p>{{One way the picture is wrong, so it doesn't mislead later.}}</p></div>
+      </div>
+      <p class="vocab"><dfn>{{term}}</dfn>{{What it means, in one line.}}</p>
+      <figure class="fig"><div class="fig-box">{{SVG}}</div><figcaption>{{What to notice.}}</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure>
+      <div class="idea"><b>Bigger idea</b>{{How this detail ties to something that holds elsewhere too.}}</div>
+    </section>
+
+    <section id="recap" data-toc="Recap" data-fold="open">
+      <div class="part">Recap</div>
+      <h2>What to remember</h2>
+      <ol class="recap"><li>{{Takeaway one, one sentence.}}</li></ol>
+    </section>
+
+    <section id="glossary" data-toc="Glossary" data-fold="closed" data-hint="{{N}} terms" data-no-unclear>
+      <div class="part">Words</div>
+      <h2>Glossary</h2>
+      <dl class="glossary"><dt>{{term}}</dt><dd>{{plain meaning}}</dd></dl>
+    </section>
+
+    <section id="unclear" data-toc="Still unclear?" data-fold="open">
+      <div class="part">Your turn</div>
+      <h2>What's still unclear?</h2>
+      <div class="unclear">
+        <p class="respond-help">Type a question under any section. Copy them all and paste them back to the agent.</p>
+        <div class="unclear-fields" style="display:grid;gap:10px"></div>
+        <label>Anything else<textarea placeholder="Anything else? (optional)"></textarea></label>
+        <pre></pre>
+        <button type="button" class="btn-dark">Copy questions</button>
+      </div>
+    </section>
+  </main>
+</div>

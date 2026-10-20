@@ -9,6 +9,9 @@
 #      and plugin.json's "skills" list names every group folder
 #   4. shellcheck passes on every tracked .sh file
 #   5. no personal paths, emails or secrets are tracked
+#   6. the kit sync script's tests pass
+#   7. every skill's kit/ matches what kit-src/ builds (scripts/sync-kit.mjs --check)
+#   8. the html skills and the kit docs read at plain-language level 80 or better
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
@@ -23,13 +26,13 @@ command -v git >/dev/null || { echo "❌ git is not installed" >&2; exit 1; }
 
 step() { printf '\n▶ %s\n' "$*"; }
 
-step "1/5 Version sync"
+step "1/8 Version sync"
 node scripts/sync-version.mjs --check
 
-step "2/5 claude plugin validate --strict"
+step "2/8 claude plugin validate --strict"
 "$BIN/claude" plugin validate --strict .
 
-step "3/5 npx skills finds every skill"
+step "3/8 npx skills finds every skill"
 # Run in a scratch HOME so the CLI can't read or write your real agent folders.
 SCRATCH="$(mktemp -d)"
 trap 'rm -rf -- "$SCRATCH"' EXIT
@@ -76,7 +79,7 @@ while IFS= read -r group; do
 done < <(git ls-files 'skills/*/*/SKILL.md' | cut -d/ -f1-2 | sort -u)
 echo "✅ every group folder is listed in plugin.json"
 
-step "4/5 shellcheck"
+step "4/8 shellcheck"
 sh_files=()
 while IFS= read -r f; do sh_files+=("$f"); done < <(git ls-files '*.sh')
 if [ "${#sh_files[@]}" -eq 0 ]; then
@@ -86,7 +89,7 @@ else
   echo "✅ ${#sh_files[@]} scripts clean"
 fi
 
-step "5/5 Scrub for personal paths, emails and secrets"
+step "5/8 Scrub for personal paths, emails and secrets"
 # Personal home-folder paths, the old hard-coded vault, email addresses,
 # and common token shapes (GitHub, OpenAI/Anthropic, AWS, private keys).
 pattern='/Users/[A-Za-z]|/home/[a-z][a-z0-9_-]*/|obsidian-vault|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
@@ -104,5 +107,29 @@ if [ -n "$hits" ]; then
   exit 1
 fi
 echo "✅ clean"
+
+step "6/8 sync-kit tests"
+node --test scripts/sync-kit.test.mjs
+
+step "7/8 Every skill's kit/ matches kit-src/"
+node scripts/sync-kit.mjs --check
+
+step "8/8 Plain-language floor (level 80) for the html skills and the kit docs"
+# The kit's own checker. to-markdown predates the house style, so it is not held to it.
+vocab_files=()
+while IFS= read -r f; do vocab_files+=("$f"); done < <(git ls-files 'skills/html/*/SKILL.md' 'kit-src/HOUSE-STYLE.md' 'kit-src/PARTS.md')
+[ "${#vocab_files[@]}" -gt 0 ] || { echo "❌ no html skills or kit docs found to check" >&2; exit 1; }
+vocab_fail=0
+for f in "${vocab_files[@]}"; do
+  if out="$(node kit-src/vocab-check.mjs "$f" --level 80 2>&1)"; then
+    echo "  $f: $(printf '%s\n' "$out" | head -1)"
+  else
+    printf '%s\n' "$out" >&2
+    echo "❌ $f is under the level 80 floor (run: node kit-src/vocab-check.mjs $f --verbose)" >&2
+    vocab_fail=1
+  fi
+done
+[ "$vocab_fail" -eq 0 ] || exit 1
+echo "✅ ${#vocab_files[@]} files at level 80 or better"
 
 printf '\n✅ All checks passed\n'

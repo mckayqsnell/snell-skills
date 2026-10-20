@@ -46,7 +46,7 @@ claude plugin install snell-skills@snell-skills
 ```
 
 This gives you every skill. Plugin skills get a name prefix, for example
-`/snell-skills:to-markdown`.
+`/snell-skills:html-plan`.
 
 To get updates without asking each time, open `/plugin`, go to
 **Marketplaces**, pick `snell-skills` and choose **Enable auto-update**.
@@ -59,7 +59,14 @@ release.
 
 | Group | Skill | What it does |
 | :- | :- | :- |
+| html | [html-plan](skills/html/html-plan/SKILL.md) | Plans a coding job as one page: it sizes the job, asks a few questions, then you pick the decisions and paste one answer back. |
+| html | [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it: a picture first, then the real thing, then where the picture breaks. Can save a PDF. |
+| html | [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look for any other page you want to read: colors, fonts, parts, sketch drawings and a reply box. |
 | tools | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
+
+The three html skills share one look. Each carries its own copy of the kit
+(`kit/`: templates, rules, scripts), so each works when you install it alone.
+Pages are single offline files: fonts and scripts are packed in.
 
 ## Repo layout
 
@@ -68,9 +75,10 @@ release.
   plugin.json        the plugin manifest (name, version, where skills live)
   marketplace.json   the catalog that lists the plugin
 skills/<group>/<name>/SKILL.md   one folder per skill, grouped
-scripts/             version sync and the check suite
+skills/html/*/kit/   built copies of the house-style kit (never edit by hand)
+kit-src/             the kit's sources: the only place to edit it
+scripts/             version sync, kit sync and the check suite
 .changeset/          pending release notes (see CONTRIBUTING.md)
-plan-html-skill/     the project plan and its template (not a skill yet)
 ```
 
 ## Working on it

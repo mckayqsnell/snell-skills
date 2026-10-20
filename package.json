@@ -18,6 +18,8 @@
     "changeset": "changeset",
     "version-packages": "changeset version && node scripts/sync-version.mjs",
     "release": "changeset git-tag",
+    "kit": "node scripts/sync-kit.mjs",
+    "test": "node --test scripts/sync-kit.test.mjs",
     "check": "bash scripts/check.sh"
   },
   "devDependencies": {

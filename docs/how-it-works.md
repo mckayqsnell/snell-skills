@@ -309,3 +309,44 @@ concurrency:
   secrets kept outside an environment. CI runs it in `auditor` mode, its
   strictest.
 - **shellcheck** checks every `.sh` file for common shell bugs.
+
+## 4. One kit, a copy in each skill
+
+The three html skills look the same because they read the same kit: the page
+templates, the rules (`HOUSE-STYLE.md`, `PARTS.md`), the defaults
+(`settings.md`), the vocab checker and the PDF script.
+
+**Why copies?** `npx skills add` lets you install one skill on its own. A skill
+can only read files inside its own folder, so each html skill needs the kit
+inside it. Copies by hand drift apart, so a script makes them.
+
+**The source.** `kit-src/` is the only place to edit the kit.
+`kit-src/build-kit.mjs` turns those sources into the finished kit. The build
+gives the same bytes every time for the same sources: no dates, nothing random.
+That is what lets CI compare copies exactly.
+
+**The sync.** `scripts/sync-kit.mjs` (run with `pnpm run kit`):
+
+1. Reads the skills to update from `kit-src/kit.config.json`. Each must be a
+   real `skills/<group>/<name>` folder inside the repo, with a `SKILL.md`. A
+   link, a missing folder, a duplicate or a path outside `skills/` stops the
+   run before anything is built.
+2. Builds the kit in a scratch folder, and checks that every required file is
+   there. A broken build never reaches a skill.
+3. Compares the build with each skill's `kit/` by SHA-256 hash and executable
+   bit, and lists files that are new, changed or gone.
+4. For each kit that differs, copies the build next to the old `kit/`, then
+   swaps it in with a rename. A rename on the same disk is atomic, so a
+   reader never sees half a kit. If anything fails, the old kit goes back.
+5. Removes the scratch folder, even when something failed.
+
+With `--check` it does steps 1 to 3 and writes nothing. CI runs that on every
+pull request. Exit codes: `0` all match, `1` a kit differs or an update
+failed, `2` bad arguments or config.
+
+**Tests.** `scripts/sync-kit.test.mjs` runs with Node's built-in test runner
+(`pnpm test`). Each test makes a tiny fake repo in a scratch folder, so it
+never touches the real skills. They cover hand edits, extra and missing files,
+a lost executable bit, bad config, links, a failing build and leftovers from
+an interrupted run.
+

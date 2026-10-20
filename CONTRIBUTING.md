@@ -19,13 +19,39 @@ pnpm run check
 
 1. Make a folder at `skills/<group>/<name>/` with a `SKILL.md` inside. The
    `name:` in its frontmatter must match the folder name.
-2. Use an existing group (today only `tools`) if one fits. A new group also
+2. Use an existing group (`html` or `tools`) if one fits. A new group also
    needs a line in the `"skills"` list in `.claude-plugin/plugin.json`, or
    the Claude Code plugin will not load it.
 3. No personal paths. Anything machine-specific goes in a gitignored
    `local.env`, with a committed `local.env.example` that explains each key.
    The skill's scripts must stop with a clear message when a key is missing.
 4. Add a row to the Skills table in `README.md`.
+
+## Changing the house-style kit
+
+The html skills share one kit: templates, rules, the page script and helper
+scripts. Its sources live in `kit-src/`. Each html skill ships a built copy in
+its own `kit/` folder, so it works when someone installs only that skill.
+
+1. Edit files in `kit-src/` only. Never edit a skill's `kit/` folder: the next
+   sync overwrites it, and CI fails while it differs.
+2. Rebuild every copy:
+
+   ```bash
+   pnpm run kit
+   ```
+
+   It builds the kit in a scratch folder, then swaps each skill's `kit/` for
+   the new one. It lists what changed in each.
+3. Commit `kit-src/` and the updated `kit/` folders together.
+
+To give another skill a kit, add its folder to `targets` in
+`kit-src/kit.config.json`, then run `pnpm run kit`. The check fails if a skill
+has a `kit/` folder the config doesn't list.
+
+`pnpm run check` runs `node scripts/sync-kit.mjs --check`, which builds the
+kit and compares it file by file (content and the executable bit) without
+writing anything.
 
 ## Every change that users would notice needs a changeset
 
