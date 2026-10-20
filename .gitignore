@@ -1,7 +1,22 @@
 .DS_Store
 
+# Per-machine settings (personal paths) for any skill that needs them.
+# Never committed; a skill that reads it ships a local.env.example.
+local.env
+
+# Dependencies
+node_modules/
+
+# Browser-automation scratch folders
+.playwright-mcp/
+.playwright-cli/
+
 # Beta house-style kit: shared by hand, not committed
 kit/beta/
 
 # Plans and bake-off pages: may hold work context, never committed
 plans/
+
+# Local Claude Code tools for this machine: preview servers and session worktrees
+.claude/launch.json
+.claude/worktrees/
