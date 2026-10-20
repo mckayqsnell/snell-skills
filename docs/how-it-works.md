@@ -22,10 +22,11 @@ differ in who does the work and what you get.
   folder into that agent's skills folder. For Claude Code that is
   `.claude/skills/`. For Codex it is a different folder, and so on.
 - **How it finds nested groups.** It walks `skills/` up to three levels
-  deep, so `skills/html/learning-doc/` is found. It also reads the
+  deep, so `skills/tools/to-markdown/` is found. It also reads the
   `"skills"` list in `.claude-plugin/plugin.json`.
-- **What you get.** Skills only. Commands and hooks are a Claude Code idea,
-  so this path skips them.
+- **What you get.** Skills only. Plugins can also carry commands and
+  hooks, which are a Claude Code idea; this path would skip them. (This
+  repo has none today.)
 - **Updates.** None by themselves. You run the command again.
 - **Works with.** Claude Code, Codex, Cursor, OpenCode and about 75 other
   agents.
@@ -44,10 +45,10 @@ differ in who does the work and what you get.
   plugin's name; the part after is the marketplace's name.
 - **How it finds nested groups.** By default a plugin only scans
   `skills/<name>/SKILL.md`, one level. `plugin.json` adds
-  `"skills": ["./skills/html/", "./skills/tools/"]`, which tells it to scan
-  each group folder too. A new group needs a new line there.
-- **What you get.** Every skill, plus the `/learning-pdf` command and the
-  session-start hook. Names get a prefix: `/snell-skills:to-markdown`.
+  `"skills": ["./skills/tools/"]`, which tells it to scan that group
+  folder too. A new group needs a new line there.
+- **What you get.** Every skill, plus any commands or hooks the plugin
+  ships (none today). Names get a prefix: `/snell-skills:to-markdown`.
 - **Updates.** Claude Code compares the `version` in `plugin.json` with the
   one you have. You get a new copy only when that string changes. That is
   why the release flow (next section) bumps it on every release. Automatic
@@ -63,15 +64,13 @@ use whatever access git already has: an SSH key loaded in `ssh-agent`, or a
 stored HTTPS login (`gh auth login`, then `gh auth setup-git`). While this
 repo is private, only people with read access can install it.
 
-### Where the personal path went
+### Personal paths: `local.env`
 
-The learning-doc folder used to be written into the skill. Now the scripts
-read `LEARNING_DOC_DIR` from a `local.env` file, which git ignores. They
-look in three places, in order: the file named by `SNELL_SKILLS_ENV`, then
-`local.env` in a clone of this repo, then `~/.config/snell-skills/local.env`.
-The middle one only works when you run the skill straight from a clone; an
-installed copy uses the last one. If none exists, the script stops and
-prints what to create.
+No skill here needs a per-machine path today. When one does, the rule is:
+put the value in a `local.env` file that git ignores, commit a
+`local.env.example` that explains each key, and make the skill's script stop
+with a clear message when the file or key is missing. Never write a path
+like `/Users/<you>/...` into a skill. CI's scrub check fails if one sneaks in.
 
 ---
 

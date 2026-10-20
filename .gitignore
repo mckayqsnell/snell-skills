@@ -1,6 +1,7 @@
 .DS_Store
 
-# Per-machine settings (personal paths). Copy local.env.example to create it.
+# Per-machine settings (personal paths) for any skill that needs them.
+# Never committed; a skill that reads it ships a local.env.example.
 local.env
 
 # Dependencies

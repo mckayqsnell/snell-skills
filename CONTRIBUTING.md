@@ -19,11 +19,12 @@ pnpm run check
 
 1. Make a folder at `skills/<group>/<name>/` with a `SKILL.md` inside. The
    `name:` in its frontmatter must match the folder name.
-2. Use an existing group (`html`, `tools`) if one fits. A new group also
+2. Use an existing group (today only `tools`) if one fits. A new group also
    needs a line in the `"skills"` list in `.claude-plugin/plugin.json`, or
    the Claude Code plugin will not load it.
-3. No personal paths. Anything machine-specific goes in `local.env` (add the
-   key to `local.env.example` with a comment).
+3. No personal paths. Anything machine-specific goes in a gitignored
+   `local.env`, with a committed `local.env.example` that explains each key.
+   The skill's scripts must stop with a clear message when a key is missing.
 4. Add a row to the Skills table in `README.md`.
 
 ## Every change that users would notice needs a changeset

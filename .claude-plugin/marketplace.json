@@ -9,7 +9,7 @@
     {
       "name": "snell-skills",
       "source": "./",
-      "description": "Textbook-style HTML learning docs, file-to-Markdown conversion, and more."
+      "description": "McKay Snell's agent skills. For now: to-markdown, which converts files into Markdown."
     }
   ]
 }

@@ -62,9 +62,12 @@ echo "✅ all $expected skills listed"
 step "4/5 shellcheck"
 sh_files=()
 while IFS= read -r f; do sh_files+=("$f"); done < <(git ls-files '*.sh')
-[ "${#sh_files[@]}" -gt 0 ] || { echo "❌ No .sh files found; this check expects some" >&2; exit 1; }
-shellcheck -x "${sh_files[@]}"
-echo "✅ ${#sh_files[@]} scripts clean"
+if [ "${#sh_files[@]}" -eq 0 ]; then
+  echo "  no tracked .sh files, nothing to check"
+else
+  shellcheck -x "${sh_files[@]}"
+  echo "✅ ${#sh_files[@]} scripts clean"
+fi
 
 step "5/5 Scrub for personal paths, emails and secrets"
 # Personal home-folder paths, the old hard-coded vault, email addresses,
@@ -77,7 +80,7 @@ allow='noreply@anthropic\.com|@users\.noreply\.github\.com|git@github\.com|^scri
 hits="$(git grep -n -I -E "$pattern" -- . ':!pnpm-lock.yaml' | grep -Ev "$allow" || true)"
 if [ -n "$hits" ]; then
   echo "$hits" >&2
-  echo "❌ Found personal paths, emails or secrets (above). Move them to local.env." >&2
+  echo "❌ Found personal paths, emails or secrets (above). Move personal values to a gitignored local.env." >&2
   exit 1
 fi
 echo "✅ clean"

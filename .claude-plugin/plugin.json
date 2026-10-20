@@ -2,7 +2,7 @@
   "name": "snell-skills",
   "displayName": "Snell Skills",
   "version": "0.0.0",
-  "description": "McKay Snell's agent skills: textbook-style HTML learning docs, file-to-Markdown conversion, and more.",
+  "description": "McKay Snell's agent skills. For now: to-markdown, which converts files into Markdown.",
   "author": {
     "name": "McKay Snell",
     "url": "https://github.com/mckayqsnell"
@@ -12,12 +12,9 @@
   "license": "MIT",
   "keywords": [
     "skills",
-    "learning",
-    "html",
     "markdown"
   ],
   "skills": [
-    "./skills/html/",
     "./skills/tools/"
   ]
 }
