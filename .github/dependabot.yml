@@ -1,0 +1,27 @@
+# Dependabot opens pull requests when a pinned GitHub Action or an npm
+# dev dependency has a new release. Each update goes through CI like any PR.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Wait a week after a release before proposing it, so a bad or
+    # compromised release has time to be caught and pulled.
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      dev-dependencies:
+        patterns:
+          - "*"

@@ -1,0 +1,63 @@
+# Release: runs on every push to main.
+#   - If there are pending changesets, it opens (or updates) a
+#     "Version Packages" pull request with the version bump and CHANGELOG.
+#   - When that pull request is merged, it tags the new version (vX.Y.Z)
+#     and creates a GitHub release. Nothing is published to npm.
+# See docs/how-it-works.md for the full flow and the safety settings.
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# Never run two releases at once, and never cancel one halfway.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version PR or GitHub release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # commit the version bump, push tags, create releases
+      pull-requests: write # open and update the Version Packages PR
+    steps:
+      - name: Check out the code (full history and tags)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Tags let `changeset git-tag` skip versions that are already released.
+          fetch-depth: 0
+          # changesets/action pushes through the GitHub API with its own token,
+          # so no git credentials need to stay on disk.
+          persist-credentials: false
+
+      - name: Set up pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies (exact versions from pnpm-lock.yaml)
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+
+      - name: Open the version PR, or tag and release
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          version-script: pnpm run version-packages
+          publish-script: pnpm run release
+          commit-message: "Version Packages"
+          pr-title: "Version Packages"
+          create-github-releases: true
