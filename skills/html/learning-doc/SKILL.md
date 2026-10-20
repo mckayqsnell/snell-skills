@@ -8,16 +8,17 @@ description: Create and maintain a beautiful, textbook-style HTML learning doc (
 Build a **living, textbook-style HTML doc** that teaches the valuable concepts surfacing this session, in plain English, beautifully laid out — then convert it to a **PDF** the user annotates on an iPad (GoodNotes). Keep it updated as the session goes.
 
 ## Quick start
-1. **Copy the template** into the vault folder (quote the path — it has spaces):
+The scripts below live in this skill's own folder (`${CLAUDE_SKILL_DIR}` in Claude Code). The docs folder comes from `LEARNING_DOC_DIR` in a `local.env` settings file; if a script says it is missing, show the user its message and stop. See `local.env.example` in the snell-skills repo.
+
+1. **Start the doc** from the template (it prints the new file's path):
    ```bash
-   DEST="$MY_SKILLS_KNOWLEDGE_DIR"
-   cp ~/.claude/skills/learning-doc/template.html "$DEST/<topic-kebab>.html"
+   "${CLAUDE_SKILL_DIR}/new-doc.sh" <topic-kebab>
    ```
-   Name it for the topic (e.g. `cloudflare-migration.html`, or prefix a ticket: `hea-1062-sync-state.html`).
+   Name it for the topic (e.g. `cloudflare-migration`, or prefix a ticket: `hea-1062-sync-state`).
 2. **Fill it in** following the template's components (lede → TOC → numbered concepts with `.vocab` and `.idea` callouts). Edit it throughout the session as new things come up — it's a *living* doc.
 3. **Generate the PDF** when the user asks (or at a natural stopping point — ask first, don't spam):
    ```bash
-   ~/.claude/skills/learning-doc/html-to-pdf.sh "$DEST/<topic-kebab>.html"
+   "${CLAUDE_SKILL_DIR}/html-to-pdf.sh" "<path printed in step 1>"
    ```
    This writes `<topic-kebab>.pdf` next to the HTML. The `/learning-pdf` command does the same.
 
@@ -39,5 +40,5 @@ This is the user's textbook — invest in it:
 
 ## Workflow notes
 - Treat the doc as **append-only-ish**: as the session surfaces something worth learning, add a concept or extend one. Mention briefly when you've updated it.
-- The vault is a git repo backed to GitHub; the user pulls it onto the iPad via **Working Copy** and opens the PDF in **GoodNotes**. So both the `.html` and `.pdf` belong in the vault folder above.
+- The vault is a git repo backed to GitHub; the user pulls it onto the iPad via **Working Copy** and opens the PDF in **GoodNotes**. So both the `.html` and `.pdf` belong in `LEARNING_DOC_DIR`.
 - Regenerating the PDF is a cheap shell command (no tokens) — re-run it after meaningful updates or when the user says so.
