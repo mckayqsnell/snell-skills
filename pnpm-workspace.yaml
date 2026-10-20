@@ -1,0 +1,5 @@
+# pnpm blocks dependency install scripts unless listed here.
+# Claude Code's postinstall links its native binary for this platform,
+# which `pnpm run check` needs for `claude plugin validate`.
+allowBuilds:
+  "@anthropic-ai/claude-code": true

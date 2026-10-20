@@ -1,0 +1,28 @@
+{
+  "name": "snell-skills",
+  "version": "0.0.0",
+  "private": true,
+  "description": "McKay Snell's agent skills. Not published to npm: this file only drives versions and the changelog.",
+  "license": "MIT",
+  "author": "McKay Snell",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mckayqsnell/snell-skills.git"
+  },
+  "type": "module",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "changeset": "changeset",
+    "version-packages": "changeset version && node scripts/sync-version.mjs",
+    "release": "changeset git-tag",
+    "check": "bash scripts/check.sh"
+  },
+  "devDependencies": {
+    "@anthropic-ai/claude-code": "2.1.304",
+    "@changesets/cli": "3.0.3",
+    "skills": "1.7.4"
+  }
+}
