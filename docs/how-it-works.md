@@ -118,10 +118,60 @@ packages unless told otherwise, so `.changeset/config.json` sets
 7. Plugin users now get the update, because the `version` in `plugin.json`
    changed.
 
-**One repo setting is needed.** GitHub blocks workflows from opening pull
-requests unless you allow it. It's under Settings → Actions → General →
-"Allow GitHub Actions to create and approve pull requests". Until it is on,
-step 4 fails.
+### Why the release uses a GitHub App, not the built-in token
+
+Every workflow run gets a built-in token called `GITHUB_TOKEN`. GitHub
+never starts other workflows from things that token does, so workflows
+can't trigger each other in an endless loop. The side effect: a Version
+Packages PR opened with `GITHUB_TOKEN` would never get CI.
+
+So the release job acts as a small **GitHub App** instead. A GitHub App is
+an account-like identity you create and install on one repo, with only the
+permissions you give it. At the start of each release run, the job swaps
+the App's private key for a **token that lasts one hour**, only works on
+this repo, and only has two write permissions (contents and pull
+requests). It's revoked when the job ends. Things done with that token
+count as the App's actions, so CI runs on the Version Packages PR like on
+any other PR.
+
+The private key sits in a GitHub **environment** called `release`. An
+environment is a named box of secrets with rules about who may open it.
+This one only opens for workflows running on `main`. So even if someone
+edited the workflow in a pull request branch, that run could not read the
+key.
+
+### Release app setup (one time)
+
+1. **Create the App.** GitHub → your avatar → Settings → Developer
+   settings → GitHub Apps → New GitHub App.
+   - Name: anything unique, for example `snell-skills-release`.
+   - Homepage URL: the repo URL.
+   - Webhook: uncheck **Active** (it needs no events).
+   - Repository permissions: **Contents: Read and write**, **Pull requests:
+     Read and write**. Leave everything else at No access. (Metadata: Read
+     is added by itself.)
+   - Where can this app be installed: **Only on this account**.
+   - Create it. On its page, note the **Client ID**, then under **Private
+     keys** choose **Generate a private key**. A `.pem` file downloads.
+2. **Install it on this repo only.** On the App's page: Install App →
+   your account → **Only select repositories** → `snell-skills`.
+3. **Make the `release` environment.** Repo → Settings → Environments →
+   New environment → `release`. Under **Deployment branches and tags**
+   choose **Selected branches and tags** and add the rule `main`.
+4. **Store the two values in that environment.**
+   - Environment variable `RELEASE_APP_CLIENT_ID` = the Client ID.
+   - Environment secret `RELEASE_APP_PRIVATE_KEY` = the whole contents of
+     the `.pem` file.
+
+   Then delete the `.pem` from your Downloads. You can generate a new key
+   any time, and GitHub keeps only the public half.
+
+If a value is missing, the release job stops at "Check the release app is
+configured" with an error naming the missing one.
+
+With the App in place, the repo setting "Allow GitHub Actions to create and
+approve pull requests" is no longer needed. You can turn it back off, so
+`GITHUB_TOKEN` can't open pull requests at all.
 
 ---
 
@@ -156,8 +206,7 @@ permissions:
 jobs:
   release:
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read # writes go through the App token instead
 ```
 
 - **What it is.** Each run gets a temporary token (`GITHUB_TOKEN`) that can
@@ -165,8 +214,10 @@ jobs:
 - **Guards against.** Damage from any step that goes wrong. If a tool in
   the CI job were compromised, its token can only read code, not push or
   release.
-- **Why per job.** Only the release job can write, and only the two things
-  it needs.
+- **Why per job.** Each job states its own needs. Here every job's
+  `GITHUB_TOKEN` is read-only. The only write access is the release App's
+  one-hour token (see section 2), and it only covers the two things the
+  release needs.
 
 ### `persist-credentials: false` on checkout
 
@@ -176,7 +227,7 @@ jobs:
   reading that saved token and using it. It also keeps the token out of
   anything that gets uploaded.
 - **Why it still works here.** CI never pushes. The release job lets
-  `changesets/action` push through the GitHub API with its own token
+  `changesets/action` push through the GitHub API with the App token
   instead of git.
 
 ### Concurrency groups
@@ -239,17 +290,22 @@ concurrency:
 - **What it is.** Dependabot opens pull requests when a pinned action or
   dev dependency has a new release, updating both the SHA and the comment.
 - **Why the cooldown.** It waits seven days after a release before
-  proposing it. Hijacked releases are usually caught and pulled within
-  days.
+  proposing it, so a bad release has time to be caught and pulled first.
+  zizmor's strictest mode asks for at least seven. It only slows down the
+  bot's suggestions, not what you can install yourself.
 - **The same rule for installs.** `pnpm-workspace.yaml` sets
-  `minimumReleaseAge: 10080` (7 days, in minutes). pnpm refuses to install
-  any package version younger than that, even one already in the lockfile.
-  So CI fails on a too-new version instead of running it.
+  `minimumReleaseAge: 1440` (one day, in minutes). That is pnpm 12's
+  default, written out so it's visible. It's shorter than the bot's
+  cooldown on purpose: you can pick up a day-old fix by hand. pnpm refuses to install any package
+  version younger than that, even one already in the lockfile, so CI fails
+  on a too-new version instead of running it.
 
 ### The linters that check all this
 
 - **actionlint** checks workflow files for mistakes: bad syntax, wrong
   inputs, shell errors in `run:` steps.
 - **zizmor** checks them for security problems: unpinned actions, broad
-  permissions, saved credentials, injection risks, cache poisoning.
+  permissions, saved credentials, injection risks, cache poisoning, and
+  secrets kept outside an environment. CI runs it in `auditor` mode, its
+  strictest.
 - **shellcheck** checks every `.sh` file for common shell bugs.

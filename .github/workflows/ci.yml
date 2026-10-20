@@ -79,7 +79,8 @@ jobs:
           "$tmp/actionlint" -version
           "$tmp/actionlint" -color
 
+      # auditor: zizmor's strictest mode, with every audit on.
       - name: zizmor (security audit of the workflows)
         run: |
           set -euo pipefail
-          pipx run "zizmor==${ZIZMOR_VERSION}" --offline .github/
+          pipx run "zizmor==${ZIZMOR_VERSION}" --offline --persona=auditor .github/
