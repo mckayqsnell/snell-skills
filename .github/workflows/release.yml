@@ -48,10 +48,12 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Install dependencies (exact versions from pnpm-lock.yaml)
+      # --ignore-scripts: this job can write to the repo, so no dependency's
+      # install script runs here. It only needs @changesets/cli, which has none.
+      - name: Install dependencies (exact versions, no install scripts)
         run: |
           set -euo pipefail
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Open the version PR, or tag and release
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2

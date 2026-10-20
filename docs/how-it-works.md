@@ -231,6 +231,8 @@ concurrency:
   run and read by another. A poisoned cache in a job that can write to the
   repo is dangerous. CI caches the pnpm store to run faster; the release
   job does not.
+- The release job also installs with `--ignore-scripts`, so no dependency's
+  install script runs while the job holds write access.
 
 ### Dependabot with a cooldown
 
