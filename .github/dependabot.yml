@@ -7,7 +7,9 @@ updates:
     schedule:
       interval: weekly
     # Wait a week after a release before proposing it, so a bad or
-    # compromised release has time to be caught and pulled.
+    # compromised release has time to be caught and pulled. (zizmor's
+    # auditor mode wants 7+ days. Installs by hand only need 1 day; see
+    # pnpm-workspace.yaml.)
     cooldown:
       default-days: 7
     groups:

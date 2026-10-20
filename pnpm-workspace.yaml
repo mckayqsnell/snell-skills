@@ -1,7 +1,8 @@
-# Supply-chain guard: refuse any package version published less than 7 days
+# Supply-chain guard: refuse any package version published less than a day
 # ago (in minutes). A hijacked release is usually caught and pulled within
-# days. Matches the 7-day cooldown in .github/dependabot.yml.
-minimumReleaseAge: 10080
+# hours. This is pnpm 12's default, written out so it's visible.
+# (Dependabot waits longer, 7 days, before proposing an update.)
+minimumReleaseAge: 1440
 
 # pnpm blocks dependency install scripts unless listed here.
 # Claude Code's postinstall links its native binary for this platform,
