@@ -57,7 +57,7 @@ differ in who does the work and what you get.
   Otherwise they run `claude plugin update snell-skills@snell-skills`.
 - **Works with.** Claude Code. Codex and GitHub Copilot read the same
   `.claude-plugin/marketplace.json`, so the README lists their install
-  commands too; those have not been run against this repo yet.
+  commands too.
 
 ### No login needed
 
