@@ -11,6 +11,7 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 | `HOUSE-STYLE.md` | This file. The rules. | Always, first. |
 | `PARTS.md` | Every part: its classes and a markup snippet. About 5 KB. | Always. Copy markup from here. |
 | `explain-template.html` | A starter for explain pages: header, one concept, recap, glossary, the "still unclear" box. Not a fixed layout. | Copy only. |
+| `page.html` | A plain starter for any other page (a review, report or guide): header, one open section, one folded section with a table. | Copy only. |
 | `template.html` | An empty plan page with every part. **Copy it; don't read it whole.** The fonts are packed in, so it is about 180 KB. | Copy only. Read just the `<body>` if you must. |
 | `house-style.html` | Every part and drawing, live, with code to copy. For people. | Open in a browser to look. |
 | `settings.md` | The defaults: colors, fonts, drawings, vocab, models, where pages go. | Read it. A project or user copy wins. |
@@ -20,7 +21,7 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 
 ## How to make a page
 
-1. Copy the whole starter with `cp`: `template.html` for a plan, `explain-template.html` for an explain page. Edit the copy in place; never rebuild it from pieces.
+1. Copy the whole starter with `cp`: `template.html` for a plan, `explain-template.html` for an explain page, `page.html` for any other page. Edit the copy in place; never rebuild it from pieces.
 2. Set `<title>` and the page's own path: `<meta name="plan-file">` on a plan, `<meta name="page-file">` on an explain page. The response box quotes that path. Then set `data-drawings` on `<html>`: `sketch` for our own pages, `clean` for customer pages.
 3. Fill in every `{{...}}`. Delete parts you don't need. Don't invent new parts: use the ones in `PARTS.md`.
 4. Keep the `<style>` and `<script>` blocks as they are. Colors, fonts and sizes come only from the CSS variables (`--accent`, `--ink`, `--font-body` and so on). Never write a raw hex color in the page body.
@@ -42,7 +43,8 @@ Write the way plainlanguage.gov says: talk to the reader, keep it short, use com
 - Short sentences. Most under 20 words.
 - Active voice: "The script checks the page", not "The page is checked".
 - One idea per sentence. One topic per paragraph.
-- Common words. If you must use a technical term, explain it in one short line the first time.
+- Common words. If you must use a technical term, explain it in one short line the first time: a `.vocab` line with the term in `<dfn>` (see PARTS.md).
+- **Technical topics:** define the 2–5 terms the page can't avoid ("commit", "hash") in place, where each first shows up. The checker counts a term defined in a `<dfn>`, `<abbr>` or `.term` as explained everywhere on the page, plurals too. A glossary entry alone counts for nothing: the glossary helps the reader look back, it doesn't explain anything where the word is used.
 - No filler words. `vocab-check.mjs --verbose` lists any it finds.
 - Headings say what the section is about, in plain words.
 - Numbers as digits: "3 files", "15 KB", "2 days".

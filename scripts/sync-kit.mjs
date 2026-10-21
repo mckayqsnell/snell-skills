@@ -27,7 +27,7 @@ export const EXIT = Object.freeze({ OK: 0, DRIFT: 1, USAGE: 2 });
 
 // Files every built kit must hold. A build that lacks one is broken, so it is never copied anywhere.
 export const REQUIRED = Object.freeze([
-  "HOUSE-STYLE.md", "PARTS.md", "settings.md", "tokens.css", "template.html", "explain-template.html",
+  "HOUSE-STYLE.md", "PARTS.md", "settings.md", "tokens.css", "template.html", "explain-template.html", "page.html",
   "house-style.html", "vocab-check.mjs", "vocab-common-3000.txt", "html-to-pdf.sh", "FONTS-LICENSE.txt", "ROUGH-LICENSE.txt",
 ]);
 

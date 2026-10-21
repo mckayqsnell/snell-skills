@@ -10,7 +10,7 @@ One look for every page: warm paper colors, packed-in serif and sans fonts, fold
 Everything lives in `kit/`, the folder next to this SKILL.md. Use its full path when you run commands from the user's project. Start there:
 
 1. Read `kit/HOUSE-STYLE.md` (the rules) and `kit/PARTS.md` (every part, with markup). Open `kit/house-style.html` in a browser to see them live.
-2. Copy a starter whole with `cp`: `kit/template.html` for a page with decisions, `kit/explain-template.html` for a page that teaches. Edit the copy in place. Keep its `<style>` and `<script>` blocks.
+2. Copy a starter whole with `cp`: `kit/page.html` for a plain page (most pages), `kit/template.html` for a page with decisions, `kit/explain-template.html` for a page that teaches. Edit the copy in place. Keep its `<style>` and `<script>` blocks. Fill every `{{…}}`, including `<title>` and the top bar tag; `grep -n '{{' <page>` must print nothing.
 3. Use only the parts in PARTS.md, and only the colors and sizes in the CSS variables.
 4. Check it the way HOUSE-STYLE.md says: light, dark, a 390 px phone, no console errors, and `node kit/vocab-check.mjs <page> --level <N>`, where N is `vocab.level` in `settings.md` (default 80).
 5. Need a PDF? `kit/html-to-pdf.sh <page>` (needs Chrome, Chromium or Edge).

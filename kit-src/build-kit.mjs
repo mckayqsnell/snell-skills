@@ -1,5 +1,5 @@
 // build-kit.mjs: builds the house-style kit from the sources in this folder (kit-src/).
-// The kit is what skills read: template.html, explain-template.html, house-style.html,
+// The kit is what skills read: template.html, explain-template.html, page.html, house-style.html,
 // tokens.css, HOUSE-STYLE.md, PARTS.md, settings.md, the scripts and the license notices.
 //
 // Don't run this by hand to update the skills. Run `pnpm run kit` (scripts/sync-kit.mjs):
@@ -62,6 +62,11 @@ export function buildKit(OUT) {
   const gearBlock = tb.slice(tb.indexOf('<button type="button" class="gear"'), tb.indexOf('</div>\n    </div>\n\n    <!-- HEADER') + 6);
   if (!gearBlock.startsWith('<button')) throw new Error('build-kit: could not find the gear block in template-body.html');
   fs.writeFileSync(path.join(OUT, 'explain-template.html'), head('{{TOPIC}}', { planFile: '' }).replace('<title>{{TOPIC}}</title>', '<title>{{TOPIC}}</title>\n<meta name="page-file" content="{{explain/topic.html}}">') + eb.replace(GEAR_MARK, gearBlock) + '\n' + foot());
+
+  // ---------- page.html (a plain page: reviews, reports, guides) ----------
+  const pb = read(path.join(HERE, 'page-body.html'));
+  if (!pb.includes(GEAR_MARK)) throw new Error('build-kit: page-body.html lost its gear placeholder');
+  fs.writeFileSync(path.join(OUT, 'page.html'), head('{{TITLE}}') + pb.replace(GEAR_MARK, gearBlock) + '\n' + foot());
 
   // ---------- house-style.html ----------
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
