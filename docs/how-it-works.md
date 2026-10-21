@@ -59,12 +59,12 @@ differ in who does the work and what you get.
   `.claude-plugin/marketplace.json`, so the README lists their install
   commands too; those have not been run against this repo yet.
 
-### Private repo, both paths
+### No login needed
 
-Neither tool has a password of its own. Both run `git` on your machine and
-use whatever access git already has: an SSH key loaded in `ssh-agent`, or a
-stored HTTPS login (`gh auth login`, then `gh auth setup-git`). While this
-repo is private, only people with read access can install it.
+The repo is public, so both tools fetch it over plain HTTPS with no login.
+Neither tool has a password of its own: they run `git` on your machine, so a
+fork you keep private still works with whatever access git already has (an
+SSH key, or `gh auth login` then `gh auth setup-git`).
 
 ### Personal paths: `local.env`
 

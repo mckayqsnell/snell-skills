@@ -18,8 +18,6 @@ Agents write walls of Markdown. I skim them, miss the one decision that mattered
 
 Every page is one offline HTML file. It has the same look every time, works on a phone, and prints to a PDF that matches it.
 
-> **Private for now.** The install commands below only work for people with read access to this repo on GitHub, with git set up to reach it (an SSH key, or `gh auth login` then `gh auth setup-git`).
-
 ## Installation (30-second setup)
 
 A plugin updates itself. `npx skills` copies editable files into your project or home folder, and you update them by hand. Pick one per agent: installing both gives you every skill twice.
