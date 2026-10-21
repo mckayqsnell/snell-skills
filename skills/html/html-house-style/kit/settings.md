@@ -7,7 +7,7 @@ version: 1
 
 look:
   colors: burnt-sienna          # round 1, pick B
-  fonts: source                 # round 2, pick E: Source Serif 4 + Source Sans 3 + Source Code Pro, packed in (87 KB)
+  fonts: source                 # round 2, pick E: Adobe Source fonts, packed in as Snell Serif + Snell Sans + Snell Mono (87 KB)
   density: default              # round 3, pick B: 17 px, line height 1.6, 61 ch; the reader can change it in the gear
   motion: highlight             # round 7, pick B: 180 ms fades, one pulse on the next decision, smooth jumps; still under reduced motion
 

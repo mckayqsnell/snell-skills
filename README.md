@@ -149,4 +149,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to make a change, rebuild the kit
 
 ## License
 
-[MIT](LICENSE) © McKay Snell. The kit packs in the Source fonts (SIL Open Font License, see `kit/FONTS-LICENSE.txt`) and Rough.js (MIT, see `kit/ROUGH-LICENSE.txt`). The banner lettering is traced from [Parisienne](https://github.com/google/fonts/tree/main/ofl/parisienne) by Astigmatic (SIL Open Font License).
+[MIT](LICENSE) © McKay Snell. The kit packs in Latin subsets of Adobe's Source Serif 4, Source Sans 3 and Source Code Pro, renamed Snell Serif, Snell Sans and Snell Mono as their license requires (SIL Open Font License, see `kit/FONTS-LICENSE.txt`) and Rough.js (MIT, see `kit/ROUGH-LICENSE.txt`). The banner lettering is traced from [Parisienne](https://github.com/google/fonts/tree/main/ofl/parisienne) by Astigmatic (SIL Open Font License).
