@@ -1,0 +1,15 @@
+{
+  "name": "snell-skills",
+  "description": "McKay Snell's agent skills, packaged as one Claude Code plugin.",
+  "owner": {
+    "name": "McKay Snell",
+    "url": "https://github.com/mckayqsnell"
+  },
+  "plugins": [
+    {
+      "name": "snell-skills",
+      "source": "./",
+      "description": "McKay Snell's agent skills: html-plan (plans as one page you answer in one paste), html-explain (pages that teach a topic), html-house-style (the shared look), and to-markdown."
+    }
+  ]
+}

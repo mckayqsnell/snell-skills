@@ -1,0 +1,56 @@
+/* House style tokens (house style 1). Picked in a design bake-off, Oct 2026.
+   Round 1 colors: B Burnt Sienna. Round 2 fonts: E Source Serif 4 + Source Sans 3 + Source Code Pro.
+   Round 3 size: B Default. Round 5 drawings: sketch A2+B1+C2+D3, clean E1. Round 7 motion: B Highlight only.
+   Every color, font and size on a page comes from here. Never write a raw hex color in a page body. */
+:root {
+  /* colors, light */
+  --bg: #faf3e6;
+  --surface: #fffaf0;
+  --sunk: #f0e6d2;
+  --ink: #2a1a10;
+  --muted: #6b5744;
+  --line: #e2d5bb;
+  --accent: #b5370f;
+  --accent-soft: #f9dfcc;
+  --go: #2a6e45;
+  --go-soft: #dcecdf;
+  --warn: #8f5a07;
+  --warn-soft: #f7e8c8;
+  --code-bg: #f1e7d2;
+  --shadow: 0 1px 2px rgba(40,30,20,.06), 0 6px 20px rgba(40,30,20,.06);
+  color-scheme: light;
+
+  /* fonts (packed into each page, see fonts.css) */
+  --font-display: "Source Serif 4", Charter, Georgia, serif;
+  --font-body: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Source Code Pro", ui-monospace, Menlo, Consolas, monospace;
+  --font-hand: "Bradley Hand", "Segoe Print", "Segoe Script", "Comic Sans MS", cursive; /* sketch edge labels only; local fonts */
+
+  /* size and spacing */
+  --size-body: 17px; --leading: 1.6; --measure: 61ch;
+  --size-h1: clamp(34px, 6vw, 48px); --size-h2: 30px; --size-h3: 22px; --size-h4: 18.5px; --leading-head: 1.2;
+  --size-code: 14.5px; --size-small: 14px; --size-label: 12px; /* --size-label is the floor for any text, drawings too */
+  --space-1: 4px; --space-2: 8px; --space-3: 14px; --space-4: 20px; --space-5: 32px; --space-6: 48px;
+  --radius: 12px; --pad-card: var(--space-5);
+  --pad-cell-x: var(--space-3); --pad-cell-y: var(--space-2); --tap: 44px;
+
+  /* motion: highlight only */
+  --motion-fast: 180ms; --motion-slow: 320ms; --motion-pulse: 1100ms; --ease: cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a120c; --surface: #241a12; --sunk: #2d2218; --ink: #f6ead8; --muted: #b9a58d;
+    --line: #41331f; --accent: #f0743a; --accent-soft: #43241a; --go: #6fcb90; --go-soft: #1d3324;
+    --warn: #ecb04e; --warn-soft: #3b2c14; --code-bg: #2d2218;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1a120c; --surface: #241a12; --sunk: #2d2218; --ink: #f6ead8; --muted: #b9a58d;
+  --line: #41331f; --accent: #f0743a; --accent-soft: #43241a; --go: #6fcb90; --go-soft: #1d3324;
+  --warn: #ecb04e; --warn-soft: #3b2c14; --code-bg: #2d2218;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+@media (prefers-reduced-motion: reduce) { :root { --motion-fast: 0ms; --motion-slow: 0ms; --motion-pulse: 0ms; } }

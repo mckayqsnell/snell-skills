@@ -1,0 +1,100 @@
+# Release: runs on every push to main.
+#   - If there are pending changesets, it opens (or updates) a
+#     "Version Packages" pull request with the version bump and CHANGELOG.
+#   - When that pull request is merged, it tags the new version (vX.Y.Z)
+#     and creates a GitHub release. Nothing is published to npm.
+# It acts through a short-lived token from the "release" GitHub App, not the
+# built-in GITHUB_TOKEN, because GitHub never runs CI on a pull request that
+# GITHUB_TOKEN opened. Setup: docs/how-it-works.md, "Release app setup".
+# See docs/how-it-works.md for the full flow and the safety settings.
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# Never run two releases at once, and never cancel one halfway.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version PR or GitHub release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # The app's key lives in the "release" environment, which only the main
+    # branch may use, so a workflow edited on another branch can't read it.
+    environment: release
+    # The built-in token only reads; all writes go through the App token below.
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the code (full history and tags)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Tags let `changeset git-tag` skip versions that are already released.
+          fetch-depth: 0
+          # changesets/action pushes through the GitHub API with its own token,
+          # so no git credentials need to stay on disk.
+          persist-credentials: false
+
+      - name: Set up pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      # --ignore-scripts: this job can write to the repo, so no dependency's
+      # install script runs here. It only needs @changesets/cli, which has none.
+      - name: Install dependencies (exact versions, no install scripts)
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Check the release app is configured
+        env:
+          CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          HAS_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          missing=0
+          if [ -z "$CLIENT_ID" ]; then
+            echo "::error::Variable RELEASE_APP_CLIENT_ID is not set in the release environment. See docs/how-it-works.md, Release app setup."
+            missing=1
+          fi
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::error::Secret RELEASE_APP_PRIVATE_KEY is not set in the release environment. See docs/how-it-works.md, Release app setup."
+            missing=1
+          fi
+          exit "$missing"
+
+      # A token that lasts one hour, can only touch this repo, and only has
+      # the two write permissions the release needs. Revoked when the job ends.
+      - name: Mint a short-lived token from the release app
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write # commit the version bump, push tags, create releases
+          permission-pull-requests: write # open and update the Version Packages PR
+
+      - name: Open the version PR, or tag and release
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          version-script: pnpm run version-packages
+          publish-script: pnpm run release
+          commit-message: "Version Packages"
+          pr-title: "Version Packages"
+          create-github-releases: true

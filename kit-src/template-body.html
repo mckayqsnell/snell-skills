@@ -1,0 +1,189 @@
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="label">Contents</div>
+    <ol id="toc-list"></ol>
+  </nav>
+  <main>
+    <!-- TOP BAR: page kind, size, date. Keep the gear: it holds theme, text size and drawing style. -->
+    <div class="topbar">
+      <span class="tag">Plan · {{S, M or L}} · updated {{DATE}}</span>
+      <button type="button" class="gear" aria-label="Style settings" aria-expanded="false" aria-controls="style-pop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.6 10.5L21.5 10.6L21.5 13.4L18.6 13.5L17.7 15.6L19.7 17.7L17.7 19.7L15.6 17.7L13.5 18.6L13.4 21.5L10.6 21.5L10.5 18.6L8.4 17.7L6.3 19.7L4.3 17.7L6.3 15.6L5.4 13.5L2.5 13.4L2.5 10.6L5.4 10.5L6.3 8.4L4.3 6.3L6.3 4.3L8.4 6.3L10.5 5.4L10.6 2.5L13.4 2.5L13.5 5.4L15.6 6.3L17.7 4.3L19.7 6.3L17.7 8.4Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <div class="style-pop" id="style-pop" role="group" aria-label="Style settings" data-vocab-skip hidden>
+        <span class="sl">Theme</span>
+        <div class="seg"><button type="button" data-theme-set="auto">Auto</button><button type="button" data-theme-set="light">Light</button><button type="button" data-theme-set="dark">Dark</button></div>
+        <span class="sl">Text size</span>
+        <div class="seg"><button type="button" data-dens-set="compact">Small</button><button type="button" data-dens-set="default">Default</button><button type="button" data-dens-set="large">Large</button></div>
+        <div class="draw-row"><span class="sl">Drawings</span>
+        <div class="seg"><button type="button" data-draw-set="sketch">Sketch</button><button type="button" data-draw-set="clean">Clean</button></div></div>
+      </div>
+    </div>
+
+    <!-- HEADER (all sizes): title names the change and the place, 3-7 words. -->
+    <header>
+      <div class="part">Plan</div>
+      <h1>{{TITLE}}</h1>
+      <p class="lede">{{ONE OR TWO SENTENCES: what this is and why it matters.}}</p>
+      <div class="meta">
+        <span>Owner <b>{{NAME}}</b></span>
+        <span>Size <b>{{S, M or L}}</b></span>
+        <span>Status <b>{{draft / agreed / building / done}}</b></span>
+      </div>
+      <!-- WHY (M and L; S only if the reason is not obvious) -->
+      <details class="fold why">
+        <summary>Why · {{N}} reasons</summary>
+        <div class="fold-body"><ol><li><b>{{Reason in bold.}}</b> {{One sentence of detail.}}</li></ol></div>
+      </details>
+    </header>
+
+    <!-- GOAL (all sizes, open): what we build and what changes for the user. -->
+    <section id="goal" data-toc="Goal" data-fold="open">
+      <div class="part">Goal</div>
+      <h2>{{What we are building}}</h2>
+      <p class="section-intro">{{One sentence intro.}}</p>
+      <p>{{Body text. Short sentences. Active voice. One idea per sentence.}}</p>
+      <div class="note tip"><b>{{Good to know.}}</b> {{Detail.}}</div>
+      <div class="note warn"><b>{{Watch for this.}}</b> {{Detail.}}</div>
+      <div class="note stop"><b>{{Hard rule.}}</b> {{Detail.}}</div>
+    </section>
+
+    <!-- HOW IT WORKS (M and L, open): the main drawing. System map for parts that talk, before/after for a change,
+         flow for a process, sequence for calls over time, timeline for dates. Copy one from house-style.html.
+         Wider than 1000? Use the viewer (.vw) from house-style.html instead of .fig. -->
+    <section id="how" data-toc="How it works" data-fold="open">
+      <div class="part">How it works</div>
+      <h2>{{How the parts fit}}</h2>
+      <figure class="fig">
+        <div class="fig-box">{{SVG}}</div>
+        <figcaption>{{One sentence: what to notice.}}</figcaption>
+        <p class="swipe">Swipe sideways to see the whole drawing.</p>
+      </figure>
+    </section>
+
+    <!-- PROGRESS (M and L, folded): one row per step or phase. Counts fill themselves from the row classes.
+         Row classes: done, prov (picked, not confirmed), you (waiting on the reader), doing, todo, blocked.
+         Each row says what proved it. The agent updates rows in the file, in the same turn something changes. -->
+    <section id="progress" data-toc="Progress" data-fold="closed" data-hint="auto">
+      <div class="part">Progress</div>
+      <h2>Progress</h2>
+      <p class="section-intro">Where everything stands. Ticks change in the file, not by clicking.</p>
+      <div class="prog-group"><h3>{{Phase 1 · name}}<small></small></h3>
+        <ul class="prog">
+          <li class="done"><div class="it">{{Something finished}}<span class="st">done</span></div><div class="nx">{{What proved it: the command or check.}}</div><span class="tick" role="img" aria-label="done"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+          <li class="you"><div class="it">{{Something waiting on the reader}}<span class="st">your move</span></div><div class="nx">{{What they need to do.}}</div><span class="tick" role="img" aria-label="your move"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg></span></li>
+          <li class="todo"><div class="it">{{Something not started}}<span class="st">not started</span></div><div class="nx">{{Next step.}}</div><span class="tick" role="img" aria-label="not started"></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- STEPS (S): numbered because order matters. Every step ends with a Check line. -->
+    <section id="steps" data-toc="Steps" data-fold="open">
+      <div class="part">Build</div>
+      <h2>Steps</h2>
+      <ol class="steps">
+        <li class="step"><div class="step-body">
+          <h3>{{Step name}} <span class="who">{{who}}</span></h3>
+          <ul class="tight"><li>{{What happens.}}</li></ul>
+          <p class="check-line"><b>Check</b>{{A command and what it must print, or what you see.}}</p>
+        </div></li>
+      </ol>
+    </section>
+
+    <!-- PHASES (M and L, instead of Steps): each phase has its own loop: build, test, review. -->
+    <section id="phases" data-toc="Phases" data-fold="open">
+      <div class="part">Build</div>
+      <h2>Phases</h2>
+      <ol class="steps phases">
+        <li class="step"><div class="step-body">
+          <h3>{{Phase name}} <span class="who">{{who}}</span></h3>
+          <ul class="tight"><li>{{What gets built.}}</li></ul>
+          <div class="loop"><span>build</span><span>test</span><span>review</span></div>
+          <p class="check-line"><b>Check</b>{{What must be true before the next phase starts.}}</p>
+        </div></li>
+      </ol>
+    </section>
+
+    <!-- FILES (M and L, folded): real paths. Badges: new, changed, gone. -->
+    <section id="files" data-toc="Files" data-fold="closed" data-hint="{{N}} files: {{n}} new, {{n}} changed">
+      <div class="part">Files</div>
+      <h2>Files this touches</h2>
+      <div class="table-box"><table class="fix cards">
+        <thead><tr><th>File</th><th>Change</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><code>{{src/path/file.ts:40}}</code></td><td><span class="chg mod">changed</span></td><td>{{One line.}}</td></tr>
+          <tr><td><code>{{src/path/new-file.ts}}</code></td><td><span class="chg new">new</span></td><td>{{One line.}}</td></tr>
+          <tr><td><code>{{src/path/old.ts}}</code></td><td><span class="chg del">gone</span></td><td>{{One line.}}</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- DECISIONS + RESPONSE (all sizes, open). 2-5 real forks that change what we build.
+         The suggested pick is checked and has data-suggested. Numbers fill themselves.
+         No open choices? Delete the .decisions block; the panel then says "Looks good, build it". -->
+    <section id="decisions" data-toc="Your call" data-fold="open">
+      <div class="part">Your call</div>
+      <h2>Decisions</h2>
+      <p class="section-intro">Suggested picks are on. Change any, then copy your answers back.</p>
+      <div class="decide"><div class="decide-grid">
+        <div class="decisions">
+          <div class="decision" id="d1">
+            <div class="decision-head"><span class="decision-num">Decision</span><span class="decision-state">not looked at</span></div>
+            <h4>{{The question, as a question?}}</h4>
+            <p>{{Two or three sentences of context. What each choice costs.}}</p>
+            <div class="opts">
+              <label class="opt"><input type="radio" name="d1" value="{{Option A, full text}}" checked data-suggested><span class="oh"><span class="t">{{Option A}}</span><em class="sug">Suggested</em></span><small>{{Why, 12 words at most.}}</small></label>
+              <label class="opt"><input type="radio" name="d1" value="{{Option B, full text}}"><span class="oh"><span class="t">{{Option B}}</span></span><small>{{Trade-off. If it drops part of the plan, say which.}}</small></label>
+            </div>
+            <details class="whyfold"><summary>Why I suggest this</summary><div class="wb"><p>{{The reason in one or two sentences.}}</p><p><b>What would change my mind:</b> {{one line}}</p></div></details>
+            <textarea placeholder="Note (optional)" aria-label="Note for this decision"></textarea>
+          </div>
+        </div>
+        <aside class="respond" aria-label="Your answers">
+          <div class="respond-head"><h3>Your answers</h3><button type="button" class="fold-r" aria-expanded="true">Fold</button></div>
+          <p class="respond-help">Updates as you pick. Copy it and paste it back to the agent.</p>
+          <button type="button" class="todo-btn" hidden></button>
+          <pre id="response-text"></pre>
+          <textarea id="response-notes" placeholder="Anything else? (optional)" aria-label="Other notes"></textarea>
+          <button type="button" class="btn-dark" id="response-copy">Copy response</button>
+        </aside>
+      </div></div>
+    </section>
+
+    <!-- BUILD SPLIT (M and L, folded): who builds what. One lead, at most 3 sub-agents, each with its own files. -->
+    <section id="split" data-toc="Build split" data-fold="closed" data-hint="{{1 lead + N sub-agents}}">
+      <div class="part">Build split</div>
+      <h2>Who builds what</h2>
+      <div class="split">
+        <div class="agent lead"><span class="role">Lead</span><h4>{{Lead role}}</h4><span class="model">{{latest Opus · medium}}</span><ul><li>{{Owns the plan and the checks.}}</li></ul></div>
+        <div class="agent"><span class="role">Sub-agent 1</span><h4>{{What it builds}}</h4><span class="model">{{latest Sonnet · medium}}</span><ul><li><code>{{its files}}</code></li></ul></div>
+      </div>
+    </section>
+
+    <!-- RISKS (M and L, folded): each risk with what we do about it. -->
+    <section id="risks" data-toc="Risks" data-fold="closed">
+      <div class="part">Risks</div>
+      <h2>Risks</h2>
+      <div class="note warn" style="margin-top:18px"><b>{{Risk.}}</b> {{What we do about it.}}</div>
+    </section>
+
+    <!-- NOT CHANGING (M and L, folded, required): what stays the same, so nobody touches it. -->
+    <section id="not-changing" data-toc="Not changing" data-fold="closed">
+      <div class="part">Scope</div>
+      <h2>Not changing</h2>
+      <ul class="notlist"><li>{{Thing that stays as it is.}}</li></ul>
+    </section>
+
+    <!-- RESEARCH (L, folded): what we read and what it told us. Name the source. -->
+    <section id="research" data-toc="Research" data-fold="closed">
+      <div class="part">Research</div>
+      <h2>What we found</h2>
+      <ul class="sources"><li>{{Finding in one sentence.}}<span class="src">{{source: doc name, page or path}}</span></li></ul>
+    </section>
+
+    <!-- OPEN QUESTIONS (all sizes, open): only questions nobody can answer yet. Delete if none. -->
+    <section id="questions" data-toc="Open questions" data-fold="open">
+      <div class="part">Open</div>
+      <h2>Open questions</h2>
+      <ul class="notlist"><li>{{Question nobody has answered yet.}}</li></ul>
+    </section>
+  </main>
+</div>
