@@ -44,20 +44,19 @@ function decode(s) {
 
 // HTML -> { units: [text], glossed: Set }  Code/pre become the token CODE (counts as 1 word, not checked).
 export function prepare(html) {
+  // A term counts as explained only where the page defines it in place: <dfn>, <abbr> or a .term
+  // span, the way PARTS.md's .vocab line does. A glossary <dt> alone earns nothing, so stacking
+  // glossary entries can't lift the score; the glossary is for the reader, not for the checker.
   const glossed = new Set();
   html = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ');
   html = dropChrome(html);
-  html = html.replace(/<dt\b[^>]*>([\s\S]*?)<\/dt>/gi, (m, inner) => {   // glossary terms count as explained
-    inner.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
-    return m;
-  });
   html = html.replace(/<(dfn|abbr)\b[^>]*>([\s\S]*?)<\/\1>/gi, (m, t, inner) => {
     inner.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
-    return inner;
+    return ` ${inner} `;
   });
   html = html.replace(/<span[^>]*class="[^"]*\bterm\b[^"]*"[^>]*>([\s\S]*?)<\/span>/gi, (m, inner) => {
     inner.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
-    return inner;
+    return ` ${inner} `;
   });
   html = html.replace(/<(pre|code)\b[^>]*>[\s\S]*?<\/\1>/gi, ' CODETOKEN ');
   html = html.replace(/<\/?(p|li|td|th|tr|h[1-6]|div|section|ul|ol|table|caption|dt|dd|br|summary|details|blockquote|figcaption)\b[^>]*>/gi, '\n');
@@ -103,7 +102,7 @@ function isCommon(w, glossed) {
   if (w.endsWith('er')) stems.push(w.slice(0, -2), w.slice(0, -1));
   if (w.endsWith('est')) stems.push(w.slice(0, -3));
   if (w.endsWith('ment')) stems.push(w.slice(0, -4));
-  return stems.some(x => x.length > 1 && (COMMON.has(x) || ALLOW.has(x)));
+  return stems.some(x => x.length > 1 && (COMMON.has(x) || ALLOW.has(x) || glossed.has(x)));
 }
 
 export function score(html, opts = {}) {
@@ -190,6 +189,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   }
   if (level != null) {
     if (args.includes('--exact')) { const ok = Math.abs(res.score - level) <= 5; console.log(ok ? `PASS: within 5 of ${level}` : `FAIL: ${res.score} is not within 5 of ${level}`); process.exit(ok ? 0 : 1); }
-    const ok = res.score >= level; console.log(ok ? `PASS: ${res.score} is at or above the floor of ${level}` : `FAIL: ${res.score} is under the floor of ${level}. Run with --verbose to see hard words, long sentences and passive voice.`); process.exit(ok ? 0 : 1);
+    const ok = res.score >= level; console.log(ok ? `PASS: ${res.score} is at or above the floor of ${level}` : `FAIL: ${res.score} is under the floor of ${level}. Run with --verbose to see hard words, long sentences and passive voice. Hard words the page can't avoid? Define each in place with <dfn> where it first shows up.`); process.exit(ok ? 0 : 1);
   }
 }

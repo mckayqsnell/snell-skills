@@ -1,0 +1,36 @@
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="label">Contents</div>
+    <ol id="toc-list"></ol>
+  </nav>
+  <main>
+    <!-- A PLAIN PAGE: a review, report, guide or one-off page. Add sections and parts from PARTS.md;
+         delete what the page doesn't need. Fill every {{...}}, including the title and the top bar tag. -->
+    <div class="topbar">
+      <span class="tag">{{Page kind, e.g. Review, Report, Guide}} · {{DATE}}</span>
+      {{GEAR: keep the gear block from template.html as it is}}
+    </div>
+
+    <header>
+      <div class="part">{{Page kind}}</div>
+      <h1>{{TITLE, 3-7 words}}</h1>
+      <p class="lede">{{ONE OR TWO SENTENCES: what this page is and what the reader gets from it.}}</p>
+    </header>
+
+    <!-- A SECTION. The h2 says what the section is about, in plain words. -->
+    <section id="s1" data-toc="{{Short name}}" data-fold="open">
+      <div class="part">{{Label}}</div>
+      <h2>{{What this section is about}}</h2>
+      <p class="section-intro">{{One sentence.}}</p>
+      <p>{{Body text.}}</p>
+      <div class="note tip"><b>{{Short title.}}</b> {{Good to know.}}</div>
+    </section>
+
+    <!-- A FOLDED SECTION with a table. Folded sections hold detail the reader can skip. -->
+    <section id="s2" data-toc="{{Short name}}" data-fold="closed" data-hint="{{3 rows}}">
+      <div class="part">{{Label}}</div>
+      <h2>{{What this section is about}}</h2>
+      <div class="table-box"><table class="fix cards"><thead><tr><th>{{Column}}</th><th>{{Column}}</th></tr></thead><tbody><tr><td>{{Cell}}</td><td>{{Cell}}</td></tr></tbody></table></div>
+    </section>
+  </main>
+</div>

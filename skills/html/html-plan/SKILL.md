@@ -46,8 +46,8 @@ A question you can answer by reading the code is not a question. Read the code.
 
 ## 3. Write the page
 
-1. **Where it goes.** `plans/YYYY-MM-DD-topic.html` in the project. Name it once, from the start. Before you write, check git: `git check-ignore -q plans/` (ignored is fine) or `git status --porcelain plans/`. If `plans/` is neither ignored nor already committed, tell the user before the page lands there. On a work repo or a page with customer context, ask first: an untracked page can get committed by accident.
-2. **Copy the whole file** with `cp kit/template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the response panel. Set `<title>`, `<meta name="plan-file">` (the response quotes it, so the agent knows which plan an answer is for), and `data-drawings` on `<html>` (`sketch`; `clean` and no Rough.js script for customer pages).
+1. **Where it goes.** `plans/YYYY-MM-DD-topic.html` in the project. Name it once, from the start. Before you write, check git with the page's own path, which works before the folder exists: `git check-ignore -q plans/<page>.html` exits 0 if it is ignored (fine). If not, `git ls-files plans/` prints something if plans are already committed there. If `plans/` is neither ignored nor already committed, tell the user before the page lands there. On a work repo or a page with customer context, ask first: an untracked page can get committed by accident.
+2. **Copy the whole file** with `cp kit/template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the response panel. Set `<title>`, `<meta name="plan-file">` (the response quotes it, so the agent knows which plan an answer is for), the top bar tag (`Plan · {{S, M or L}} · updated {{DATE}}`), and `data-drawings` on `<html>` (`sketch`; `clean` and no Rough.js script for customer pages). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
 3. **Fill it in.** Keep the `<style>` and `<script>` blocks. Delete parts the size doesn't need. Use only parts from `PARTS.md`.
 4. **Parts by size**, in this order:
 
@@ -94,8 +94,9 @@ Write plain SVG in the clean look; the page draws the sketch look itself. Copy a
 
 1. **Check in a browser** if you have one (Playwright, or your own browser tool): desktop light, desktop dark, and phone at 390 px. No console errors. Nothing scrolls sideways except drawings and code in their own box. Pick an option and type a note: the response must change and quote the note. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Do the read-through: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say it was checked by read-through.
-3. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80).
-4. **Can't fix something?** Say it in one sentence and hand over anyway.
-5. **Open it** in the user's browser: `open` (Mac), `xdg-open` (Linux), `start` (Windows). No screen: print the path.
-6. **Tell the user in 2 lines:** the path, the size, and what you need ("3 decisions need your pick").
-7. **Act on the response** when it comes back. Apply the picks and notes, update Progress, and send the page again if the shape changed. Then build.
+3. **Placeholders:** `grep -n '{{' plans/<page>.html` prints nothing.
+4. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80).
+5. **Can't fix something?** Say it in one sentence and hand over anyway.
+6. **Open it** in the user's browser: `open` (Mac), `xdg-open` (Linux), `start` (Windows). No screen: print the path.
+7. **Tell the user in 2 lines:** the path, the size, and what you need ("3 decisions need your pick").
+8. **Act on the response** when it comes back. Apply the picks and notes, update Progress, and send the page again if the shape changed. Then build.

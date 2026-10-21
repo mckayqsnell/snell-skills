@@ -1,13 +1,13 @@
 # settings.md (house style 1 defaults)
 
-The defaults every html-* skill reads, picked in a design bake-off (Oct 2026). The setup wizard (`/setup-snell-skills`, coming later) writes your own copy. A copy in the project wins over your user copy, and your user copy wins over this file.
+The defaults every html-* skill reads, picked in a design bake-off (Oct 2026). To change one, copy this file to your project or user folder and edit the copy. A copy in the project wins over your user copy, and your user copy wins over this file.
 
 ```yaml
 version: 1
 
 look:
   colors: burnt-sienna          # round 1, pick B
-  fonts: source                 # round 2, pick E: Adobe Source fonts, packed in as Snell Serif + Snell Sans + Snell Mono (87 KB)
+  fonts: source                 # round 2, pick E: Adobe Source fonts, packed in as Snell Serif + Snell Sans + Snell Mono (94.0 KB)
   density: default              # round 3, pick B: 17 px, line height 1.6, 61 ch; the reader can change it in the gear
   motion: highlight             # round 7, pick B: 180 ms fades, one pulse on the next decision, smooth jumps; still under reduced motion
 
