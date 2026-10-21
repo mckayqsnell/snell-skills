@@ -20,9 +20,17 @@ Every page is one offline HTML file. It has the same look every time, works on a
 
 ## Installation (30-second setup)
 
-A plugin updates itself. `npx skills` copies editable files into your project or home folder, and you update them by hand. Pick one per agent: installing both gives you every skill twice.
-
 ### 1. Get the skills
+
+**Recommended: `npx skills`.** It works with Claude Code, Codex, Copilot, Gemini CLI, Cursor, OpenCode, Windsurf, Amp and more:
+
+```bash
+npx skills@latest add mckayqsnell/snell-skills
+```
+
+The [skills CLI](https://github.com/vercel-labs/skills) asks which skills and which agents you want, then copies them into each agent's skills folder. Add `-g` to install for your user instead of this project, or `-a <agent>` to skip the question. To update, run `npx skills@latest update`; re-run `add` to pick up new skills. Each html skill carries its own copy of the kit, so you can install just one.
+
+**Or install it as a plugin** for your agent. A plugin can update itself, and its skills get a name prefix (`/snell-skills:html-plan`). Pick one way per agent: installing both gives you every skill twice.
 
 <details>
 <summary><strong>Claude Code</strong></summary>
@@ -46,7 +54,7 @@ Plugin skills get a name prefix: `/snell-skills:html-plan`.
 <details>
 <summary><strong>Codex</strong> (not yet tested)</summary>
 
-These commands follow the tool's docs but have not been run against this repo yet. If one fails, use the last option below.
+These commands follow the tool's docs but have not been run against this repo yet. If one fails, use `npx skills` above.
 
 ```bash
 codex plugin marketplace add mckayqsnell/snell-skills
@@ -61,7 +69,7 @@ codex plugin add snell-skills@snell-skills
 <details>
 <summary><strong>GitHub Copilot</strong> (CLI) (not yet tested)</summary>
 
-These commands follow the tool's docs but have not been run against this repo yet. If one fails, use the last option below.
+These commands follow the tool's docs but have not been run against this repo yet. If one fails, use `npx skills` above.
 
 ```bash
 copilot plugin marketplace add mckayqsnell/snell-skills
@@ -76,7 +84,7 @@ copilot plugin install snell-skills@snell-skills
 <details>
 <summary><strong>Gemini CLI</strong> (manual updates) (not yet tested)</summary>
 
-These commands follow the tool's docs but have not been run against this repo yet. If one fails, use the last option below.
+These commands follow the tool's docs but have not been run against this repo yet. If one fails, use `npx skills` above.
 
 ```bash
 gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/html
@@ -87,19 +95,6 @@ gemini skills install https://github.com/mckayqsnell/snell-skills.git --path ski
 ```
 
 Re-run both commands to update.
-
-</details>
-
-<details>
-<summary><strong>Any other agent, or editable files</strong> (manual updates)</summary>
-
-```bash
-npx skills@latest add mckayqsnell/snell-skills
-```
-
-The [skills CLI](https://github.com/vercel-labs/skills) asks which skills and which agents you want (Cursor, OpenCode, Windsurf, Amp and more), then copies them into each agent's skills folder. Add `-g` to install for your user instead of this project, or `-a <agent>` to skip the question. To update, run `npx skills@latest update`; re-run `add` to pick up new skills.
-
-Each html skill carries its own copy of the kit, so you can install just one.
 
 </details>
 
