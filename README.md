@@ -10,7 +10,9 @@
 
 # Snell Skills
 
-[![skills.sh](https://skills.sh/b/mckayqsnell/snell-skills)](https://skills.sh/mckayqsnell/snell-skills)
+<!-- Static badge until skills.sh counts installs. Then switch back to the live one:
+[![skills.sh](https://skills.sh/b/mckayqsnell/snell-skills)](https://skills.sh/mckayqsnell/snell-skills) -->
+[![skills.sh](https://img.shields.io/badge/skills.sh-snell--skills-0a0a0a?labelColor=000000&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii01IC01IDM0IDM0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTI0IDIyLjUyNUgwTDEyIDEuNDc1bDEyIDIxLjA1eiIvPjwvc3ZnPg%3D%3D)](https://skills.sh/mckayqsnell/snell-skills)
 
 My agent skills for turning plans and hard ideas into pages I actually want to read.
 
