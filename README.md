@@ -46,7 +46,9 @@ Plugin skills get a name prefix: `/snell-skills:html-plan`.
 </details>
 
 <details>
-<summary><strong>Codex</strong></summary>
+<summary><strong>Codex</strong> (not yet tested)</summary>
+
+These commands follow the tool's docs but have not been run against this repo yet. If one fails, use the last option below.
 
 ```bash
 codex plugin marketplace add mckayqsnell/snell-skills
@@ -59,7 +61,9 @@ codex plugin add snell-skills@snell-skills
 </details>
 
 <details>
-<summary><strong>GitHub Copilot</strong> (CLI)</summary>
+<summary><strong>GitHub Copilot</strong> (CLI) (not yet tested)</summary>
+
+These commands follow the tool's docs but have not been run against this repo yet. If one fails, use the last option below.
 
 ```bash
 copilot plugin marketplace add mckayqsnell/snell-skills
@@ -72,7 +76,9 @@ copilot plugin install snell-skills@snell-skills
 </details>
 
 <details>
-<summary><strong>Gemini CLI</strong> (manual updates)</summary>
+<summary><strong>Gemini CLI</strong> (manual updates) (not yet tested)</summary>
+
+These commands follow the tool's docs but have not been run against this repo yet. If one fails, use the last option below.
 
 ```bash
 gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/html

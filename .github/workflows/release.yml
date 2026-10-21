@@ -69,11 +69,11 @@ jobs:
           set -euo pipefail
           missing=0
           if [ -z "$CLIENT_ID" ]; then
-            echo "::error::Repo variable RELEASE_APP_CLIENT_ID is not set. See docs/how-it-works.md, Release app setup."
+            echo "::error::Variable RELEASE_APP_CLIENT_ID is not set in the release environment. See docs/how-it-works.md, Release app setup."
             missing=1
           fi
           if [ "$HAS_KEY" != "true" ]; then
-            echo "::error::Repo secret RELEASE_APP_PRIVATE_KEY is not set. See docs/how-it-works.md, Release app setup."
+            echo "::error::Secret RELEASE_APP_PRIVATE_KEY is not set in the release environment. See docs/how-it-works.md, Release app setup."
             missing=1
           fi
           exit "$missing"

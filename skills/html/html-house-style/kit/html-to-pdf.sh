@@ -37,16 +37,21 @@ find_chrome() {
 }
 BROWSER="$(find_chrome)"
 
+# On Windows (Git Bash), Chrome needs C:/... not /c/..., so convert the path first.
+URL_PATH="$ABS"
+if command -v cygpath >/dev/null 2>&1; then URL_PATH="/$(cygpath -m "$ABS")"; fi
 # A file URL needs spaces and other odd characters escaped.
-URL="file://$(printf '%s' "$ABS" | sed -e 's/%/%25/g' -e 's/ /%20/g' -e 's/#/%23/g' -e 's/?/%3F/g')"
+URL="file://$(printf '%s' "$URL_PATH" | sed -e 's/%/%25/g' -e 's/ /%20/g' -e 's/#/%23/g' -e 's/?/%3F/g')"
 
 TMP_OUT="$(mktemp "${TMPDIR:-/tmp}/html-to-pdf.XXXXXX")"
 trap 'rm -f "$TMP_OUT"' EXIT
+PDF_ARG="$TMP_OUT"
+if command -v cygpath >/dev/null 2>&1; then PDF_ARG="$(cygpath -w "$TMP_OUT")"; fi
 
 # --virtual-time-budget lets the page script finish (folds, sketch drawings) before printing.
 # Backgrounds print because the page CSS sets print-color-adjust: exact.
 if ! "$BROWSER" --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=4000 \
-     --print-to-pdf="$TMP_OUT" "$URL" >/dev/null 2>&1; then
+     --print-to-pdf="$PDF_ARG" "$URL" >/dev/null 2>&1; then
   die "the browser failed to print $IN"
 fi
 [ -s "$TMP_OUT" ] || die "the browser wrote an empty PDF for $IN"

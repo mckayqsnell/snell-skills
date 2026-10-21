@@ -119,6 +119,9 @@ export async function findOrphanKits(root, targets) {
   return orphans;
 }
 
+// Files the OS drops into folders on its own. They are never part of a kit, on either side.
+const IGNORED = new Set([".DS_Store", "Thumbs.db", "desktop.ini"]);
+
 // Map of relative path -> { hash, exec } for every file under dir.
 // Links are refused: a kit must be plain files, so a copy can't point outside the skill.
 export async function snapshot(dir) {
@@ -129,7 +132,7 @@ export async function snapshot(dir) {
     const full = join(ent.parentPath ?? ent.path, ent.name);
     const rel = relative(dir, full).split(sep).join("/");
     if (ent.isSymbolicLink()) throw new KitError(`${full} is a symbolic link; a kit holds plain files only`, EXIT.DRIFT);
-    if (ent.isDirectory()) continue;
+    if (ent.isDirectory() || IGNORED.has(ent.name)) continue;
     if (!ent.isFile()) throw new KitError(`${full} is not a regular file`, EXIT.DRIFT);
     const [data, info] = await Promise.all([readFile(full), stat(full)]);
     files.set(rel, { hash: createHash("sha256").update(data).digest("hex"), exec: (info.mode & 0o111) !== 0 });
@@ -173,13 +176,17 @@ async function replaceKit(built, target, log) {
       if (hadOld) await rename(old, target.kit); // put the old kit back before giving up
       throw e;
     }
-    if (hadOld) await rm(old, { recursive: true, force: true });
   } catch (e) {
     await rm(staged, { recursive: true, force: true }).catch(() => {});
     if (hadOld && !(await exists(target.kit)) && (await exists(old))) {
       await rename(old, target.kit).catch((e2) => log.error(`could not restore ${target.rel}/kit from ${old}: ${e2.message}`));
     }
     throw new KitError(`could not update ${target.rel}/kit: ${e.message}`, EXIT.DRIFT);
+  }
+  // The new kit is in place. Failing to delete the old copy is not a failed update, so only warn.
+  if (hadOld) {
+    await rm(old, { recursive: true, force: true }).catch((e) =>
+      log.warn(`${target.rel}/kit is updated, but the old copy ${old} could not be removed (${e.message}). Delete it by hand; the next sync refuses to run while it is there.`));
   }
 }
 

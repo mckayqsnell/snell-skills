@@ -7,6 +7,8 @@ description: 'Explain a topic as one HTML page that teaches it the way a good te
 
 Same look and parts as html-plan: both read the house-style kit in `kit/`.
 
+**`kit/` is the folder next to this SKILL.md.** Use its full path when you run commands from the user's project, e.g. `cp <this skill's folder>/kit/explain-template.html explain/…`.
+
 You make a page that makes something click. The reader is the user, unless they say `for:"…"`. They should get the gist from the first line, and understand it after one read.
 
 Read `kit/HOUSE-STYLE.md` and `kit/PARTS.md` first (the "Explain parts" part too). `kit/settings.md` holds the defaults; a project or user `settings.md` wins. Copy `kit/explain-template.html`; don't read it whole (fonts are packed in).
@@ -47,9 +49,9 @@ If the answer fits in a few sentences, answer in chat and offer the page in one 
 
 1. **Browser check** if you have one: desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. No console errors, no sideways scroll except drawings and code in their own box. Type in one "unclear" box: the copied text must quote it under that section's name. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Read it through instead: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say you checked it by reading.
-3. **Words:** `node kit/vocab-check.mjs <page> --level 80` must pass. For `for:"…"` a non-technical reader, aim higher.
+3. **Words:** `node kit/vocab-check.mjs <page> --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80). For `for:"…"` a non-technical reader, aim higher.
 4. **Can't fix something?** Say it in one sentence and hand over anyway.
-5. **Open it** (`open` on Mac, `xdg-open` on Linux, `start` on Windows) and tell the user the path in one line.
+5. **Open it** (`open` on Mac, `xdg-open` on Linux, `start` on Windows). No screen: print the path. Tell the user the path in one line.
 
 ## 6. keep: save the HTML and a PDF
 

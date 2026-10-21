@@ -7,12 +7,12 @@ description: 'The shared look for HTML pages an agent makes for a person to read
 
 One look for every page: warm paper colors, the Source fonts, folding sections, notes, tables that turn into cards on a phone, drawings in a hand-drawn sketch style, and a box that turns the reader's picks and notes into one reply to paste back. html-plan and html-explain use the same kit; this skill is for every other page.
 
-Everything lives in `kit/`. Start there:
+Everything lives in `kit/`, the folder next to this SKILL.md. Use its full path when you run commands from the user's project. Start there:
 
 1. Read `kit/HOUSE-STYLE.md` (the rules) and `kit/PARTS.md` (every part, with markup). Open `kit/house-style.html` in a browser to see them live.
 2. Copy a starter whole with `cp`: `kit/template.html` for a page with decisions, `kit/explain-template.html` for a page that teaches. Edit the copy in place. Keep its `<style>` and `<script>` blocks.
 3. Use only the parts in PARTS.md, and only the colors and sizes in the CSS variables.
-4. Check it the way HOUSE-STYLE.md says: light, dark, a 390 px phone, no console errors, and `node kit/vocab-check.mjs <page> --level 80`.
+4. Check it the way HOUSE-STYLE.md says: light, dark, a 390 px phone, no console errors, and `node kit/vocab-check.mjs <page> --level <N>`, where N is `vocab.level` in `settings.md` (default 80).
 5. Need a PDF? `kit/html-to-pdf.sh <page>` (needs Chrome, Chromium or Edge).
 
 Defaults are in `kit/settings.md`. A `settings.md` in the project, then the user's own, wins over it.

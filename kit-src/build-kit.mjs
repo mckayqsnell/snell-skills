@@ -13,14 +13,16 @@ import { fileURLToPath } from 'node:url';
 import { FLOW, BEFORE_AFTER, MAP, SEQUENCE, TIMELINE, BIG } from './drawings.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch (e) { throw new Error(`build-kit: cannot read ${path.relative(HERE, p)} (${e.code || e.message})`); } };
+// Line endings are normalized to LF, so a CRLF checkout builds the same bytes.
+const read = (p) => { try { return fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n'); } catch (e) { throw new Error(`build-kit: cannot read ${path.relative(HERE, p)} (${e.code || e.message})`); } };
 
 const fonts = read(path.join(HERE, 'fonts.css'));
 const tokens = read(path.join(HERE, 'tokens.css'));
 const css = read(path.join(HERE, 'kit.css'));
 const js = read(path.join(HERE, 'kit.js'));
-const rough = read(path.join(HERE, 'rough.mjs')).replace(/export\s*\{\s*\w+\s+as\s+default\s*\}\s*;?\s*$/, '');
-const roughVar = (rough.match(/export\s*\{\s*(\w+)\s+as\s+default/) || read(path.join(HERE, 'rough.mjs')).match(/export\s*\{\s*(\w+)\s+as\s+default/) || [])[1];
+const roughSrc = read(path.join(HERE, 'rough.mjs'));
+const roughVar = (roughSrc.match(/export\s*\{\s*(\w+)\s+as\s+default\s*\}\s*;?\s*$/) || [])[1];
+const rough = roughSrc.replace(/export\s*\{\s*\w+\s+as\s+default\s*\}\s*;?\s*$/, '');
 if (!roughVar) throw new Error('build-kit: could not find the default export in rough.mjs; check the Rough.js bundle');
 const roughScript = `<script>/* Rough.js 4.6.6 (MIT, Preet Shihn) for the sketch look. Leave it out on customer pages. */\n(function(){${rough}\nwindow.rough=${roughVar};})();</script>`;
 const VERSION = '1';
@@ -185,13 +187,12 @@ export function buildKit(OUT) {
   .hs-sw i { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--muted); flex: none; }
   @media print { .hs-live { break-inside: avoid; } .hs-code { display: none; } }
   </style>`;
-  const gearHtml = gearBlock;  // eslint-disable-line no-unused-vars
   const body = `<div class="wrap">
     <nav class="toc" aria-label="Contents"><div class="label">Contents</div><ol id="toc-list"></ol></nav>
     <main>
       <div class="topbar">
         <span class="tag">Reference · ${VERSION}</span>
-        ${gearHtml}
+        ${gearBlock}
       </div>
       <header>
         <div class="part">House style</div>

@@ -7,6 +7,8 @@ description: Plan a coding job as one HTML page the user reads, picks decisions 
 
 Uses the `grilling` skill (by Matt Pocock) for M and L when it is installed, and `domain-modeling` when the repo has a CONTEXT.md. Both are optional.
 
+**`kit/` is the folder next to this SKILL.md.** Use its full path when you run commands from the user's project, e.g. `cp <this skill's folder>/kit/template.html plans/…`.
+
 You make a plan the user can read in one sitting and answer in one paste. The page is the plan. The user builds from it later, in a fresh session. Don't start building until their answer arrives.
 
 For size S and up, read `kit/HOUSE-STYLE.md` and `kit/PARTS.md` first. They hold the look, the parts and the writing rules (plain language, level 80 as a floor). Copy `kit/template.html`; don't read it whole (fonts are packed in, so it is big). `kit/settings.md` holds the defaults; a project or user `settings.md` wins.
@@ -92,7 +94,7 @@ Write plain SVG in the clean look; the page draws the sketch look itself. Copy a
 
 1. **Check in a browser** if you have one (Playwright, or your own browser tool): desktop light, desktop dark, and phone at 390 px. No console errors. Nothing scrolls sideways except drawings and code in their own box. Pick an option and type a note: the response must change and quote the note. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Do the read-through: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say it was checked by read-through.
-3. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level 80` must pass.
+3. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80).
 4. **Can't fix something?** Say it in one sentence and hand over anyway.
 5. **Open it** in the user's browser: `open` (Mac), `xdg-open` (Linux), `start` (Windows). No screen: print the path.
 6. **Tell the user in 2 lines:** the path, the size, and what you need ("3 decisions need your pick").

@@ -45,17 +45,19 @@ differ in who does the work and what you get.
   plugin's name; the part after is the marketplace's name.
 - **How it finds nested groups.** By default a plugin only scans
   `skills/<name>/SKILL.md`, one level. `plugin.json` adds
-  `"skills": ["./skills/tools/"]`, which tells it to scan that group
-  folder too. A new group needs a new line there.
+  `"skills": ["./skills/html/", "./skills/tools/"]`, which tells it to scan
+  those group folders too. A new group needs a new line there.
 - **What you get.** Every skill, plus any commands or hooks the plugin
-  ships (none today). Names get a prefix: `/snell-skills:to-markdown`.
+  ships (none today). Names get a prefix: `/snell-skills:html-plan`.
 - **Updates.** Claude Code compares the `version` in `plugin.json` with the
   one you have. You get a new copy only when that string changes. That is
   why the release flow (next section) bumps it on every release. Automatic
   updates are **off by default** for non-Anthropic marketplaces: each user
   turns them on once under `/plugin` → Marketplaces → Enable auto-update.
   Otherwise they run `claude plugin update snell-skills@snell-skills`.
-- **Works with.** Claude Code only.
+- **Works with.** Claude Code. Codex and GitHub Copilot read the same
+  `.claude-plugin/marketplace.json`, so the README lists their install
+  commands too; those have not been run against this repo yet.
 
 ### Private repo, both paths
 
@@ -66,7 +68,11 @@ repo is private, only people with read access can install it.
 
 ### Personal paths: `local.env`
 
-No skill here needs a per-machine path today. When one does, the rule is:
+One skill needs a per-machine path today: html-explain's `keep` saves pages
+to the folder in the `MY_SKILLS_KNOWLEDGE_DIR` environment variable (or
+`explain.keep_dir` in a `settings.md`), and asks the user when neither is
+set. That is a variable the user sets, not a file the repo ships, so it
+needs no `local.env`. For anything a script reads, the rule is:
 put the value in a `local.env` file that git ignores, commit a
 `local.env.example` that explains each key, and make the skill's script stop
 with a clear message when the file or key is missing. Never write a path

@@ -25,6 +25,9 @@ pnpm run check
 3. No personal paths. Anything machine-specific goes in a gitignored
    `local.env`, with a committed `local.env.example` that explains each key.
    The skill's scripts must stop with a clear message when a key is missing.
+   (A skill may instead read one environment variable the user sets, like
+   html-explain's `MY_SKILLS_KNOWLEDGE_DIR`, if the README says so and the
+   skill asks when it is missing.)
 4. Add a row to the Skills table in `README.md`.
 
 ## Changing the house-style kit

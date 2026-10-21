@@ -90,6 +90,11 @@ describe("check finds drift and writes nothing", () => {
     assert.ok(said(/html-to-pdf\.sh \(executable bit\)/));
   });
 
+  it("ignores a .DS_Store the OS dropped in a kit", async () => {
+    await writeFile(join(root, "skills/g/a/kit/.DS_Store"), "finder");
+    assert.equal(await go(["--check"]), EXIT.OK);
+  });
+
   it("a source change that was never synced", async () => {
     assert.equal(await go(["--check"], fakeBuild("v2")), EXIT.DRIFT);
     assert.ok(said(/2 of 2 kits are out of date/));

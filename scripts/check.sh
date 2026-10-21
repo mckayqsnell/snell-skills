@@ -95,11 +95,13 @@ step "5/8 Scrub for personal paths, emails and secrets"
 pattern='/Users/[A-Za-z]|/home/[a-z][a-z0-9_-]*/|obsidian-vault|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
 # Allowed: git's noreply addresses and the git@github.com SSH host. These
 # are cut out of each matching line before it is checked again, so another
-# email on the same line is still caught. This script's own pattern line is
-# skipped. The lockfile is skipped: it is generated and its package@version
-# strings can look like emails.
+# email on the same line is still caught. Only this script's own pattern=
+# line is dropped (the rest of check.sh is scanned like any file). The
+# lockfile is skipped: it is generated and its package@version strings can
+# look like emails.
 allow='noreply@anthropic\.com|[A-Za-z0-9._%+-]*@users\.noreply\.github\.com|git@github\.com'
-hits="$(git grep -n -I -E "$pattern" -- . ':!pnpm-lock.yaml' ':!scripts/check.sh' \
+hits="$(git grep -n -I -E "$pattern" -- . ':!pnpm-lock.yaml' \
+  | grep -Ev '^scripts/check\.sh:[0-9]+:pattern=' \
   | sed -E "s/$allow//g" | grep -E "$pattern" || true)"
 if [ -n "$hits" ]; then
   echo "$hits" >&2

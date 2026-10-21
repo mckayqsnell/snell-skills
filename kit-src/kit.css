@@ -335,7 +335,7 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
   section.folded > :not(.part):not(h2) { display: revert !important; }
   section.folded > h2::after { content: none; }
   .fig-box { overflow: visible; } .fig-box > svg { min-width: 0 !important; }
-  h2, h3, h4 { break-after: avoid; }
+  h2, h3, h4, .part { break-after: avoid; }
   .fig, .note, .layers, .vocab, .idea, .worked, .pair > div, .decision, .prog li, table tr, .codeblock { break-inside: avoid; }
   .vw, .vw.is-full { position: static !important; overflow: visible; border: 0; }
   .vw-stage { overflow: visible !important; max-height: none !important; height: auto !important; aspect-ratio: auto !important; }

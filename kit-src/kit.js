@@ -241,7 +241,7 @@
   }
   function drawStyle(st, save) {
     var want = st === 'sketch' && window.rough ? 'sketch' : 'clean';
-    $$('.fig-box > svg, .vw-pan > svg').forEach(function (svg) { if (want === 'sketch') sketchSvg(svg); svg.classList.toggle('is-sketch', want === 'sketch'); });
+    $$('.fig-box > svg, .vw-pan > svg, .vw-map > svg').forEach(function (svg) { if (want === 'sketch') sketchSvg(svg); svg.classList.toggle('is-sketch', want === 'sketch'); });
     root.dataset.drawNow = want; if (save) store('hs-drawings', st);
     $$('[data-draw-set]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.drawSet === want)); });
   }

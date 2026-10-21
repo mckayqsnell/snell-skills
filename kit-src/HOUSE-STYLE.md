@@ -37,7 +37,7 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 
 ## Writing: plain language, level 80 as a floor
 
-Write the way plainlanguage.gov says: talk to the reader, keep it short, use common words. Then run `node vocab-check.mjs page.html --level 80`. The score must be 80 or more. It is a floor, not a target. Don't write worse to hit a number. Don't chop sentences into bits to push it up.
+Write the way plainlanguage.gov says: talk to the reader, keep it short, use common words. Then run `node vocab-check.mjs page.html --level <N>`, where N is `vocab.level` in `settings.md` (default 80). The score must be N or more. It is a floor, not a target. Don't write worse to hit a number. Don't chop sentences into bits to push it up.
 
 - Short sentences. Most under 20 words.
 - Active voice: "The script checks the page", not "The page is checked".
