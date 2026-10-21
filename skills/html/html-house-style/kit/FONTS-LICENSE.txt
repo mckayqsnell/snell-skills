@@ -1,4 +1,8 @@
-The kit packs subsets of three Adobe fonts into its pages (fonts.css). Each is licensed under the SIL Open Font License, Version 1.1:
+The kit packs subsets of three Adobe fonts into its pages (fonts.css). Because they are
+subsets (Modified Versions), they are renamed as the license requires, and do not use the
+Reserved Font Name "Source": Source Serif 4 is packed as "Snell Serif", Source Sans 3 as
+"Snell Sans", and Source Code Pro as "Snell Mono". The copyright and license records
+inside each font are unchanged. Each is licensed under the SIL Open Font License, Version 1.1:
 
 Copyright 2014 - 2023 Adobe (http://www.adobe.com/), with Reserved Font Name ‘Source’. All Rights Reserved. Source is a trademark of Adobe in the United States and/or other countries.
   (https://github.com/adobe-fonts/source-serif)

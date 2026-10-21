@@ -198,14 +198,14 @@ export function buildKit(OUT) {
         <div class="part">House style</div>
         <h1>Every part, ready to copy</h1>
         <p class="lede">The look for our plan and explainer pages. Each part below is live, with its code folded under it. Start a page from <code>template.html</code>. Read the rules in <code>HOUSE-STYLE.md</code> and the class list in <code>PARTS.md</code>.</p>
-        <div class="meta"><span>Colors <b>Burnt Sienna</b></span><span>Fonts <b>Source Serif 4 · Source Sans 3 · Source Code Pro</b></span><span>Text <b>17 px · 61 ch</b></span><span>Drawings <b>sketch, clean for customers</b></span></div>
+        <div class="meta"><span>Colors <b>Burnt Sienna</b></span><span>Fonts <b>Snell Serif · Snell Sans · Snell Mono</b></span><span>Text <b>17 px · 61 ch</b></span><span>Drawings <b>sketch, clean for customers</b></span></div>
       </header>
       <section id="look" data-toc="Colors + type" data-fold="open">
         <div class="part">Look</div><h2>Colors and type</h2>
         <p class="section-intro">Use these variables. Never a raw hex color in the page body. The gear at the top right switches theme, text size and drawing style.</p>
         ${swatches}
-        <h3 style="margin-top:28px">Heading in Source Serif 4</h3>
-        <p style="margin-top:8px">Body text in Source Sans 3 at 17 px. Short sentences. Active voice. <code>Code in Source Code Pro</code>.</p>
+        <h3 style="margin-top:28px">Heading in Snell Serif</h3>
+        <p style="margin-top:8px">Body text in Snell Sans at 17 px. Short sentences. Active voice. <code>Code in Snell Mono</code>.</p>
       </section>
       <section id="parts" data-toc="Parts" data-fold="open">
         <div class="part">Parts</div><h2>Page parts</h2>

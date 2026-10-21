@@ -5,7 +5,7 @@ description: 'The shared look for HTML pages an agent makes for a person to read
 
 # html-house-style
 
-One look for every page: warm paper colors, the Source fonts, folding sections, notes, tables that turn into cards on a phone, drawings in a hand-drawn sketch style, and a box that turns the reader's picks and notes into one reply to paste back. html-plan and html-explain use the same kit; this skill is for every other page.
+One look for every page: warm paper colors, packed-in serif and sans fonts, folding sections, notes, tables that turn into cards on a phone, drawings in a hand-drawn sketch style, and a box that turns the reader's picks and notes into one reply to paste back. html-plan and html-explain use the same kit; this skill is for every other page.
 
 Everything lives in `kit/`, the folder next to this SKILL.md. Use its full path when you run commands from the user's project. Start there:
 
