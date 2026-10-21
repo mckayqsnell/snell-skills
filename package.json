@@ -1,6 +1,6 @@
 {
   "name": "snell-skills",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "McKay Snell's agent skills. Not published to npm: this file only drives versions and the changelog.",
   "license": "MIT",
