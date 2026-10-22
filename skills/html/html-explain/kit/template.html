@@ -808,6 +808,8 @@ window.rough=at;})();</script>
      Page default: <html data-drawings="sketch"> or "clean". Customer pages: clean, and no Rough.js at all.
      The reader can switch in the gear. The clean shapes stay in the page, so print and no-script still work. */
   var SK = { roughness: 1, bowing: 1, seed: 7, strokeWidth: 1.5, fillStyle: 'solid' };
+  /* rounded boxes: one stroke, corners pinned; a second pass splits into loops on the curves */
+  var RR = { disableMultiStroke: true, preserveVertices: true, roughness: 0.7, fillShapeRoughnessGain: 0 };
   function pointsOf(d) {
     var t = d.match(/[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?/g) || [], i = 0, x = 0, y = 0, c = '', P = [];
     function n() { return parseFloat(t[i++]); }
@@ -832,7 +834,7 @@ window.rough=at;})();</script>
       if (fill !== 'none') o.fill = fill;
       var dash = a('stroke-dasharray');
       var dr = null, tag = el.tagName;
-      if (tag === 'rect') { var x = +a('x') || 0, y = +a('y') || 0, w = +a('width'), h = +a('height'), r = +a('rx') || 0; dr = r ? g.path(roundRect(x, y, w, h, r), o) : g.rectangle(x, y, w, h, o); }
+      if (tag === 'rect') { var x = +a('x') || 0, y = +a('y') || 0, w = +a('width'), h = +a('height'), r = +a('rx') || 0; dr = r ? g.path(roundRect(x, y, w, h, r), Object.assign({}, o, RR)) : g.rectangle(x, y, w, h, o); }
       else if (tag === 'line') dr = g.line(+a('x1'), +a('y1'), +a('x2'), +a('y2'), o);
       else if (tag === 'circle') dr = g.circle(+a('cx'), +a('cy'), 2 * +a('r'), o);
       else if (tag === 'ellipse') dr = g.ellipse(+a('cx'), +a('cy'), 2 * +a('rx'), 2 * +a('ry'), o);
