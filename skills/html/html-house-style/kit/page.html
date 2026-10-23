@@ -41,7 +41,7 @@
   --font-hand: "Bradley Hand", "Segoe Print", "Segoe Script", "Comic Sans MS", cursive; /* sketch edge labels only; local fonts */
 
   /* size and spacing */
-  --size-body: 17px; --leading: 1.6; --measure: 61ch;
+  --size-body: 17px; --leading: 1.6; --measure: 61ch; --measure-lede: 60ch;
   --size-h1: clamp(34px, 6vw, 48px); --size-h2: 30px; --size-h3: 22px; --size-h4: 18.5px; --leading-head: 1.2;
   --size-code: 14.5px; --size-small: 14px; --size-label: 12px; /* --size-label is the floor for any text, drawings too */
   --space-1: 4px; --space-2: 8px; --space-3: 14px; --space-4: 20px; --space-5: 32px; --space-6: 48px;
@@ -90,6 +90,11 @@ h3 { font-size: var(--size-h3); font-weight: 700; }
 h4 { font-size: var(--size-h4); font-weight: 700; }
 p { margin: 0; }
 p, li { max-width: var(--measure); }
+
+/* Pages that are mostly drawings: text, callouts and figures on one edge.
+   Set data-width="full" on <html>. Prose-led pages keep the 61ch measure,
+   which is the right default for reading. */
+[data-width="full"] { --measure: 100%; --measure-lede: 100%; }
 b, strong { font-weight: 600; }
 code { font-family: var(--font-mono); font-size: .88em; background: var(--code-bg); padding: 2px 6px; border-radius: 5px; overflow-wrap: anywhere; }
 kbd { font-family: var(--font-mono); font-size: .85em; background: var(--surface); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; }
@@ -136,7 +141,7 @@ main { min-width: 0; max-width: 760px; }
 
 /* ---------- header ---------- */
 .part { font: 500 12px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-.lede { font-size: 19px; color: var(--muted); margin-top: 14px; max-width: 60ch; }
+.lede { font-size: 19px; color: var(--muted); margin-top: 14px; max-width: var(--measure-lede); }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .meta span { font-size: 13.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 5px 11px; color: var(--muted); }
 .meta b { color: var(--ink); font-weight: 600; }
@@ -662,6 +667,8 @@ window.rough=at;})();</script>
      Page default: <html data-drawings="sketch"> or "clean". Customer pages: clean, and no Rough.js at all.
      The reader can switch in the gear. The clean shapes stay in the page, so print and no-script still work. */
   var SK = { roughness: 1, bowing: 1, seed: 7, strokeWidth: 1.5, fillStyle: 'solid' };
+  /* rounded boxes: one stroke, corners pinned; a second pass splits into loops on the curves */
+  var RR = { disableMultiStroke: true, preserveVertices: true, roughness: 0.7, fillShapeRoughnessGain: 0 };
   function pointsOf(d) {
     var t = d.match(/[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?/g) || [], i = 0, x = 0, y = 0, c = '', P = [];
     function n() { return parseFloat(t[i++]); }
@@ -686,7 +693,7 @@ window.rough=at;})();</script>
       if (fill !== 'none') o.fill = fill;
       var dash = a('stroke-dasharray');
       var dr = null, tag = el.tagName;
-      if (tag === 'rect') { var x = +a('x') || 0, y = +a('y') || 0, w = +a('width'), h = +a('height'), r = +a('rx') || 0; dr = r ? g.path(roundRect(x, y, w, h, r), o) : g.rectangle(x, y, w, h, o); }
+      if (tag === 'rect') { var x = +a('x') || 0, y = +a('y') || 0, w = +a('width'), h = +a('height'), r = +a('rx') || 0; dr = r ? g.path(roundRect(x, y, w, h, r), Object.assign({}, o, RR)) : g.rectangle(x, y, w, h, o); }
       else if (tag === 'line') dr = g.line(+a('x1'), +a('y1'), +a('x2'), +a('y2'), o);
       else if (tag === 'circle') dr = g.circle(+a('cx'), +a('cy'), 2 * +a('r'), o);
       else if (tag === 'ellipse') dr = g.ellipse(+a('cx'), +a('cy'), 2 * +a('rx'), 2 * +a('ry'), o);
