@@ -6,11 +6,18 @@ Classes and the smallest markup for each part. Copy from here instead of reading
 
 ```html
 <html lang="en" data-drawings="sketch">            <!-- "clean" for customer pages -->
+<html lang="en" data-drawings="sketch" data-width="full">   <!-- see below -->
 <meta name="plan-file" content="plans/2026-10-19-topic.html">
 <div class="wrap"><nav class="toc"><div class="label">Contents</div><ol id="toc-list"></ol></nav><main> … </main></div>
 ```
 
 Keep the top bar with `.tag` and the `.gear` + `.style-pop` block from the template.
+
+`data-width="full"` puts running text, callouts and figures on one edge, for a
+page that is mostly drawings. Without it, text and callouts stop at `--measure`
+(61ch) while figures fill `main`, so every drawing overhangs the paragraph
+above it. Leave it off for a prose-led page: 61ch is the right measure for
+reading, and the wider column runs about 90 characters a line.
 
 ## Sections
 

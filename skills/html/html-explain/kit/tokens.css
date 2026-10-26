@@ -27,7 +27,7 @@
   --font-hand: "Bradley Hand", "Segoe Print", "Segoe Script", "Comic Sans MS", cursive; /* sketch edge labels only; local fonts */
 
   /* size and spacing */
-  --size-body: 17px; --leading: 1.6; --measure: 61ch;
+  --size-body: 17px; --leading: 1.6; --measure: 61ch; --measure-lede: 60ch;
   --size-h1: clamp(34px, 6vw, 48px); --size-h2: 30px; --size-h3: 22px; --size-h4: 18.5px; --leading-head: 1.2;
   --size-code: 14.5px; --size-small: 14px; --size-label: 12px; /* --size-label is the floor for any text, drawings too */
   --space-1: 4px; --space-2: 8px; --space-3: 14px; --space-4: 20px; --space-5: 32px; --space-6: 48px;
