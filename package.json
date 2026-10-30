@@ -23,8 +23,8 @@
     "check": "bash scripts/check.sh"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.303",
+    "@anthropic-ai/claude-code": "2.1.306",
     "@changesets/cli": "3.0.3",
-    "skills": "1.7.2"
+    "skills": "1.7.4"
   }
 }
