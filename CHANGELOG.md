@@ -1,5 +1,14 @@
 # snell-skills
 
+## 1.0.3
+
+### Patch Changes
+
+- 768a07c: New `data-width="full"` on `<html>`: running text, callouts and figures share one edge, for pages that are mostly drawings. Without it, text and callouts stop at `--measure` (61ch) while figures fill `main`, so every drawing overhangs the paragraph above it. Prose-led pages are unchanged — 61ch stays the default, because the wider column runs about 90 characters a line.
+  
+  `.lede` had its measure hard-coded at 60ch, so a page that widened `--measure` got everything except its opening line. It now reads a new `--measure-lede` token, which keeps the same default and moves with the rest.
+- 25886c7: Rounded boxes in sketch drawings no longer get loops and doubled lines on their corners. They now draw with one stroke, with the corners pinned, so pill-shaped labels and rounded cards look clean. Square boxes, lines and arrows keep the hand-drawn double stroke.
+
 ## 1.0.2
 
 ### Patch Changes
