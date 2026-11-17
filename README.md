@@ -110,7 +110,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 | Skill | What it does |
 | :- | :- |
 | [html-plan](skills/html/html-plan/SKILL.md) | Plans a coding job as one page. Sizes the job first (below S, S, M, L), so a tiny job gets a ready-to-paste prompt and a big one gets phases, a build split and risks. You pick the decisions and paste one answer back. |
-| [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it: a picture first, then the real thing, then where the picture breaks. Ends with a recap, a glossary and a "what's still unclear?" box. |
+| [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it, in the way that suits that topic best. Draws the mechanism (3D, moving data, a scene with Play) and ends with a recap and the questions a sharp reader would ask. |
 | [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer and a reply box. |
 | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
 

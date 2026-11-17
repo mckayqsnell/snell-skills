@@ -10,7 +10,7 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 |---|---|---|
 | `HOUSE-STYLE.md` | This file. The rules. | Always, first. |
 | `PARTS.md` | Every part: its classes and a markup snippet. About 5 KB. | Always. Copy markup from here. |
-| `explain-template.html` | A starter for explain pages: header, one concept, recap, glossary, the "still unclear" box. Not a fixed layout. | Copy only. |
+| `explain-template.html` | A starter for explain pages: header, one concept, recap, likely questions, glossary. Not a fixed layout. | Copy only. |
 | `page.html` | A plain starter for any other page (a review, report or guide): header, one open section, one folded section with a table. | Copy only. |
 | `template.html` | An empty plan page with every part. **Copy it; don't read it whole.** The fonts are packed in, so it is about 180 KB. | Copy only. Read just the `<body>` if you must. |
 | `house-style.html` | Every part and drawing, live, with code to copy. For people. | Open in a browser to look. |
@@ -22,7 +22,7 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 ## How to make a page
 
 1. Copy the whole starter with `cp`: `template.html` for a plan, `explain-template.html` for an explain page, `page.html` for any other page. Edit the copy in place; never rebuild it from pieces.
-2. Set `<title>` and the page's own path: `<meta name="plan-file">` on a plan, `<meta name="page-file">` on an explain page. The response box quotes that path.
+2. Set `<title>` and the page's own path: `<meta name="plan-file">` on a plan, `<meta name="page-file">` on an explain page. On a plan, the response box quotes that path.
 3. Fill in every `{{...}}`. Delete parts you don't need. Don't invent new page parts: use the ones in `PARTS.md`. Drawings are different: there you have room to invent (see Drawings).
 4. Keep the `<style>` and `<script>` blocks as they are. Colors, fonts and sizes come only from the CSS variables (`--accent`, `--ink`, `--font-body` and so on). Never write a raw hex color in the page body.
 5. Check it (see "Check before you hand over").

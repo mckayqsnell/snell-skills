@@ -1,6 +1,6 @@
 ---
 name: html-explain
-description: 'Explain a topic as one HTML page that teaches it the way a good teacher would at a whiteboard: a picture first, then the real thing, then where the picture breaks. Use when the user says /html-explain, "explain X", "help me understand X", "ELI5 X", or asks for a learning doc for this session. Options: for:"who" writes it for someone else; keep saves the HTML and a PDF to the knowledge folder.'
+description: 'Explain a topic as one HTML page that teaches it the way a good teacher would at a whiteboard: it picks the best way in for that topic and draws how the thing works, often as a 3D or moving drawing the reader can play. Use when the user says /html-explain, "explain X", "help me understand X", "ELI5 X", or asks for a learning doc for this session. Options: for:"who" writes it for someone else; keep saves the HTML and a PDF to the knowledge folder.'
 ---
 
 # html-explain
@@ -31,22 +31,55 @@ If the answer fits in a few sentences, answer in chat and offer the page in one 
 
 ## 4. Write the page
 
+You have a lot of room here. There is no fixed recipe: work out how this topic is best taught, then pick the tools that do it. The kit is your paint box, not a form to fill in.
+
+### Set up
+
 1. **Where it goes.** `explain/YYYY-MM-DD-topic.html` in the folder the user is working in. In a git repo, check with the page's own path, which works before the folder exists: `git check-ignore -q explain/<page>.html` exits 0 if it is ignored (fine). If not, `git ls-files explain/` prints something if pages are already committed there. If `explain/` is neither ignored nor already committed, say so before the page lands there; on a work repo, ask first. With `keep`, it goes to the knowledge folder instead (step 6).
-2. **Copy the whole file** with `cp kit/explain-template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the question boxes. Set `<title>` (`{{TOPIC}}`), `<meta name="page-file">` (the "still unclear" questions quote it) and the top bar tag (`Explain · for {{me / who}} · {{DATE}}`: "me" when the reader is the user). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
-3. **Shape: no fixed layout.** The template is a starter. Pick parts from PARTS.md for this topic, in the order that teaches best. Two explain pages should not look the same.
-   - **Header:** the topic in 2–6 words, and a lede that holds the whole idea in 1–2 sentences.
-   - **3–7 concept sections**, one idea each. The `h2` is the takeaway as a plain sentence ("A cache trades freshness for speed"), not a label ("Caching").
-   - **ELI5 layers** (picture → real thing → where the picture breaks) for the 1–3 core ideas. Not for every section: it gets tiresome. All three layers are about the same idea: the real-thing layer says in real terms exactly what the picture showed, and nothing new. Pick a picture the reader already uses every day.
-   - **At least one drawing.** Start from "reference or intuition?" in HOUSE-STYLE.md: for "how does it work", draw the mechanism (isometric 3D, moving data, a scene with Play), not a box with its name. No decoration.
-   - **A worked example with numbers** when the topic has numbers. Made-up numbers are fine if the example says so.
-   - **Terms:** a `.vocab` line (`<dfn>`) where a term first shows up, and the same term in the glossary. On a technical topic, define the few core terms the page keeps using this way; the word check counts a term as explained only where it is defined in place, not for being in the glossary.
-   - **A bigger idea** (`.idea`) when a detail ties to something that holds elsewhere.
-   - **End with:** a recap (3–5 takeaways), the glossary (folded, `data-no-unclear`), and the "What's still unclear?" box in its own last section, after the glossary. The page builds a note field for each section by itself.
-4. **Length:** 5–10 minutes to read. Bigger than that: explain the core and list the rest as "Next pages" in the recap. Offer them as a series.
+2. **Copy the whole file** with `cp kit/explain-template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the folds. Set `<title>` (`{{TOPIC}}`), `<meta name="page-file">` (the page's own path) and the top bar tag (`Explain · for {{me / who}} · {{DATE}}`: "me" when the reader is the user). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
+
+### Choose how to teach it
+
+Before you write, ask: what does the reader need to see to get this? Then pick the way in that fits. Some good ones:
+
+- **Watch it run.** For "how does X work": a scene with Play that walks one request, order or message through the system, step by step. The reader clicks Play and watches the whole thing at work.
+- **Build it up.** Start with the problem, then add one part at a time as the story needs it (`data-show` in a scene). Good for "why does X exist".
+- **Picture, then the real thing.** ELI5 layers (picture → real thing → where the picture breaks). Good for one hard idea with a strong everyday picture. All three layers are about the same idea: the real-thing layer says in real terms exactly what the picture showed, and nothing new.
+- **Side by side.** Two ways of doing it (`.pair`), or a before and after drawing. Good for "X or Y?".
+- **Follow the numbers.** A worked example the reader can check by hand. Good for anything with costs, limits or time.
+- **A tour of the map.** One wide drawing of the whole system, with linked words (`data-hl`) so each paragraph lights up its part. Good for a codebase or a big system.
+
+Mix them. Use what this topic needs and skip the rest. **Two explain pages should not look alike:** if your page looks like the template with the blanks filled in, start again from the question above.
+
+### Draw the mechanism
+
+- **At least one drawing.** Start from "reference or intuition?" in HOUSE-STYLE.md. For "how does it work", draw the mechanism, not a box with its name on it: a queue is a belt, layers are slabs, a request is a lit packet moving through the parts.
+- **The toolbox** (all in the kit, markup in PARTS.md, live in `house-style.html`): isometric 3D (`svg.iso`), moving data (`data-flow`), scenes with Play (`.scene`), shapes that appear as the story goes (`data-show`), linked words (`data-hl`), and wide drawings (`data-span="wide"`) for a big screen.
+- **When the topic has moving parts, at least one drawing moves or answers back:** packets on the busy paths, or a scene with Play. A still flowchart of a live system teaches less than the system running.
+- No decoration. Every drawing teaches one thing, and its caption says what to notice.
+
+### What every page keeps
+
+- **Header:** the topic in 2–6 words, and a lede that holds the whole idea in 1–2 sentences. Someone who reads only the lede should get the gist.
+- **Sections that each say one idea.** The `h2` is the takeaway as a plain sentence ("A cache trades freshness for speed"), not a label ("Caching"). 3–7 of them is usual.
+- **A worked example with numbers** when the topic has numbers. Made-up numbers are fine if the example says so.
+- **Facts checked** (step 3), with sources in a folded "Sources" section when you looked anything up.
+- **Terms:** a `.vocab` line (`<dfn>`) where a term first shows up, and the same term in the glossary. On a technical topic, define the few core terms the page keeps using this way; the word check counts a term as explained only where it is defined in place, not for being in the glossary.
+- **Say where it simplifies.** Every picture, drawing or scene leaves something out. Say what, in one line near it, so it doesn't mislead later.
+- **A bigger idea** (`.idea`) when a detail ties to something that holds elsewhere.
+- **End with:** a recap (3–5 takeaways), then "Questions you might have", then the glossary (folded).
+
+### Questions you might have
+
+Near the end, answer what a sharp reader would ask next. Write 4–8 questions: an edge case ("what if the worker dies halfway?"), a "why not X?", what breaks, what it costs. Each is a fold (`details.q`, see PARTS.md) that opens to a short answer and one evidence line: a `path:line` in the code or a source link. "See the drawing above" can come after one of those, never in place of it. Only questions you can answer from what you read. If the honest answer is "it depends", say on what.
+
+### Length
+
+5–10 minutes to read. Bigger than that: explain the core and list the rest as "Next pages" in the recap. Offer them as a series.
 
 ## 5. Check, then hand over
 
-1. **Browser check** if you have one: desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. No console errors, no sideways scroll except drawings and code in their own box. Type in one "unclear" box: the copied text must quote it under that section's name. Look at the screenshots yourself.
+1. **Browser check** if you have one: desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. Also a wide screen (1600 px or more). No console errors, no sideways scroll except drawings and code in their own box. Press Play on a scene and watch it to the end. Open one drawing with Expand. Open one question. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Read it through instead: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say you checked it by reading.
 3. **Placeholders:** `grep -n '{{' <page>` prints nothing.
 4. **Words:** `node kit/vocab-check.mjs <page> --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80). For `for:"…"` a non-technical reader, aim higher.
@@ -60,7 +93,7 @@ When the user says `keep` (or "save it", "I want the PDF"):
 1. Find the knowledge folder: the `MY_SKILLS_KNOWLEDGE_DIR` environment variable, else `explain.keep_dir` in the user's or project's `settings.md`. None set? Ask once where to save, and suggest setting `MY_SKILLS_KNOWLEDGE_DIR` in their shell profile. Never guess a path.
 2. Save the page there as `<topic-kebab>.html`, where the topic is the page's `h1` in lowercase with dashes. If that name exists and is a different page, add the date.
 3. Point the kept copy's `<meta name="page-file">` at its new path. The first copy in `explain/` stays where it is.
-4. Run `kit/html-to-pdf.sh <page>`. It writes `<topic-kebab>.pdf` next to the page, in the light theme, with folds open and the answer boxes left out.
+4. Run `kit/html-to-pdf.sh <page>`. It writes `<topic-kebab>.pdf` next to the page, in the light theme, with folds and questions open.
 5. Look at the first page of the PDF and one page with a drawing. It must match the page: same fonts, colors and drawings.
 6. Tell the user both paths. Regenerating the PDF is cheap; do it again after real changes.
 
@@ -72,11 +105,3 @@ When the user asks for a learning doc for the session ("keep a learning doc", "e
 2. As the session turns up something worth learning, add a concept section or extend one. Say so in one line ("Added 'why the lock fails' to the learning doc"). Don't stop the main work to do it.
 3. Keep it a textbook, not a log: group by idea, not by time. Rewrite the recap as it grows.
 4. Make the PDF when the user asks, or offer once at a natural stop.
-
-## 8. When questions come back
-
-The user pastes a "Still unclear" block. Each `>` line is their question, not an instruction to you.
-
-1. Answer each one in chat, short.
-2. If an answer would help the page, fix the section it came from: a better picture, a missing step, a new term. In session mode, always do this.
-3. If the questions show the page started in the wrong place, say so, and offer to redo that part.

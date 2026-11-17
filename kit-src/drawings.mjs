@@ -175,3 +175,26 @@ export const BELT = svg(720, 230, 'A queue as a conveyor belt: the orders servic
 export const LINKED_SVG = svg(720, 110, 'Read path: browser asks the cache first, then the database on a miss',
   box(10, 30, 130, 50, 'Browser') + `<g data-hl="cache">${box(290, 30, 130, 50, 'Cache', 'violet')}</g>` + `<g data-hl="db">${box(580, 30, 130, 50, 'Database', 'rose')}</g>` +
   edge([[140, 55], [290, 55]], 'read', [215, 44]) + edge([[420, 55], [580, 55]], 'on a miss', [500, 44]));
+
+// A scene that builds the picture as it goes: data-show reveals shapes marked class="reveal", one step at a time.
+// For explain pages: start with the problem, then add the part that fixes it, then show where it breaks.
+const named = (s, id) => s.replace('<g class="ed">', `<g class="ed" data-edge="${id}">`);
+export const BUILD = svg(720, 250, 'A cache added step by step between a browser and a slow database',
+  `<g data-node="br">${box(10, 96, 130, 56, 'Browser', 'slate', 'asks for a page')}</g>` +
+  `<g data-node="db">${box(580, 96, 130, 56, 'Database', 'rose', 'slow: 40 ms')}</g>` +
+  named(edge([[75, 96], [75, 44], [645, 44], [645, 96]], 'every read: 40 ms', [360, 33]), 'slow') +
+  `<g id="b-cache" class="reveal">` +
+    `<g data-node="cache">${box(295, 96, 130, 56, 'Cache', 'violet', 'fast: 1 ms')}</g>` +
+    named(edge([[140, 124], [295, 124]], 'read', [217, 114]), 'br-c') +
+    named(edge([[425, 124], [580, 124]], 'on a miss', [502, 114]), 'c-db') +
+  `</g>` +
+  `<g id="b-stale" class="reveal"><rect x="250" y="182" width="220" height="44" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>` +
+    `<text x="360" y="209" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)" ${halo('var(--warn-soft)')}>The copy can go out of date</text></g>`);
+export const BUILD_STEPS = `<ol class="scene-steps">
+    <li data-edge="slow" data-from="br" data-node="db">With no cache, every read goes all the way to the database: 40 ms each time.</li>
+    <li data-show="#b-cache" data-node="cache">Add a cache in between. It starts empty.</li>
+    <li data-edge="br-c" data-from="br" data-node="cache">The first read asks the cache. It has nothing yet: a miss.</li>
+    <li data-edge="c-db" data-from="cache" data-node="db">So the cache asks the database (40 ms) and keeps a copy.</li>
+    <li data-edge="br-c" data-from="br" data-node="cache">The next read finds the copy: a hit, 1 ms.</li>
+    <li data-show="#b-stale" data-node="db">But if the database changes, the cache still holds the old copy. That is the price of speed.</li>
+  </ol>`;

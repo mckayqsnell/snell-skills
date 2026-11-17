@@ -104,7 +104,7 @@ Each decision needs its own `name` on the radios. The number, the state tag and 
 Sources (Research on plans, Sources on explain pages), as a folded section:
 
 ```html
-<section id="sources" data-toc="Sources" data-fold="closed" data-no-unclear>
+<section id="sources" data-toc="Sources" data-fold="closed">
   <div class="part">Sources</div><h2>Where the facts come from</h2>
   <ul class="sources"><li>The finding, in one sentence.<span class="src"><a href="https://www.irs.gov/publications/p505">IRS Publication 505 (2026)</a></span></li></ul>
 </section>
@@ -212,6 +212,18 @@ Start from `explain-template.html`. It is a starter, not a layout: pick the part
 <ol class="recap"><li>One takeaway, one sentence.</li></ol>
 ```
 
-**What's still unclear?** Copy the `.unclear` block from `explain-template.html` unchanged, in the last section. The page script adds one note field for every other section. Put `data-no-unclear` on a section to leave it out (the glossary, say). The copied Markdown names the page from `<meta name="page-file">`.
+**Questions you might have.** Near the end, after the recap: 4–8 questions a sharp reader would ask next (an edge case, "why not X?", what breaks). Each is a `<details class="q">` that opens to a short answer and one evidence line: a `path:line` or a source link (a pointer to a drawing only on top of one). No input boxes.
 
-**PDF:** `kit/html-to-pdf.sh page.html` writes `page.pdf` next to it, in the light theme, with folded sections opened and the boxes for answers left out.
+```html
+<section id="questions" data-toc="Questions" data-fold="open">
+  <div class="part">Questions</div><h2>Questions you might have</h2>
+  <div class="qs">
+    <details class="q"><summary>What if the worker crashes halfway through?</summary>
+      <div class="q-a"><p>The answer, in 1–3 sentences.</p><p class="q-ev"><b>Evidence</b><code>src/worker.ts:42</code></p></div></details>
+  </div>
+</section>
+```
+
+In print and in the PDF every question shows open.
+
+**PDF:** `kit/html-to-pdf.sh page.html` writes `page.pdf` next to it, in the light theme, with folded sections and questions opened, and a plan's answer boxes left out.

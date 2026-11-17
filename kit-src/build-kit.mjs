@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FLOW, BEFORE_AFTER, MAP, SEQUENCE, TIMELINE, BIG, LIVE, ISO, SCENE_STEPS, STACK, BELT, LINKED_SVG } from './drawings.mjs';
+import { FLOW, BEFORE_AFTER, MAP, SEQUENCE, TIMELINE, BIG, LIVE, ISO, SCENE_STEPS, STACK, BELT, LINKED_SVG, BUILD, BUILD_STEPS } from './drawings.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // Line endings are normalized to LF, so a CRLF checkout builds the same bytes.
@@ -174,7 +174,13 @@ export function buildKit(OUT) {
   const worked = `<div class="worked" style="margin:0"><b>100 reads of the same page</b><ol><li>First read: miss, 40 ms.</li><li>Next 99 reads: hits, 1 ms each = 99 ms.</li></ol><p class="res">139 ms in all, against 4,000 ms with no cache.</p></div>`;
   const recap = `<ol class="recap" style="margin:0"><li>A cache keeps a fast copy of slow data.</li><li>Every copy can go stale; a TTL limits how stale.</li></ol>`;
   const glossary = `<dl class="glossary" style="margin:0"><dt>Cache</dt><dd>A fast copy of data that is slow to get.</dd><dt>TTL</dt><dd>How long a copy is trusted.</dd></dl>`;
-  const unclearDemo = `<div class="unclear" style="margin:0"><p class="respond-help">Type a question under any section. Copy them all and paste them back to the agent.</p><div class="unclear-fields" style="display:none"></div><label>Anything else<textarea placeholder="Anything else? (optional)"></textarea></label><pre></pre><button type="button" class="btn-dark">Copy questions</button></div>`;
+  const questions = `<div class="qs" style="margin:0">
+    <details class="q" open><summary>What happens if the database changes while a copy is in the cache?</summary><div class="q-a"><p>The cache keeps handing out the old copy until its TTL runs out, or until the code that wrote the change also deletes the copy.</p><p class="q-ev"><b>Evidence</b><code>src/cache.ts:31</code> sets the TTL; the last step of the drawing above shows it.</p></div></details>
+    <details class="q"><summary>Why not cache everything forever?</summary><div class="q-a"><p>Memory runs out, and every copy drifts further from the truth. Most caches keep the data read most often and drop the rest.</p><p class="q-ev"><b>Evidence</b><code>src/cache.ts:18</code> sets the size limit.</p></div></details>
+  </div>`;
+  const buildScene = `<figure class="fig scene" style="margin:0" data-intro="Press Play: the drawing starts with the problem, then adds the fix."><div class="fig-box">${BUILD}</div>
+  ${BUILD_STEPS}
+  <figcaption>The cache and the warning appear only when the story gets to them.</figcaption></figure>`;
   const sw = ['bg', 'surface', 'sunk', 'ink', 'muted', 'line', 'accent', 'accent-soft', 'go', 'go-soft', 'warn', 'warn-soft', 'code-bg', 'teal', 'teal-soft', 'violet', 'violet-soft', 'ochre', 'ochre-soft', 'rose', 'rose-soft', 'slate', 'slate-soft', 'glow'];
   const wideFig = (svg, cap) => fig(svg, cap).replace('<figure class="fig"', '<figure class="fig" data-span="wide"');
   const sceneFig = (svg, steps, cap) => `<figure class="fig scene" data-span="wide" style="margin:0"><div class="fig-box">${svg.replace(/aria-label="[^"]*"/, 'aria-label="One request, step by step, on the 3D map"').replace(/ data-flow(="[^"]*")?/g, '')}</div>
@@ -243,7 +249,8 @@ export function buildKit(OUT) {
         ${demo('Worked example', worked, 'Real numbers, one line each, the result last.')}
         ${demo('Recap', recap)}
         ${demo('Glossary', glossary)}
-        ${demo('What is still unclear?', unclearDemo, 'The page builds one note field per section. Here there are none, so only "Anything else" shows.')}
+        ${demo('Questions you might have', questions, 'Near the end: 4–8 questions a sharp reader would ask next. Each opens to a short answer and one line of evidence.')}
+        ${demo('Scene that builds the picture', buildScene, 'Start with the problem, then add each part as the story reaches it. Steps with <code>data-show</code> reveal shapes marked <code>class="reveal"</code>.')}
       </section>
       <section id="drawings" data-toc="Drawings" data-fold="open">
         <div class="part">Drawings</div><h2>Drawings</h2>

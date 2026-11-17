@@ -318,12 +318,21 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 .recap { counter-reset: rc; list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
 .recap li { counter-increment: rc; display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 12px; align-items: baseline; }
 .recap li::before { content: counter(rc); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 14px var(--font-display); background: var(--go-soft); color: var(--go); }
-/* "What's still unclear?": a note per section, one Copy. The page script builds the fields. */
-.unclear { margin-top: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--sunk); padding: var(--space-4); display: grid; gap: var(--space-3); }
-.unclear label { display: grid; gap: 4px; font-weight: 600; font-size: 14.5px; }
-.unclear textarea { width: 100%; min-height: 44px; resize: vertical; font: 14px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-.unclear pre { margin: 0; padding: var(--space-3); font: 13px/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow: auto; }
-.unclear pre:empty { display: none; }
+/* Likely questions: each <details class="q"> opens to a short answer and one evidence line. */
+.qs { display: grid; gap: 8px; margin-top: 18px; max-width: var(--measure); }
+.q { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.q > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 12px; min-height: var(--tap); padding: 10px 14px; font-weight: 600; font-size: 16px; line-height: 1.35; border-radius: 10px; }
+.q > summary::-webkit-details-marker { display: none; }
+.q > summary::before { content: "?"; flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--font-display); color: var(--accent); background: var(--accent-soft); }
+.q > summary::after { content: ""; margin-left: auto; flex: none; width: 7px; height: 7px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform var(--motion-fast) var(--ease); }
+.q[open] > summary::after { transform: rotate(-135deg); }
+.q > summary:hover { background: var(--sunk); }
+.q > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.q[open] > summary { border-radius: 10px 10px 0 0; }
+.q-a { padding: 2px 16px 14px 50px; display: grid; gap: 8px; font-size: 15.5px; }
+.q-ev { font-size: 14px; color: var(--muted); }
+.q-ev > b:first-child { font: 600 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; margin-right: 8px; }
+@media (max-width: 600px) { .q-a { padding-left: 16px; } }
 
 /* ================= visual toolbox (1.1) ================= */
 /* Tones: put one class on a shape or group; its shapes read --tone (line) and --tone-soft (fill). */
@@ -417,7 +426,7 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: var(--bg); }
   /* zero page margin so the page color runs to the edge; the padding repeats on every printed page */
   body { padding: 14mm 15mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-  .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag, .fig-x, .scene-ui, .pkt { display: none !important; }
+  .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag, .fig-x, .scene-ui, .pkt { display: none !important; }
   .scene-js .scene-steps { position: static; width: auto; height: auto; clip: auto; white-space: normal; overflow: visible; }
   svg.scene-svg .reveal { opacity: 1; } .fig[data-span] { width: auto; }
   .wrap { display: block; max-width: none; padding: 0; } main { max-width: none; }
@@ -425,8 +434,9 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   section.folded > :not(.part):not(h2) { display: revert !important; }
   section.folded > h2::after { content: none; }
   .fig-box { overflow: visible; } .fig-box > svg { min-width: 0 !important; }
+  .q > summary::after { content: none; } .q::details-content { content-visibility: visible; display: block; }
   h2, h3, h4, .part { break-after: avoid; }
-  .fig, .note, .layers, .vocab, .idea, .worked, .pair > div, .decision, .prog li, table tr, .codeblock { break-inside: avoid; }
+  .fig, .note, .layers, .vocab, .idea, .worked, .pair > div, .decision, .prog li, table tr, .codeblock, .q { break-inside: avoid; }
   .vw, .vw.is-full { position: static !important; overflow: visible; border: 0; }
   .vw-stage { overflow: visible !important; max-height: none !important; height: auto !important; aspect-ratio: auto !important; }
   .vw-pan { position: static !important; transform: none !important; width: 100% !important; height: auto !important; }
