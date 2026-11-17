@@ -205,12 +205,24 @@ Start from `explain-template.html`. It is a starter, not a layout: pick the part
   <div class="layer real"><span class="lk">The real thing</span><p>The real term, in plain words.</p></div>
   <div class="layer breaks"><span class="lk">Where the picture breaks</span><p>One way the picture is wrong.</p></div>
 </div>
-<p class="vocab"><dfn>TTL</dfn>What it means, in one line.</p>
 <div class="idea"><b>Bigger idea</b>How this ties to something that holds elsewhere too.</div>
 <div class="pair"><div><h4>A</h4><p>…</p></div><div><h4>B</h4><p>…</p></div></div>
 <div class="worked"><b>Example title</b><ol><li>Step with real numbers.</li></ol><p class="res">The result.</p></div>
 <ol class="recap"><li>One takeaway, one sentence.</li></ol>
 ```
+
+**Hover terms.** Define a word where it is used. It gets a light dotted line. Hover, Tab or a tap shows a small card with the meaning, and Escape closes it. The page adds the ids and the aria. In print, the meaning shows in small type in brackets after the word.
+
+```html
+<p>Each copy has a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How long a copy is trusted.</span></abbr>, so old data goes away.</p>
+<p>The cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one.</span></dfn>.</p>
+```
+
+- `<abbr class="term">` for an acronym: start the card with what the letters stand for, in `<b>`. `<dfn class="term">` for any other term.
+- Only for real jargon this reader wouldn't know. Never for basic words like app, ticket or deploy (see "Writing" in HOUSE-STYLE.md).
+- Define a term once, where it first shows up, and put it in the glossary too.
+- The checker counts a hover term as explained everywhere on the page. It scores the card's words as their own sentence.
+- Fallback for the one term a whole section is about: `<p class="vocab"><dfn>TTL</dfn>What it means, in one line.</p>`.
 
 **Questions you might have.** Near the end, after the recap: 4–8 questions a sharp reader would ask next (an edge case, "why not X?", what breaks). Each is a `<details class="q">` that opens to a short answer and one evidence line: a `path:line` or a source link (a pointer to a drawing only on top of one). No input boxes.
 

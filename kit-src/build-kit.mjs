@@ -168,6 +168,7 @@ export function buildKit(OUT) {
     <div class="layer real"><span class="lk">The real thing</span><p>A cache keeps a copy of slow-to-get data in fast memory, so the next read skips the slow trip.</p></div>
     <div class="layer breaks"><span class="lk">Where the picture breaks</span><p>A sticky note never goes stale on its own. A cache copy can: the real number changes and the note does not.</p></div>
   </div>`;
+  const hoverTerm = `<p style="margin:0">Each cached copy carries a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How many seconds a cached copy is trusted before it is thrown away.</span></abbr>. When two writers race, the cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one, even if the older one held more data.</span></dfn>, so a slow writer can undo a fast one.</p>`;
   const vocab = `<p class="vocab" style="margin:0"><dfn>TTL</dfn>"Time to live": how many seconds a cached copy is trusted before it is thrown away.</p>`;
   const idea = `<div class="idea" style="margin:0"><b>Bigger idea</b>Every cache trades freshness for speed. The only question is how stale you can stand.</div>`;
   const pair = `<div class="pair" style="margin:0"><div><h4>Cache hit</h4><p>The copy is there. Answer in about 1 ms.</p></div><div><h4>Cache miss</h4><p>No copy. Go to the database (about 40 ms), then keep a copy.</p></div></div>`;
@@ -243,7 +244,8 @@ export function buildKit(OUT) {
         <div class="part">Explain</div><h2>Parts for explain pages</h2>
         <p class="section-intro">Pick the ones the topic needs. Two explain pages should not look the same.</p>
         ${demo('ELI5 layers', layers, 'For the core ideas: the picture, the real thing, then where the picture breaks.')}
-        ${demo('Term', vocab, 'Define a term where it first shows up. It also goes in the glossary.')}
+        ${demo('Hover term', hoverTerm, 'The main way to define a word. Point at a dotted word, Tab to it, or tap it on a phone: a small card shows what it means. Escape closes it. In print the meaning shows in brackets after the word. Define only real jargon, and spell out every acronym the first time. The term also goes in the glossary.')}
+        ${demo('Term on its own line', vocab, 'A fallback, for the one term a whole section is about. Most terms should be hover terms.')}
         ${demo('Bigger idea', idea)}
         ${demo('Side by side', pair, 'Two things compared. Stacks on a phone.')}
         ${demo('Worked example', worked, 'Real numbers, one line each, the result last.')}
@@ -281,7 +283,7 @@ export function buildKit(OUT) {
   fs.writeFileSync(path.join(OUT, 'tokens.css'), tokens);
   for (const f of ['HOUSE-STYLE.md', 'PARTS.md', 'settings.md', 'html-to-pdf.sh']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   fs.chmodSync(path.join(OUT, 'html-to-pdf.sh'), 0o755);
-  for (const f of ['vocab-check.mjs', 'vocab-common-3000.txt', 'FONTS-LICENSE.txt']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
+  for (const f of ['vocab-check.mjs', 'vocab-common-3000.txt', 'vocab-engineer.txt', 'FONTS-LICENSE.txt']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   return fs.readdirSync(OUT).sort();
 }
 

@@ -1,0 +1,34 @@
+# Everyday software words a software engineer reads without a second look (vocab.reader: engineer, the default).
+# vocab-check.mjs counts these as common. A non-technical reader (vocab.reader: general) switches this list off.
+# Only add words every engineer knows. Real jargon (idempotent, quorum, backpressure) stays out: define it in place.
+addon alert alerts analytics android angular api apis app approval approvals approve apps arg args array
+arrays assert assertion async auth authentication authorization await aws azure backend backlog balancer bash
+batch batches billing boolean breakpoint browser buffer bug bugfix bugs builder builds bundle bundler bundles
+cache cached caches caching callback callbacks cart cert certificate certificates changelog chat checkout ci
+cleanup cli client clients clone cloud cluster clusters coder codes coding columns commands commit commits
+compile compile-time compiled compiler component components config configs configuration constant container
+containers conversion cookie cookies cpu crash crashes credential credentials cron css csv customer customers
+dashboard dashboards database databases db debt debug debugger debugging defaults dependencies dependency
+deploy deployed deployment deployments deploys desktop developer diff diffs directories directory disk dns
+doc docker docs documentation domains download downloads e2e email emails encrypt encryption endpoint
+endpoints enum env environments errors exceptions export exports extensions filename filter filters fixture
+fixtures flags fork formatter framework frameworks frontend fullstack funnel gateway gcp git github gitlab
+golang gpu graphql grpc handler handlers hardware hash hashes hashing header headers hostname hosts hotfix
+http id ids import imports inbox indexes indices instances integer integration integrations interface
+interfaces invoice invoices ios java javascript jobs joins json jwt keys kubernetes lambda latency legacy
+libraries lint linter linting load log logger logging login logout logs loop loops markdown merges messages
+metric metrics middleware migration migrations minify mock mocks module modules mongodb monitor monorepo
+mysql node nodejs nodes nosql notification notifications null oauth offline onboarding options output
+paginate pagination param parameter parameters params password patch paths payload payloads payment payments
+permissions pipeline pipelines plugin plugins ports postgres postgresql pricing prod profile programmer
+promise promises protocol proxy prs python queries query queue queued queues ram react readme realtime rebase
+refactor refund refunds regex remote repository requests requirement responses retries retro retry roadmap
+rollback rollbacks rollout router routing rows ruby runner runtime rust sandbox scheduler schema schemas
+scripting scripts scroll sdk sdks searches secrets server serverless servers sessions settings shell sign-in
+signup slack sms socket sockets spec specs sprint sql sqlite ssl stack staging stakeholder standup stream
+streams strings stubs subscription subscriptions suite svelte sync tables tcp tech terminal tests thread
+threads throughput ticket tickets tier tiers timeout timeouts tls toggle token tokens toml trace traces
+tracing tracking transaction transactions typecheck typescript udp ui undefined upload uploads upstream
+uptime uri url urls uuid ux variable vendor vendors versioning vm vue webhook webhooks websites websocket
+websockets widget worker workflow workflows xml yaml
+ms kb mb gb

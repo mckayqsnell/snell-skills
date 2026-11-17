@@ -31,6 +31,8 @@ page_parts:                     # round 8
 vocab:
   standard: plain-language      # round 9: plainlanguage.gov style. Other option: ste-lite
   level: 80                     # a floor, checked with vocab-check.mjs; never a target
+  reader: engineer              # 1.2: everyday software words (app, ticket, deploy) count as common; define only real jargon.
+                                #      general: for a non-technical reader (for:"…"); put <meta name="vocab-reader" content="general"> in that page
 
 plans:                          # round 10
   sizes: [below-s, s, m, l]     # below S: no page, a ready-to-paste prompt

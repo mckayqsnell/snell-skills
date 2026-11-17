@@ -94,7 +94,7 @@ Hand-written SVG, from the toolbox in HOUSE-STYLE.md: flat reference drawings, i
 1. **Check in a browser** if you have one (Playwright, or your own browser tool): desktop light, desktop dark, a wide screen (1600 px), and phone at 390 px. No console errors. Open a drawing with Expand and press Play on any scene. Nothing scrolls sideways except drawings and code in their own box. Pick an option and type a note: the response must change and quote the note. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Do the read-through: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say it was checked by read-through.
 3. **Placeholders:** `grep -n '{{' plans/<page>.html` prints nothing.
-4. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80).
+4. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80). The reader is a software engineer: never define basic words like app, ticket or deploy. Define only real jargon, with a hover term (`<dfn class="term">`, see PARTS.md), and always spell out an acronym the first time.
 5. **Can't fix something?** Say it in one sentence and hand over anyway.
 6. **Open it** in the user's browser: `open` (Mac), `xdg-open` (Linux), `start` (Windows). No screen: print the path.
 7. **Tell the user in 2 lines:** the path, the size, and what you need ("3 decisions need your pick").
