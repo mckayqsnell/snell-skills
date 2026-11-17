@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-drawings="sketch">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,7 @@
 
 /* House style tokens (house style 1). Picked in a design bake-off, Oct 2026.
    Round 1 colors: B Burnt Sienna. Round 2 fonts: E, Adobe Source Serif 4 + Source Sans 3 + Source Code Pro, packed in renamed as Snell Serif, Snell Sans and Snell Mono (OFL: subsets may not keep the reserved name "Source").
-   Round 3 size: B Default. Round 5 drawings: sketch A2+B1+C2+D3, clean E1. Round 7 motion: B Highlight only.
+   Round 3 size: B Default. Round 5 drawings: clean E1 (the sketch look was dropped in 1.1). Round 7 motion: B Highlight only.
    Every color, font and size on a page comes from here. Never write a raw hex color in a page body. */
 :root {
   /* colors, light */
@@ -31,6 +31,13 @@
   --warn: #8f5a07;
   --warn-soft: #f7e8c8;
   --code-bg: #f1e7d2;
+  /* diagram hues (1.1): color means something, at most 3 per drawing. Each has a line color and a soft fill. */
+  --teal: #1f7a72; --teal-soft: #d6ece8;
+  --violet: #6a4fa3; --violet-soft: #e6dff3;
+  --ochre: #a06b08; --ochre-soft: #f5e7c6;
+  --rose: #b0456a; --rose-soft: #f6dde5;
+  --slate: #4f6170; --slate-soft: #e0e5e9;
+  --glow: #f07a2a;   /* lit packets and the hot node in moving drawings */
   --shadow: 0 1px 2px rgba(40,30,20,.06), 0 6px 20px rgba(40,30,20,.06);
   color-scheme: light;
 
@@ -38,7 +45,6 @@
   --font-display: "Snell Serif", Charter, Georgia, serif;
   --font-body: "Snell Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Snell Mono", ui-monospace, Menlo, Consolas, monospace;
-  --font-hand: "Bradley Hand", "Segoe Print", "Segoe Script", "Comic Sans MS", cursive; /* sketch edge labels only; local fonts */
 
   /* size and spacing */
   --size-body: 17px; --leading: 1.6; --measure: 61ch; --measure-lede: 60ch;
@@ -56,6 +62,7 @@
     --bg: #1a120c; --surface: #241a12; --sunk: #2d2218; --ink: #f6ead8; --muted: #b9a58d;
     --line: #41331f; --accent: #f0743a; --accent-soft: #43241a; --go: #6fcb90; --go-soft: #1d3324;
     --warn: #ecb04e; --warn-soft: #3b2c14; --code-bg: #2d2218;
+    --teal: #5fc8bb; --teal-soft: #17302d; --violet: #b39ae8; --violet-soft: #2a2140; --ochre: #e3b24f; --ochre-soft: #3a2c12; --rose: #ee8db0; --rose-soft: #3d1f2a; --slate: #a7b8c6; --slate-soft: #232b31; --glow: #ffa65c;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
     color-scheme: dark;
   }
@@ -64,6 +71,7 @@
   --bg: #1a120c; --surface: #241a12; --sunk: #2d2218; --ink: #f6ead8; --muted: #b9a58d;
   --line: #41331f; --accent: #f0743a; --accent-soft: #43241a; --go: #6fcb90; --go-soft: #1d3324;
   --warn: #ecb04e; --warn-soft: #3b2c14; --code-bg: #2d2218;
+  --teal: #5fc8bb; --teal-soft: #17302d; --violet: #b39ae8; --violet-soft: #2a2140; --ochre: #e3b24f; --ochre-soft: #3a2c12; --rose: #ee8db0; --rose-soft: #3d1f2a; --slate: #a7b8c6; --slate-soft: #232b31; --glow: #ffa65c;
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
   color-scheme: dark;
 }
@@ -251,10 +259,6 @@ ul.tight { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 .fig-box > svg { display: block; height: auto; max-width: none; margin: 0 auto; }
 .fig figcaption { font-size: var(--size-small); color: var(--muted); margin-top: 8px; }
 .fig .swipe { display: none; font-size: 13px; color: var(--muted); margin-top: 4px; }
-svg.is-sketch [data-clean] { display: none; }
-svg:not(.is-sketch) .sk { display: none; }
-svg.is-sketch text.el { font-family: var(--font-hand); font-weight: 400; }
-.style-pop .draw-row { display: grid; gap: var(--space-2); }
 .style-pop [hidden] { display: none; }
 .fig.scrolls .swipe { display: block; }
 
@@ -400,12 +404,99 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 .unclear pre { margin: 0; padding: var(--space-3); font: 13px/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow: auto; }
 .unclear pre:empty { display: none; }
 
+/* ================= visual toolbox (1.1) ================= */
+/* Tones: put one class on a shape or group; its shapes read --tone (line) and --tone-soft (fill). */
+.tone-plain { --tone: var(--muted); --tone-soft: var(--surface); }
+.tone-accent { --tone: var(--accent); --tone-soft: var(--accent-soft); }
+.tone-go { --tone: var(--go); --tone-soft: var(--go-soft); }
+.tone-warn { --tone: var(--warn); --tone-soft: var(--warn-soft); }
+.tone-teal { --tone: var(--teal); --tone-soft: var(--teal-soft); }
+.tone-violet { --tone: var(--violet); --tone-soft: var(--violet-soft); }
+.tone-ochre { --tone: var(--ochre); --tone-soft: var(--ochre-soft); }
+.tone-rose { --tone: var(--rose); --tone-soft: var(--rose-soft); }
+.tone-slate { --tone: var(--slate); --tone-soft: var(--slate-soft); }
+
+/* Wide figures: on a big screen they reach past the text column to the right. */
+@media (min-width: 1240px) {
+  .fig[data-span="wide"], .vw[data-span="wide"] { width: min(1400px, max(100%, calc(50vw + 200px))); max-width: none; }
+}
+
+/* Isometric 3D (svg.iso). The script draws the faces; colors come from the tone. */
+svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
+.iso-floor { fill: var(--sunk); stroke: var(--line); stroke-width: 1; }
+.iso-grid { fill: none; stroke: var(--line); stroke-width: .75; opacity: .8; }
+.iso-node polygon, .iso-node path, .iso-node ellipse { stroke: var(--tone); stroke-width: 1.5; stroke-linejoin: round; }
+.iso-t { fill: var(--tone-soft); transition: filter var(--motion-slow) var(--ease); }
+.iso-l { fill: color-mix(in oklab, var(--tone) 26%, var(--tone-soft)); }
+.iso-r { fill: color-mix(in oklab, var(--tone) 46%, var(--tone-soft)); }
+.iso-ring { fill: none; stroke-width: 1 !important; opacity: .5; }
+.iso-lb, .iso-sb { fill: var(--ink); font: 600 15px var(--font-body); paint-order: stroke; stroke: var(--halo, var(--surface)); stroke-width: 4px; stroke-linejoin: round; }
+.iso-sb { fill: var(--muted); font-weight: 400; font-size: 13px; }
+.iso-route { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; }
+
+/* Moving data: lit packets on [data-flow] edges. */
+.pkt { pointer-events: none; }
+.pkt-halo { fill: var(--glow); opacity: .14; }
+.pkt-glow { fill: var(--glow); opacity: .32; }
+.pkt-core { fill: var(--glow); }
+.pkt-hero .pkt-core { fill: var(--surface); stroke: var(--glow); stroke-width: 3; }
+.flow-still path, path.flow-still { stroke: var(--glow) !important; }
+.scene.playing .pkt:not(.pkt-hero) { opacity: .25 !important; }
+
+/* The hot node in a scene, and linked words. */
+svg .hot { filter: drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 2px var(--glow)); }
+svg .hot :is(rect, .iso-t) { stroke: var(--glow) !important; }
+svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
+.hl { border-bottom: 2px solid color-mix(in oklab, var(--glow) 55%, transparent); cursor: help; border-radius: 2px; transition: background var(--motion-fast) var(--ease); }
+.hl.hl-on, .hl:focus-visible { background: color-mix(in oklab, var(--glow) 22%, transparent); outline: none; }
+.scene-js .reveal { opacity: 0; transition: opacity var(--motion-slow) var(--ease); }
+.scene-js .reveal.shown { opacity: 1; }
+
+/* Scenes: Play, step and the line that says what is happening. */
+.scene-ui { margin-top: 10px; display: grid; gap: 6px; }
+.scene-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.scene-bar button { font: 600 14px var(--font-body); min-height: 36px; min-width: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.scene-bar button:hover { background: var(--sunk); }
+.scene-bar .scene-play, .scene-bar .scene-play:hover { background: var(--accent); border-color: var(--accent); color: var(--surface); min-width: 96px; }
+.scene-bar .scene-play:hover { filter: brightness(1.08); }
+.scene-dots { display: flex; gap: 5px; margin-left: 6px; }
+.scene-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); cursor: pointer; transition: background var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease); }
+.scene-dots i.done { background: var(--muted); }
+.scene-dots i.now { background: var(--glow); transform: scale(1.35); }
+.scene-count { font: 500 12.5px var(--font-mono); color: var(--muted); margin-left: auto; }
+.scene-say { min-height: 3.2em; font-size: 15.5px; max-width: 72ch; }
+.scene-js .scene-steps { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.scene-steps { margin: 10px 0 0; padding-left: 22px; font-size: 15px; display: grid; gap: 4px; }
+
+/* Expand: a button on every drawing, and the full-window view it opens. */
+.fig-box.xp-ready { position: relative; }
+.fig-x { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 6px; font: 600 12.5px var(--font-body); color: var(--muted); background: color-mix(in oklab, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer; opacity: .75; transition: opacity var(--motion-fast) var(--ease); z-index: 2; }
+.fig-x span:first-child { font-size: 15px; line-height: 1; }
+.fig-box:hover .fig-x, .fig-x:focus-visible { opacity: 1; color: var(--ink); }
+.fig.peek .fig-box { cursor: zoom-in; }
+.fig.peek .fig-x { opacity: 1; color: var(--ink); }
+.fig.peek .fig-x-t::after { content: " · tap"; }
+.xp { position: fixed; inset: 0; z-index: 1000; background: var(--bg); display: flex; flex-direction: column; --halo: var(--bg); animation: xp-in var(--motion-fast) var(--ease); }
+@keyframes xp-in { from { opacity: 0; transform: scale(.985); } }
+.xp-bar { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.xp-title { flex: 1; min-width: 0; font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xp-bar button { font: 600 18px/1 var(--font-body); min-width: var(--tap); min-height: var(--tap); border: 0; background: transparent; color: var(--ink); border-radius: 8px; cursor: pointer; }
+.xp-bar button:hover { background: var(--sunk); }
+.xp-stage { position: relative; flex: 1; overflow: hidden; cursor: grab; touch-action: none; }
+.xp-stage.grab { cursor: grabbing; }
+.xp-pan { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.xp-pan.anim { transition: transform var(--motion-fast) ease-out; }
+.xp-pan > svg { display: block; }
+.xp .scene-ui { padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); margin: 0; }
+
 @page { margin: 0; }
 @media print {
   html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: var(--bg); }
   /* zero page margin so the page color runs to the edge; the padding repeats on every printed page */
   body { padding: 14mm 15mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-  .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag { display: none !important; }
+  .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag, .fig-x, .scene-ui, .pkt { display: none !important; }
+  .scene-js .scene-steps { position: static; width: auto; height: auto; clip: auto; white-space: normal; overflow: visible; }
+  .scene-js .reveal { opacity: 1; } .fig[data-span] { width: auto; }
   .wrap { display: block; max-width: none; padding: 0; } main { max-width: none; }
   section { padding-top: 32px; }
   section.folded > :not(.part):not(h2) { display: revert !important; }
@@ -422,6 +513,7 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 <style>
   .hs-live { --halo: var(--surface); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-top: 10px; display: grid; gap: 10px; }
   .hs-live > * { min-width: 0; }
+  @media (min-width: 1240px) { .hs-live:has(> [data-span="wide"]) { width: min(1400px, max(100%, calc(50vw + 200px))); } .hs-live > [data-span="wide"] { width: auto; } }
   .hs-live .fig-box { padding: 12px 0; border: 0; background: none; }
   .hs-code { margin-top: 8px; max-width: none; }
   .hs-code pre { max-height: 320px; overflow: auto; }
@@ -443,20 +535,18 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
         <div class="seg"><button type="button" data-theme-set="auto">Auto</button><button type="button" data-theme-set="light">Light</button><button type="button" data-theme-set="dark">Dark</button></div>
         <span class="sl">Text size</span>
         <div class="seg"><button type="button" data-dens-set="compact">Small</button><button type="button" data-dens-set="default">Default</button><button type="button" data-dens-set="large">Large</button></div>
-        <div class="draw-row"><span class="sl">Drawings</span>
-        <div class="seg"><button type="button" data-draw-set="sketch">Sketch</button><button type="button" data-draw-set="clean">Clean</button></div></div>
       </div>
       </div>
       <header>
         <div class="part">House style</div>
         <h1>Every part, ready to copy</h1>
         <p class="lede">The look for our plan and explainer pages. Each part below is live, with its code folded under it. Start a page from <code>template.html</code>. Read the rules in <code>HOUSE-STYLE.md</code> and the class list in <code>PARTS.md</code>.</p>
-        <div class="meta"><span>Colors <b>Burnt Sienna</b></span><span>Fonts <b>Snell Serif · Snell Sans · Snell Mono</b></span><span>Text <b>17 px · 61 ch</b></span><span>Drawings <b>sketch, clean for customers</b></span></div>
+        <div class="meta"><span>Colors <b>Burnt Sienna</b></span><span>Fonts <b>Snell Serif · Snell Sans · Snell Mono</b></span><span>Text <b>17 px · 61 ch</b></span><span>Drawings <b>SVG: flat, 3D, moving</b></span></div>
       </header>
       <section id="look" data-toc="Colors + type" data-fold="open">
         <div class="part">Look</div><h2>Colors and type</h2>
-        <p class="section-intro">Use these variables. Never a raw hex color in the page body. The gear at the top right switches theme, text size and drawing style.</p>
-        <div class="hs-sw"><div><i style="background:var(--bg)"></i><code>--bg</code></div><div><i style="background:var(--surface)"></i><code>--surface</code></div><div><i style="background:var(--sunk)"></i><code>--sunk</code></div><div><i style="background:var(--ink)"></i><code>--ink</code></div><div><i style="background:var(--muted)"></i><code>--muted</code></div><div><i style="background:var(--line)"></i><code>--line</code></div><div><i style="background:var(--accent)"></i><code>--accent</code></div><div><i style="background:var(--accent-soft)"></i><code>--accent-soft</code></div><div><i style="background:var(--go)"></i><code>--go</code></div><div><i style="background:var(--go-soft)"></i><code>--go-soft</code></div><div><i style="background:var(--warn)"></i><code>--warn</code></div><div><i style="background:var(--warn-soft)"></i><code>--warn-soft</code></div><div><i style="background:var(--code-bg)"></i><code>--code-bg</code></div></div>
+        <p class="section-intro">Use these variables. Never a raw hex color in the page body. The gear at the top right switches theme and text size. The second row is the drawing hues: color means something, at most 3 in one drawing.</p>
+        <div class="hs-sw"><div><i style="background:var(--bg)"></i><code>--bg</code></div><div><i style="background:var(--surface)"></i><code>--surface</code></div><div><i style="background:var(--sunk)"></i><code>--sunk</code></div><div><i style="background:var(--ink)"></i><code>--ink</code></div><div><i style="background:var(--muted)"></i><code>--muted</code></div><div><i style="background:var(--line)"></i><code>--line</code></div><div><i style="background:var(--accent)"></i><code>--accent</code></div><div><i style="background:var(--accent-soft)"></i><code>--accent-soft</code></div><div><i style="background:var(--go)"></i><code>--go</code></div><div><i style="background:var(--go-soft)"></i><code>--go-soft</code></div><div><i style="background:var(--warn)"></i><code>--warn</code></div><div><i style="background:var(--warn-soft)"></i><code>--warn-soft</code></div><div><i style="background:var(--code-bg)"></i><code>--code-bg</code></div><div><i style="background:var(--teal)"></i><code>--teal</code></div><div><i style="background:var(--teal-soft)"></i><code>--teal-soft</code></div><div><i style="background:var(--violet)"></i><code>--violet</code></div><div><i style="background:var(--violet-soft)"></i><code>--violet-soft</code></div><div><i style="background:var(--ochre)"></i><code>--ochre</code></div><div><i style="background:var(--ochre-soft)"></i><code>--ochre-soft</code></div><div><i style="background:var(--rose)"></i><code>--rose</code></div><div><i style="background:var(--rose-soft)"></i><code>--rose-soft</code></div><div><i style="background:var(--slate)"></i><code>--slate</code></div><div><i style="background:var(--slate-soft)"></i><code>--slate-soft</code></div><div><i style="background:var(--glow)"></i><code>--glow</code></div></div>
         <h3 style="margin-top:28px">Heading in Snell Serif</h3>
         <p style="margin-top:8px">Body text in Snell Sans at 17 px. Short sentences. Active voice. <code>Code in Snell Mono</code>.</p>
       </section>
@@ -669,7 +759,7 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
       </section>
       <section id="drawings" data-toc="Drawings" data-fold="open">
         <div class="part">Drawings</div><h2>Drawings</h2>
-        <p class="section-intro">Write the clean SVG. The page draws it in the sketch look unless the page or the reader asks for clean. Switch in the gear to compare.</p>
+        <p class="section-intro">Reference drawings: boxes and arrows you can point at. Every drawing gets an Expand button that opens it full window. These are starting points, not templates.</p>
         <h3 style="margin-top:34px">Flow</h3>
   <div class="hs-live"><figure class="fig" style="margin:0"><div class="fig-box"><svg viewBox="0 0 720 100" role="img" aria-label="Flow: you ask, the agent writes plan.html, a build session builds from it" font-family="var(--font-body)">
 <rect class="bx" x="10" y="25" width="120" height="50" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><text class="bt" x="70" y="55" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">You</text><g class="ed"><path d="M130 50L191 50" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M200 50L190 55L190 45z" fill="var(--ink)"/></g><text class="el" x="165" y="41" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">asks</text><rect class="bx" x="200" y="25" width="120" height="50" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text class="bt" x="260" y="55" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--accent-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Agent</text><g class="ed"><path d="M320 50L381 50" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M390 50L380 55L380 45z" fill="var(--ink)"/></g><text class="el" x="355" y="41" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">writes</text><rect class="bx" x="390" y="25" width="120" height="50" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><text class="bt" x="450" y="55" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">plan.html</text><g class="ed"><path d="M510 50L571 50" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M580 50L570 55L570 45z" fill="var(--ink)"/></g><text class="el" x="545" y="41" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">feeds</text><rect class="bx" x="580" y="25" width="130" height="50" rx="8" fill="var(--go-soft)" stroke="var(--go)" stroke-width="1.5"/><text class="bt" x="645" y="55" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--go-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Build</text>
@@ -723,12 +813,147 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
   &lt;p class="vw-hint"&gt;Click the drawing, then arrows, + and −, 0 to reset. Ctrl or Cmd + wheel zooms. A plain wheel scrolls the page.&lt;/p&gt;
   &lt;/div&gt;</pre></div></div></details>
       </section>
+      <section id="alive" data-toc="3D and motion" data-fold="open">
+        <div class="part">3D and motion</div><h2>Drawings that move, stack and answer back</h2>
+        <p class="section-intro">For "how does it work" pages. Packets run while a drawing is on screen. Scenes wait for Play. Reduced motion and print get a still drawing. Wide ones reach past the text on a big screen.</p>
+        <h3 style="margin-top:34px">Live map (wide)</h3><p style="margin-top:6px">A reference drawing that shows traffic. <code>data-span="wide"</code> lets it use a big screen.</p>
+  <div class="hs-live"><figure class="fig" data-span="wide" style="margin:0"><div class="fig-box"><svg viewBox="0 0 980 250" role="img" aria-label="Live map: requests flow from the browser through the API to orders and Postgres; jobs flow through a queue to a worker" font-family="var(--font-body)">
+<rect class="gp" x="10" y="10" width="490" height="230" rx="12" fill="var(--sunk)" stroke="var(--muted)" stroke-width="1.25"/><text class="gl" x="24" y="32" font-size="13" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Request path</text><rect class="gp" x="525" y="10" width="445" height="230" rx="12" fill="none" stroke="var(--muted)" stroke-width="1.25" stroke-dasharray="6 5"/><text class="gl" x="539" y="32" font-size="13" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Later, off the request path</text><rect class="bx" x="30" y="60" width="110" height="50" rx="8" fill="var(--slate-soft)" stroke="var(--slate)" stroke-width="1.5"/><text class="bt" x="85" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--slate-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Browser</text><rect class="bx" x="190" y="60" width="115" height="50" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text class="bt" x="247.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--accent-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">API</text><rect class="bx" x="355" y="60" width="120" height="50" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/><text class="bt" x="415" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Orders</text><rect class="bx" x="355" y="160" width="120" height="50" rx="8" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="1.5"/><text class="bt" x="415" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--rose-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Postgres</text><rect class="bx" x="565" y="60" width="135" height="50" rx="8" fill="var(--ochre-soft)" stroke="var(--ochre)" stroke-width="1.5"/><text class="bt" x="632.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--ochre-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Queue</text><rect class="bx" x="775" y="60" width="135" height="50" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/><text class="bt" x="842.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Worker</text><rect class="bx" x="775" y="160" width="135" height="50" rx="8" fill="var(--go-soft)" stroke="var(--go)" stroke-width="1.5"/><text class="bt" x="842.5" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--go-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Email sent</text><g class="ed" data-flow="2"><path d="M140 85L181 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M190 85L180 90L180 80z" fill="var(--ink)"/></g><text class="el" x="165" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">POST</text><g class="ed" data-flow="2"><path d="M305 85L346 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M355 85L345 90L345 80z" fill="var(--ink)"/></g><text class="el" x="330" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">route</text><g class="ed" data-flow="1"><path d="M415 110L415 151" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M415 160L410 150L420 150z" fill="var(--ink)"/></g><text class="el" x="427" y="140" text-anchor="start" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">insert</text><g class="ed" data-flow="1" data-flow-speed="3.2"><path d="M475 85L556 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M565 85L555 90L555 80z" fill="var(--ink)"/></g><text class="el" x="520" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">job</text><g class="ed" data-flow="1" data-flow-speed="3.2"><path d="M700 85L766 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M775 85L765 90L765 80z" fill="var(--ink)"/></g><text class="el" x="737" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">pick up</text><g class="ed" data-flow="1" data-flow-speed="3.2"><path d="M842 110L842 151" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M842 160L837 150L847 150z" fill="var(--ink)"/></g><text class="el" x="854" y="140" text-anchor="start" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">send</text>
+</svg></div><figcaption>Packets show where traffic goes. Add data-flow to an edge.</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Live map (wide)</span><button type="button" class="btn-sm" data-copy="#src-26">Copy</button></div><pre id="src-26">&lt;figure class="fig" data-span="wide" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg viewBox="0 0 980 250" role="img" aria-label="Live map: requests flow from the browser through the API to orders and Postgres; jobs flow through a queue to a worker" font-family="var(--font-body)"&gt;
+&lt;rect class="gp" x="10" y="10" width="490" height="230" rx="12" fill="var(--sunk)" stroke="var(--muted)" stroke-width="1.25"/&gt;&lt;text class="gl" x="24" y="32" font-size="13" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Request path&lt;/text&gt;&lt;rect class="gp" x="525" y="10" width="445" height="230" rx="12" fill="none" stroke="var(--muted)" stroke-width="1.25" stroke-dasharray="6 5"/&gt;&lt;text class="gl" x="539" y="32" font-size="13" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Later, off the request path&lt;/text&gt;&lt;rect class="bx" x="30" y="60" width="110" height="50" rx="8" fill="var(--slate-soft)" stroke="var(--slate)" stroke-width="1.5"/&gt;&lt;text class="bt" x="85" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--slate-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Browser&lt;/text&gt;&lt;rect class="bx" x="190" y="60" width="115" height="50" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/&gt;&lt;text class="bt" x="247.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--accent-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;API&lt;/text&gt;&lt;rect class="bx" x="355" y="60" width="120" height="50" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/&gt;&lt;text class="bt" x="415" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Orders&lt;/text&gt;&lt;rect class="bx" x="355" y="160" width="120" height="50" rx="8" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="1.5"/&gt;&lt;text class="bt" x="415" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--rose-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Postgres&lt;/text&gt;&lt;rect class="bx" x="565" y="60" width="135" height="50" rx="8" fill="var(--ochre-soft)" stroke="var(--ochre)" stroke-width="1.5"/&gt;&lt;text class="bt" x="632.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--ochre-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Queue&lt;/text&gt;&lt;rect class="bx" x="775" y="60" width="135" height="50" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/&gt;&lt;text class="bt" x="842.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Worker&lt;/text&gt;&lt;rect class="bx" x="775" y="160" width="135" height="50" rx="8" fill="var(--go-soft)" stroke="var(--go)" stroke-width="1.5"/&gt;&lt;text class="bt" x="842.5" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--go-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Email sent&lt;/text&gt;&lt;g class="ed" data-flow="2"&gt;&lt;path d="M140 85L181 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M190 85L180 90L180 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="165" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;POST&lt;/text&gt;&lt;g class="ed" data-flow="2"&gt;&lt;path d="M305 85L346 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M355 85L345 90L345 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="330" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;route&lt;/text&gt;&lt;g class="ed" data-flow="1"&gt;&lt;path d="M415 110L415 151" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M415 160L410 150L420 150z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="427" y="140" text-anchor="start" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;insert&lt;/text&gt;&lt;g class="ed" data-flow="1" data-flow-speed="3.2"&gt;&lt;path d="M475 85L556 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M565 85L555 90L555 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="520" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;job&lt;/text&gt;&lt;g class="ed" data-flow="1" data-flow-speed="3.2"&gt;&lt;path d="M700 85L766 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M775 85L765 90L765 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="737" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;pick up&lt;/text&gt;&lt;g class="ed" data-flow="1" data-flow-speed="3.2"&gt;&lt;path d="M842 110L842 151" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M842 160L837 150L847 150z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="854" y="140" text-anchor="start" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;send&lt;/text&gt;
+&lt;/svg&gt;&lt;/div&gt;&lt;figcaption&gt;Packets show where traffic goes. Add data-flow to an edge.&lt;/figcaption&gt;&lt;p class="swipe"&gt;Swipe sideways to see the whole drawing.&lt;/p&gt;&lt;/figure&gt;</pre></div></div></details>
+        <h3 style="margin-top:34px">Isometric 3D</h3><p style="margin-top:6px">The default 3D look. Write <code>data-box</code>, <code>data-cyl</code> and <code>data-route</code>; the script does the math.</p>
+  <div class="hs-live"><figure class="fig" style="margin:0"><div class="fig-box"><svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)">
+  <g data-floor="-0.6 -0.6 17 8"/>
+  <g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/>
+  <g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/>
+  <g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/>
+  <g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/>
+  <g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/>
+  <g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/>
+  <g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/>
+  <g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/>
+  <g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/>
+  <g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/>
+  <g data-node="orders" class="tone-teal" data-box="6.8 2.6 1.6 1.6 1.7" data-label="Orders" data-sub="service"/>
+  <g data-node="queue" class="tone-ochre" data-box="10.2 2.8 2.8 1.2 0.5" data-label="Queue" data-sub="jobs wait here"/>
+  <g data-node="worker" class="tone-teal" data-box="14.4 2.6 1.6 1.6 1" data-label="Worker" data-sub="sends email"/>
+  <g data-node="db" class="tone-rose" data-cyl="10.8 5.6 1.6 1.3" data-label="Postgres" data-sub="orders table"/>
+</svg></div><figcaption>Blocks, a cylinder and routes, written in floor units. The page draws the faces and sorts them.</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Isometric 3D</span><button type="button" class="btn-sm" data-copy="#src-27">Copy</button></div><pre id="src-27">&lt;figure class="fig" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)"&gt;
+  &lt;g data-floor="-0.6 -0.6 17 8"/&gt;
+  &lt;g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/&gt;
+  &lt;g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/&gt;
+  &lt;g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/&gt;
+  &lt;g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/&gt;
+  &lt;g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/&gt;
+  &lt;g data-node="orders" class="tone-teal" data-box="6.8 2.6 1.6 1.6 1.7" data-label="Orders" data-sub="service"/&gt;
+  &lt;g data-node="queue" class="tone-ochre" data-box="10.2 2.8 2.8 1.2 0.5" data-label="Queue" data-sub="jobs wait here"/&gt;
+  &lt;g data-node="worker" class="tone-teal" data-box="14.4 2.6 1.6 1.6 1" data-label="Worker" data-sub="sends email"/&gt;
+  &lt;g data-node="db" class="tone-rose" data-cyl="10.8 5.6 1.6 1.3" data-label="Postgres" data-sub="orders table"/&gt;
+&lt;/svg&gt;&lt;/div&gt;&lt;figcaption&gt;Blocks, a cylinder and routes, written in floor units. The page draws the faces and sorts them.&lt;/figcaption&gt;&lt;p class="swipe"&gt;Swipe sideways to see the whole drawing.&lt;/p&gt;&lt;/figure&gt;</pre></div></div></details>
+        <h3 style="margin-top:34px">Scene: press Play</h3><p style="margin-top:6px">Each list item is a step: an edge to run, the node that lights up. Press Play, or step with ‹ and ›.</p>
+  <div class="hs-live"><figure class="fig scene" data-span="wide" style="margin:0"><div class="fig-box"><svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="One request, step by step, on the 3D map" font-family="var(--font-body)">
+  <g data-floor="-0.6 -0.6 17 8"/>
+  <g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/>
+  <g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/>
+  <g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/>
+  <g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/>
+  <g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/>
+  <g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/>
+  <g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/>
+  <g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/>
+  <g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/>
+  <g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/>
+  <g data-node="orders" class="tone-teal" data-box="6.8 2.6 1.6 1.6 1.7" data-label="Orders" data-sub="service"/>
+  <g data-node="queue" class="tone-ochre" data-box="10.2 2.8 2.8 1.2 0.5" data-label="Queue" data-sub="jobs wait here"/>
+  <g data-node="worker" class="tone-teal" data-box="14.4 2.6 1.6 1.6 1" data-label="Worker" data-sub="sends email"/>
+  <g data-node="db" class="tone-rose" data-cyl="10.8 5.6 1.6 1.3" data-label="Postgres" data-sub="orders table"/>
+</svg></div>
+  <ol class="scene-steps">
+    <li data-edge="b-g" data-from="browser" data-node="gateway">The browser sends <code>POST /orders</code> to the API gateway.</li>
+    <li data-edge="g-a" data-from="gateway" data-node="auth">The gateway asks Auth if the token is good.</li>
+    <li data-edge="g-a" data-back data-from="auth" data-node="gateway">Auth says yes. The gateway passes the request on.</li>
+    <li data-edge="g-o" data-from="gateway" data-node="orders">The Orders service gets the request.</li>
+    <li data-edge="o-d" data-from="orders" data-node="db">Orders writes one row to Postgres.</li>
+    <li data-edge="o-q" data-from="orders" data-node="queue">Orders puts a "send receipt" job on the queue, then answers the browser at once.</li>
+    <li data-edge="q-w" data-from="queue" data-node="worker">Later, a worker picks up the job, off the request path.</li>
+    <li data-edge="w-d" data-from="worker" data-node="db">The worker reads the order and sends the email. Done.</li>
+  </ol>
+  <figcaption>One request, step by step. Without the script it reads as a numbered list.</figcaption></figure></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Scene: press Play</span><button type="button" class="btn-sm" data-copy="#src-28">Copy</button></div><pre id="src-28">&lt;figure class="fig scene" data-span="wide" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="One request, step by step, on the 3D map" font-family="var(--font-body)"&gt;
+  &lt;g data-floor="-0.6 -0.6 17 8"/&gt;
+  &lt;g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/&gt;
+  &lt;g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/&gt;
+  &lt;g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/&gt;
+  &lt;g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/&gt;
+  &lt;g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/&gt;
+  &lt;g data-node="orders" class="tone-teal" data-box="6.8 2.6 1.6 1.6 1.7" data-label="Orders" data-sub="service"/&gt;
+  &lt;g data-node="queue" class="tone-ochre" data-box="10.2 2.8 2.8 1.2 0.5" data-label="Queue" data-sub="jobs wait here"/&gt;
+  &lt;g data-node="worker" class="tone-teal" data-box="14.4 2.6 1.6 1.6 1" data-label="Worker" data-sub="sends email"/&gt;
+  &lt;g data-node="db" class="tone-rose" data-cyl="10.8 5.6 1.6 1.3" data-label="Postgres" data-sub="orders table"/&gt;
+&lt;/svg&gt;&lt;/div&gt;
+  &lt;ol class="scene-steps"&gt;
+    &lt;li data-edge="b-g" data-from="browser" data-node="gateway"&gt;The browser sends &lt;code&gt;POST /orders&lt;/code&gt; to the API gateway.&lt;/li&gt;
+    &lt;li data-edge="g-a" data-from="gateway" data-node="auth"&gt;The gateway asks Auth if the token is good.&lt;/li&gt;
+    &lt;li data-edge="g-a" data-back data-from="auth" data-node="gateway"&gt;Auth says yes. The gateway passes the request on.&lt;/li&gt;
+    &lt;li data-edge="g-o" data-from="gateway" data-node="orders"&gt;The Orders service gets the request.&lt;/li&gt;
+    &lt;li data-edge="o-d" data-from="orders" data-node="db"&gt;Orders writes one row to Postgres.&lt;/li&gt;
+    &lt;li data-edge="o-q" data-from="orders" data-node="queue"&gt;Orders puts a "send receipt" job on the queue, then answers the browser at once.&lt;/li&gt;
+    &lt;li data-edge="q-w" data-from="queue" data-node="worker"&gt;Later, a worker picks up the job, off the request path.&lt;/li&gt;
+    &lt;li data-edge="w-d" data-from="worker" data-node="db"&gt;The worker reads the order and sends the email. Done.&lt;/li&gt;
+  &lt;/ol&gt;
+  &lt;figcaption&gt;One request, step by step. Without the script it reads as a numbered list.&lt;/figcaption&gt;&lt;/figure&gt;</pre></div></div></details>
+        <h3 style="margin-top:34px">Stacked layers</h3><p style="margin-top:6px">Depth for layers: a request goes down through the stack.</p>
+  <div class="hs-live"><figure class="fig" style="margin:0"><div class="fig-box"><svg class="iso" data-iso="36 200 150" viewBox="0 0 600 360" role="img" aria-label="Three layers stacked: the page on top, the API in the middle, the database at the bottom, with a request moving down through them" font-family="var(--font-body)">
+  <g class="ed" data-route="3,2,2.6 3,2,1.8" data-flow data-flow-speed="1.6"/>
+  <g class="ed" data-route="3.6,2.6,1.3 3.6,2.6,0.5" data-flow data-flow-speed="1.6" data-flow-back/>
+  <g class="tone-slate" data-box="0 0 6 4 0.5" data-z="0"/>
+  <g class="tone-teal" data-box="0 0 6 4 0.5" data-z="1.3"/>
+  <g class="tone-accent" data-box="0 0 6 4 0.5" data-z="2.6"/>
+  <text class="iso-lb" data-at="6.4 0 2.8">Page</text>
+  <text class="iso-lb" data-at="6.4 0 1.5">API</text>
+  <text class="iso-lb" data-at="6.4 0 0.2">Database</text>
+</svg></div><figcaption>Lines can rise between layers: give a route points with a height.</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Stacked layers</span><button type="button" class="btn-sm" data-copy="#src-29">Copy</button></div><pre id="src-29">&lt;figure class="fig" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg class="iso" data-iso="36 200 150" viewBox="0 0 600 360" role="img" aria-label="Three layers stacked: the page on top, the API in the middle, the database at the bottom, with a request moving down through them" font-family="var(--font-body)"&gt;
+  &lt;g class="ed" data-route="3,2,2.6 3,2,1.8" data-flow data-flow-speed="1.6"/&gt;
+  &lt;g class="ed" data-route="3.6,2.6,1.3 3.6,2.6,0.5" data-flow data-flow-speed="1.6" data-flow-back/&gt;
+  &lt;g class="tone-slate" data-box="0 0 6 4 0.5" data-z="0"/&gt;
+  &lt;g class="tone-teal" data-box="0 0 6 4 0.5" data-z="1.3"/&gt;
+  &lt;g class="tone-accent" data-box="0 0 6 4 0.5" data-z="2.6"/&gt;
+  &lt;text class="iso-lb" data-at="6.4 0 2.8"&gt;Page&lt;/text&gt;
+  &lt;text class="iso-lb" data-at="6.4 0 1.5"&gt;API&lt;/text&gt;
+  &lt;text class="iso-lb" data-at="6.4 0 0.2"&gt;Database&lt;/text&gt;
+&lt;/svg&gt;&lt;/div&gt;&lt;figcaption&gt;Lines can rise between layers: give a route points with a height.&lt;/figcaption&gt;&lt;p class="swipe"&gt;Swipe sideways to see the whole drawing.&lt;/p&gt;&lt;/figure&gt;</pre></div></div></details>
+        <h3 style="margin-top:34px">Intuition: draw the mechanism</h3><p style="margin-top:6px">When the reader wants to feel how it works, draw a picture of the mechanism.</p>
+  <div class="hs-live"><figure class="fig" style="margin:0"><div class="fig-box"><svg viewBox="0 0 720 230" role="img" aria-label="A queue as a conveyor belt: the orders service drops jobs on the left, the worker takes them off on the right" font-family="var(--font-body)">
+<rect class="bx" x="10" y="40" width="130" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/><text class="bt" x="75" y="66" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Orders</text><text class="bs" x="75" y="83" text-anchor="middle" font-size="13" fill="var(--muted)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">drops jobs</text><rect class="bx" x="580" y="40" width="130" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/><text class="bt" x="645" y="66" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Worker</text><text class="bs" x="645" y="83" text-anchor="middle" font-size="13" fill="var(--muted)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">takes one</text><rect x="160" y="120" width="400" height="26" rx="13" fill="var(--sunk)" stroke="var(--muted)" stroke-width="1.5"/><circle cx="180" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/><circle cx="260" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/><circle cx="340" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/><circle cx="420" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/><circle cx="500" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/><circle cx="540" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/><g class="ed" data-flow="4" data-flow-speed="7"><path d="M150 108H570" fill="none" stroke="none"/></g><g class="ed"><path d="M75 96L75 108L141 108" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M150 108L140 113L140 103z" fill="var(--ink)"/></g><g class="ed"><path d="M570 108L645 108L645 105" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M645 96L650 106L640 106z" fill="var(--ink)"/></g><text x="360" y="185" text-anchor="middle" font-size="14" fill="var(--muted)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Jobs wait on the belt. If the worker is slow, the belt fills up; nothing is lost.</text>
+</svg></div><figcaption>A queue drawn as what it acts like, not as a box called "queue".</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Intuition: draw the mechanism</span><button type="button" class="btn-sm" data-copy="#src-30">Copy</button></div><pre id="src-30">&lt;figure class="fig" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg viewBox="0 0 720 230" role="img" aria-label="A queue as a conveyor belt: the orders service drops jobs on the left, the worker takes them off on the right" font-family="var(--font-body)"&gt;
+&lt;rect class="bx" x="10" y="40" width="130" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/&gt;&lt;text class="bt" x="75" y="66" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Orders&lt;/text&gt;&lt;text class="bs" x="75" y="83" text-anchor="middle" font-size="13" fill="var(--muted)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;drops jobs&lt;/text&gt;&lt;rect class="bx" x="580" y="40" width="130" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/&gt;&lt;text class="bt" x="645" y="66" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Worker&lt;/text&gt;&lt;text class="bs" x="645" y="83" text-anchor="middle" font-size="13" fill="var(--muted)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;takes one&lt;/text&gt;&lt;rect x="160" y="120" width="400" height="26" rx="13" fill="var(--sunk)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;circle cx="180" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;circle cx="260" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;circle cx="340" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;circle cx="420" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;circle cx="500" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;circle cx="540" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/&gt;&lt;g class="ed" data-flow="4" data-flow-speed="7"&gt;&lt;path d="M150 108H570" fill="none" stroke="none"/&gt;&lt;/g&gt;&lt;g class="ed"&gt;&lt;path d="M75 96L75 108L141 108" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M150 108L140 113L140 103z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;g class="ed"&gt;&lt;path d="M570 108L645 108L645 105" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M645 96L650 106L640 106z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text x="360" y="185" text-anchor="middle" font-size="14" fill="var(--muted)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Jobs wait on the belt. If the worker is slow, the belt fills up; nothing is lost.&lt;/text&gt;
+&lt;/svg&gt;&lt;/div&gt;&lt;figcaption&gt;A queue drawn as what it acts like, not as a box called "queue".&lt;/figcaption&gt;&lt;p class="swipe"&gt;Swipe sideways to see the whole drawing.&lt;/p&gt;&lt;/figure&gt;</pre></div></div></details>
+        <h3 style="margin-top:34px">Linked words</h3><p style="margin-top:6px">Hover a colored word: its shape lights up too, and the other way round.</p>
+  <div class="hs-live"><p>Reads go to the <span data-hl="cache">cache</span> first. On a miss, the <span data-hl="db">database</span> answers and the cache keeps a copy.</p><figure class="fig" style="margin:0"><div class="fig-box"><svg viewBox="0 0 720 110" role="img" aria-label="Read path: browser asks the cache first, then the database on a miss" font-family="var(--font-body)">
+<rect class="bx" x="10" y="30" width="130" height="50" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><text class="bt" x="75" y="60" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Browser</text><g data-hl="cache"><rect class="bx" x="290" y="30" width="130" height="50" rx="8" fill="var(--violet-soft)" stroke="var(--violet)" stroke-width="1.5"/><text class="bt" x="355" y="60" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--violet-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Cache</text></g><g data-hl="db"><rect class="bx" x="580" y="30" width="130" height="50" rx="8" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="1.5"/><text class="bt" x="645" y="60" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--rose-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Database</text></g><g class="ed"><path d="M140 55L281 55" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M290 55L280 60L280 50z" fill="var(--ink)"/></g><text class="el" x="215" y="44" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">read</text><g class="ed"><path d="M420 55L571 55" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M580 55L570 60L570 50z" fill="var(--ink)"/></g><text class="el" x="500" y="44" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round">on a miss</text>
+</svg></div><figcaption>The same data-hl key on a word and a shape links them.</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Linked words</span><button type="button" class="btn-sm" data-copy="#src-31">Copy</button></div><pre id="src-31">&lt;p&gt;Reads go to the &lt;span data-hl="cache"&gt;cache&lt;/span&gt; first. On a miss, the &lt;span data-hl="db"&gt;database&lt;/span&gt; answers and the cache keeps a copy.&lt;/p&gt;&lt;figure class="fig" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg viewBox="0 0 720 110" role="img" aria-label="Read path: browser asks the cache first, then the database on a miss" font-family="var(--font-body)"&gt;
+&lt;rect class="bx" x="10" y="30" width="130" height="50" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;text class="bt" x="75" y="60" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Browser&lt;/text&gt;&lt;g data-hl="cache"&gt;&lt;rect class="bx" x="290" y="30" width="130" height="50" rx="8" fill="var(--violet-soft)" stroke="var(--violet)" stroke-width="1.5"/&gt;&lt;text class="bt" x="355" y="60" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--violet-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Cache&lt;/text&gt;&lt;/g&gt;&lt;g data-hl="db"&gt;&lt;rect class="bx" x="580" y="30" width="130" height="50" rx="8" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="1.5"/&gt;&lt;text class="bt" x="645" y="60" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--rose-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Database&lt;/text&gt;&lt;/g&gt;&lt;g class="ed"&gt;&lt;path d="M140 55L281 55" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M290 55L280 60L280 50z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="215" y="44" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;read&lt;/text&gt;&lt;g class="ed"&gt;&lt;path d="M420 55L571 55" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M580 55L570 60L570 50z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="500" y="44" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;on a miss&lt;/text&gt;
+&lt;/svg&gt;&lt;/div&gt;&lt;figcaption&gt;The same data-hl key on a word and a shape links them.&lt;/figcaption&gt;&lt;p class="swipe"&gt;Swipe sideways to see the whole drawing.&lt;/p&gt;&lt;/figure&gt;</pre></div></div></details>
+      </section>
     </main>
   </div>
-  <script>/* Rough.js 4.6.6 (MIT, Preet Shihn) for the sketch look. Leave it out on customer pages. */
-(function(){function t(t,e,s){if(t&&t.length){const[n,o]=e,a=Math.PI/180*s,h=Math.cos(a),r=Math.sin(a);for(const e of t){const[t,s]=e;e[0]=(t-n)*h-(s-o)*r+n,e[1]=(t-n)*r+(s-o)*h+o}}}function e(t,e){return t[0]===e[0]&&t[1]===e[1]}function s(s,n,o,a=1){const h=o,r=Math.max(n,.1),i=s[0]&&s[0][0]&&"number"==typeof s[0][0]?[s]:s,c=[0,0];if(h)for(const e of i)t(e,c,h);const l=function(t,s,n){const o=[];for(const s of t){const t=[...s];e(t[0],t[t.length-1])||t.push([t[0][0],t[0][1]]),t.length>2&&o.push(t)}const a=[];s=Math.max(s,.1);const h=[];for(const t of o)for(let e=0;e<t.length-1;e++){const s=t[e],n=t[e+1];if(s[1]!==n[1]){const t=Math.min(s[1],n[1]);h.push({ymin:t,ymax:Math.max(s[1],n[1]),x:t===s[1]?s[0]:n[0],islope:(n[0]-s[0])/(n[1]-s[1])})}}if(h.sort(((t,e)=>t.ymin<e.ymin?-1:t.ymin>e.ymin?1:t.x<e.x?-1:t.x>e.x?1:t.ymax===e.ymax?0:(t.ymax-e.ymax)/Math.abs(t.ymax-e.ymax))),!h.length)return a;let r=[],i=h[0].ymin,c=0;for(;r.length||h.length;){if(h.length){let t=-1;for(let e=0;e<h.length&&!(h[e].ymin>i);e++)t=e;h.splice(0,t+1).forEach((t=>{r.push({s:i,edge:t})}))}if(r=r.filter((t=>!(t.edge.ymax<=i))),r.sort(((t,e)=>t.edge.x===e.edge.x?0:(t.edge.x-e.edge.x)/Math.abs(t.edge.x-e.edge.x))),(1!==n||c%s==0)&&r.length>1)for(let t=0;t<r.length;t+=2){const e=t+1;if(e>=r.length)break;const s=r[t].edge,n=r[e].edge;a.push([[Math.round(s.x),i],[Math.round(n.x),i]])}i+=n,r.forEach((t=>{t.edge.x=t.edge.x+n*t.edge.islope})),c++}return a}(i,r,a);if(h){for(const e of i)t(e,c,-h);!function(e,s,n){const o=[];e.forEach((t=>o.push(...t))),t(o,s,n)}(l,c,-h)}return l}function n(t,e){var n;const o=e.hachureAngle+90;let a=e.hachureGap;a<0&&(a=4*e.strokeWidth),a=Math.round(Math.max(a,.1));let h=1;return e.roughness>=1&&((null===(n=e.randomizer)||void 0===n?void 0:n.next())||Math.random())>.7&&(h=a),s(t,a,o,h||1)}class o{constructor(t){this.helper=t}fillPolygons(t,e){return this._fillPolygons(t,e)}_fillPolygons(t,e){const s=n(t,e);return{type:"fillSketch",ops:this.renderLines(s,e)}}renderLines(t,e){const s=[];for(const n of t)s.push(...this.helper.doubleLineOps(n[0][0],n[0][1],n[1][0],n[1][1],e));return s}}function a(t){const e=t[0],s=t[1];return Math.sqrt(Math.pow(e[0]-s[0],2)+Math.pow(e[1]-s[1],2))}class h extends o{fillPolygons(t,e){let s=e.hachureGap;s<0&&(s=4*e.strokeWidth),s=Math.max(s,.1);const o=n(t,Object.assign({},e,{hachureGap:s})),h=Math.PI/180*e.hachureAngle,r=[],i=.5*s*Math.cos(h),c=.5*s*Math.sin(h);for(const[t,e]of o)a([t,e])&&r.push([[t[0]-i,t[1]+c],[...e]],[[t[0]+i,t[1]-c],[...e]]);return{type:"fillSketch",ops:this.renderLines(r,e)}}}class r extends o{fillPolygons(t,e){const s=this._fillPolygons(t,e),n=Object.assign({},e,{hachureAngle:e.hachureAngle+90}),o=this._fillPolygons(t,n);return s.ops=s.ops.concat(o.ops),s}}class i{constructor(t){this.helper=t}fillPolygons(t,e){const s=n(t,e=Object.assign({},e,{hachureAngle:0}));return this.dotsOnLines(s,e)}dotsOnLines(t,e){const s=[];let n=e.hachureGap;n<0&&(n=4*e.strokeWidth),n=Math.max(n,.1);let o=e.fillWeight;o<0&&(o=e.strokeWidth/2);const h=n/4;for(const r of t){const t=a(r),i=t/n,c=Math.ceil(i)-1,l=t-c*n,u=(r[0][0]+r[1][0])/2-n/4,p=Math.min(r[0][1],r[1][1]);for(let t=0;t<c;t++){const a=p+l+t*n,r=u-h+2*Math.random()*h,i=a-h+2*Math.random()*h,c=this.helper.ellipse(r,i,o,o,e);s.push(...c.ops)}}return{type:"fillSketch",ops:s}}}class c{constructor(t){this.helper=t}fillPolygons(t,e){const s=n(t,e);return{type:"fillSketch",ops:this.dashedLine(s,e)}}dashedLine(t,e){const s=e.dashOffset<0?e.hachureGap<0?4*e.strokeWidth:e.hachureGap:e.dashOffset,n=e.dashGap<0?e.hachureGap<0?4*e.strokeWidth:e.hachureGap:e.dashGap,o=[];return t.forEach((t=>{const h=a(t),r=Math.floor(h/(s+n)),i=(h+n-r*(s+n))/2;let c=t[0],l=t[1];c[0]>l[0]&&(c=t[1],l=t[0]);const u=Math.atan((l[1]-c[1])/(l[0]-c[0]));for(let t=0;t<r;t++){const a=t*(s+n),h=a+s,r=[c[0]+a*Math.cos(u)+i*Math.cos(u),c[1]+a*Math.sin(u)+i*Math.sin(u)],l=[c[0]+h*Math.cos(u)+i*Math.cos(u),c[1]+h*Math.sin(u)+i*Math.sin(u)];o.push(...this.helper.doubleLineOps(r[0],r[1],l[0],l[1],e))}})),o}}class l{constructor(t){this.helper=t}fillPolygons(t,e){const s=e.hachureGap<0?4*e.strokeWidth:e.hachureGap,o=e.zigzagOffset<0?s:e.zigzagOffset,a=n(t,e=Object.assign({},e,{hachureGap:s+o}));return{type:"fillSketch",ops:this.zigzagLines(a,o,e)}}zigzagLines(t,e,s){const n=[];return t.forEach((t=>{const o=a(t),h=Math.round(o/(2*e));let r=t[0],i=t[1];r[0]>i[0]&&(r=t[1],i=t[0]);const c=Math.atan((i[1]-r[1])/(i[0]-r[0]));for(let t=0;t<h;t++){const o=2*t*e,a=2*(t+1)*e,h=Math.sqrt(2*Math.pow(e,2)),i=[r[0]+o*Math.cos(c),r[1]+o*Math.sin(c)],l=[r[0]+a*Math.cos(c),r[1]+a*Math.sin(c)],u=[i[0]+h*Math.cos(c+Math.PI/4),i[1]+h*Math.sin(c+Math.PI/4)];n.push(...this.helper.doubleLineOps(i[0],i[1],u[0],u[1],s),...this.helper.doubleLineOps(u[0],u[1],l[0],l[1],s))}})),n}}const u={};class p{constructor(t){this.seed=t}next(){return this.seed?(2**31-1&(this.seed=Math.imul(48271,this.seed)))/2**31:Math.random()}}const f=0,d=1,g=2,M={A:7,a:7,C:6,c:6,H:1,h:1,L:2,l:2,M:2,m:2,Q:4,q:4,S:4,s:4,T:2,t:2,V:1,v:1,Z:0,z:0};function k(t,e){return t.type===e}function b(t){const e=[],s=function(t){const e=new Array;for(;""!==t;)if(t.match(/^([ \t\r\n,]+)/))t=t.substr(RegExp.$1.length);else if(t.match(/^([aAcChHlLmMqQsStTvVzZ])/))e[e.length]={type:f,text:RegExp.$1},t=t.substr(RegExp.$1.length);else{if(!t.match(/^(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)/))return[];e[e.length]={type:d,text:`${parseFloat(RegExp.$1)}`},t=t.substr(RegExp.$1.length)}return e[e.length]={type:g,text:""},e}(t);let n="BOD",o=0,a=s[o];for(;!k(a,g);){let h=0;const r=[];if("BOD"===n){if("M"!==a.text&&"m"!==a.text)return b("M0,0"+t);o++,h=M[a.text],n=a.text}else k(a,d)?h=M[n]:(o++,h=M[a.text],n=a.text);if(!(o+h<s.length))throw new Error("Path data ended short");for(let t=o;t<o+h;t++){const e=s[t];if(!k(e,d))throw new Error("Param not a number: "+n+","+e.text);r[r.length]=+e.text}if("number"!=typeof M[n])throw new Error("Bad segment: "+n);{const t={key:n,data:r};e.push(t),o+=h,a=s[o],"M"===n&&(n="L"),"m"===n&&(n="l")}}return e}function y(t){let e=0,s=0,n=0,o=0;const a=[];for(const{key:h,data:r}of t)switch(h){case"M":a.push({key:"M",data:[...r]}),[e,s]=r,[n,o]=r;break;case"m":e+=r[0],s+=r[1],a.push({key:"M",data:[e,s]}),n=e,o=s;break;case"L":a.push({key:"L",data:[...r]}),[e,s]=r;break;case"l":e+=r[0],s+=r[1],a.push({key:"L",data:[e,s]});break;case"C":a.push({key:"C",data:[...r]}),e=r[4],s=r[5];break;case"c":{const t=r.map(((t,n)=>n%2?t+s:t+e));a.push({key:"C",data:t}),e=t[4],s=t[5];break}case"Q":a.push({key:"Q",data:[...r]}),e=r[2],s=r[3];break;case"q":{const t=r.map(((t,n)=>n%2?t+s:t+e));a.push({key:"Q",data:t}),e=t[2],s=t[3];break}case"A":a.push({key:"A",data:[...r]}),e=r[5],s=r[6];break;case"a":e+=r[5],s+=r[6],a.push({key:"A",data:[r[0],r[1],r[2],r[3],r[4],e,s]});break;case"H":a.push({key:"H",data:[...r]}),e=r[0];break;case"h":e+=r[0],a.push({key:"H",data:[e]});break;case"V":a.push({key:"V",data:[...r]}),s=r[0];break;case"v":s+=r[0],a.push({key:"V",data:[s]});break;case"S":a.push({key:"S",data:[...r]}),e=r[2],s=r[3];break;case"s":{const t=r.map(((t,n)=>n%2?t+s:t+e));a.push({key:"S",data:t}),e=t[2],s=t[3];break}case"T":a.push({key:"T",data:[...r]}),e=r[0],s=r[1];break;case"t":e+=r[0],s+=r[1],a.push({key:"T",data:[e,s]});break;case"Z":case"z":a.push({key:"Z",data:[]}),e=n,s=o}return a}function m(t){const e=[];let s="",n=0,o=0,a=0,h=0,r=0,i=0;for(const{key:c,data:l}of t){switch(c){case"M":e.push({key:"M",data:[...l]}),[n,o]=l,[a,h]=l;break;case"C":e.push({key:"C",data:[...l]}),n=l[4],o=l[5],r=l[2],i=l[3];break;case"L":e.push({key:"L",data:[...l]}),[n,o]=l;break;case"H":n=l[0],e.push({key:"L",data:[n,o]});break;case"V":o=l[0],e.push({key:"L",data:[n,o]});break;case"S":{let t=0,a=0;"C"===s||"S"===s?(t=n+(n-r),a=o+(o-i)):(t=n,a=o),e.push({key:"C",data:[t,a,...l]}),r=l[0],i=l[1],n=l[2],o=l[3];break}case"T":{const[t,a]=l;let h=0,c=0;"Q"===s||"T"===s?(h=n+(n-r),c=o+(o-i)):(h=n,c=o);const u=n+2*(h-n)/3,p=o+2*(c-o)/3,f=t+2*(h-t)/3,d=a+2*(c-a)/3;e.push({key:"C",data:[u,p,f,d,t,a]}),r=h,i=c,n=t,o=a;break}case"Q":{const[t,s,a,h]=l,c=n+2*(t-n)/3,u=o+2*(s-o)/3,p=a+2*(t-a)/3,f=h+2*(s-h)/3;e.push({key:"C",data:[c,u,p,f,a,h]}),r=t,i=s,n=a,o=h;break}case"A":{const t=Math.abs(l[0]),s=Math.abs(l[1]),a=l[2],h=l[3],r=l[4],i=l[5],c=l[6];if(0===t||0===s)e.push({key:"C",data:[n,o,i,c,i,c]}),n=i,o=c;else if(n!==i||o!==c){x(n,o,i,c,t,s,a,h,r).forEach((function(t){e.push({key:"C",data:t})})),n=i,o=c}break}case"Z":e.push({key:"Z",data:[]}),n=a,o=h}s=c}return e}function w(t,e,s){return[t*Math.cos(s)-e*Math.sin(s),t*Math.sin(s)+e*Math.cos(s)]}function x(t,e,s,n,o,a,h,r,i,c){const l=(u=h,Math.PI*u/180);var u;let p=[],f=0,d=0,g=0,M=0;if(c)[f,d,g,M]=c;else{[t,e]=w(t,e,-l),[s,n]=w(s,n,-l);const h=(t-s)/2,c=(e-n)/2;let u=h*h/(o*o)+c*c/(a*a);u>1&&(u=Math.sqrt(u),o*=u,a*=u);const p=o*o,k=a*a,b=p*k-p*c*c-k*h*h,y=p*c*c+k*h*h,m=(r===i?-1:1)*Math.sqrt(Math.abs(b/y));g=m*o*c/a+(t+s)/2,M=m*-a*h/o+(e+n)/2,f=Math.asin(parseFloat(((e-M)/a).toFixed(9))),d=Math.asin(parseFloat(((n-M)/a).toFixed(9))),t<g&&(f=Math.PI-f),s<g&&(d=Math.PI-d),f<0&&(f=2*Math.PI+f),d<0&&(d=2*Math.PI+d),i&&f>d&&(f-=2*Math.PI),!i&&d>f&&(d-=2*Math.PI)}let k=d-f;if(Math.abs(k)>120*Math.PI/180){const t=d,e=s,r=n;d=i&&d>f?f+120*Math.PI/180*1:f+120*Math.PI/180*-1,p=x(s=g+o*Math.cos(d),n=M+a*Math.sin(d),e,r,o,a,h,0,i,[d,t,g,M])}k=d-f;const b=Math.cos(f),y=Math.sin(f),m=Math.cos(d),P=Math.sin(d),v=Math.tan(k/4),S=4/3*o*v,O=4/3*a*v,L=[t,e],T=[t+S*y,e-O*b],D=[s+S*P,n-O*m],A=[s,n];if(T[0]=2*L[0]-T[0],T[1]=2*L[1]-T[1],c)return[T,D,A].concat(p);{p=[T,D,A].concat(p);const t=[];for(let e=0;e<p.length;e+=3){const s=w(p[e][0],p[e][1],l),n=w(p[e+1][0],p[e+1][1],l),o=w(p[e+2][0],p[e+2][1],l);t.push([s[0],s[1],n[0],n[1],o[0],o[1]])}return t}}const P={randOffset:function(t,e){return G(t,e)},randOffsetWithRange:function(t,e,s){return E(t,e,s)},ellipse:function(t,e,s,n,o){const a=T(s,n,o);return D(t,e,o,a).opset},doubleLineOps:function(t,e,s,n,o){return $(t,e,s,n,o,!0)}};function v(t,e,s,n,o){return{type:"path",ops:$(t,e,s,n,o)}}function S(t,e,s){const n=(t||[]).length;if(n>2){const o=[];for(let e=0;e<n-1;e++)o.push(...$(t[e][0],t[e][1],t[e+1][0],t[e+1][1],s));return e&&o.push(...$(t[n-1][0],t[n-1][1],t[0][0],t[0][1],s)),{type:"path",ops:o}}return 2===n?v(t[0][0],t[0][1],t[1][0],t[1][1],s):{type:"path",ops:[]}}function O(t,e,s,n,o){return function(t,e){return S(t,!0,e)}([[t,e],[t+s,e],[t+s,e+n],[t,e+n]],o)}function L(t,e){if(t.length){const s="number"==typeof t[0][0]?[t]:t,n=j(s[0],1*(1+.2*e.roughness),e),o=e.disableMultiStroke?[]:j(s[0],1.5*(1+.22*e.roughness),z(e));for(let t=1;t<s.length;t++){const a=s[t];if(a.length){const t=j(a,1*(1+.2*e.roughness),e),s=e.disableMultiStroke?[]:j(a,1.5*(1+.22*e.roughness),z(e));for(const e of t)"move"!==e.op&&n.push(e);for(const t of s)"move"!==t.op&&o.push(t)}}return{type:"path",ops:n.concat(o)}}return{type:"path",ops:[]}}function T(t,e,s){const n=Math.sqrt(2*Math.PI*Math.sqrt((Math.pow(t/2,2)+Math.pow(e/2,2))/2)),o=Math.ceil(Math.max(s.curveStepCount,s.curveStepCount/Math.sqrt(200)*n)),a=2*Math.PI/o;let h=Math.abs(t/2),r=Math.abs(e/2);const i=1-s.curveFitting;return h+=G(h*i,s),r+=G(r*i,s),{increment:a,rx:h,ry:r}}function D(t,e,s,n){const[o,a]=F(n.increment,t,e,n.rx,n.ry,1,n.increment*E(.1,E(.4,1,s),s),s);let h=q(o,null,s);if(!s.disableMultiStroke&&0!==s.roughness){const[o]=F(n.increment,t,e,n.rx,n.ry,1.5,0,s),a=q(o,null,s);h=h.concat(a)}return{estimatedPoints:a,opset:{type:"path",ops:h}}}function A(t,e,s,n,o,a,h,r,i){const c=t,l=e;let u=Math.abs(s/2),p=Math.abs(n/2);u+=G(.01*u,i),p+=G(.01*p,i);let f=o,d=a;for(;f<0;)f+=2*Math.PI,d+=2*Math.PI;d-f>2*Math.PI&&(f=0,d=2*Math.PI);const g=2*Math.PI/i.curveStepCount,M=Math.min(g/2,(d-f)/2),k=V(M,c,l,u,p,f,d,1,i);if(!i.disableMultiStroke){const t=V(M,c,l,u,p,f,d,1.5,i);k.push(...t)}return h&&(r?k.push(...$(c,l,c+u*Math.cos(f),l+p*Math.sin(f),i),...$(c,l,c+u*Math.cos(d),l+p*Math.sin(d),i)):k.push({op:"lineTo",data:[c,l]},{op:"lineTo",data:[c+u*Math.cos(f),l+p*Math.sin(f)]})),{type:"path",ops:k}}function _(t,e){const s=m(y(b(t))),n=[];let o=[0,0],a=[0,0];for(const{key:t,data:h}of s)switch(t){case"M":a=[h[0],h[1]],o=[h[0],h[1]];break;case"L":n.push(...$(a[0],a[1],h[0],h[1],e)),a=[h[0],h[1]];break;case"C":{const[t,s,o,r,i,c]=h;n.push(...Z(t,s,o,r,i,c,a,e)),a=[i,c];break}case"Z":n.push(...$(a[0],a[1],o[0],o[1],e)),a=[o[0],o[1]]}return{type:"path",ops:n}}function I(t,e){const s=[];for(const n of t)if(n.length){const t=e.maxRandomnessOffset||0,o=n.length;if(o>2){s.push({op:"move",data:[n[0][0]+G(t,e),n[0][1]+G(t,e)]});for(let a=1;a<o;a++)s.push({op:"lineTo",data:[n[a][0]+G(t,e),n[a][1]+G(t,e)]})}}return{type:"fillPath",ops:s}}function C(t,e){return function(t,e){let s=t.fillStyle||"hachure";if(!u[s])switch(s){case"zigzag":u[s]||(u[s]=new h(e));break;case"cross-hatch":u[s]||(u[s]=new r(e));break;case"dots":u[s]||(u[s]=new i(e));break;case"dashed":u[s]||(u[s]=new c(e));break;case"zigzag-line":u[s]||(u[s]=new l(e));break;default:s="hachure",u[s]||(u[s]=new o(e))}return u[s]}(e,P).fillPolygons(t,e)}function z(t){const e=Object.assign({},t);return e.randomizer=void 0,t.seed&&(e.seed=t.seed+1),e}function W(t){return t.randomizer||(t.randomizer=new p(t.seed||0)),t.randomizer.next()}function E(t,e,s,n=1){return s.roughness*n*(W(s)*(e-t)+t)}function G(t,e,s=1){return E(-t,t,e,s)}function $(t,e,s,n,o,a=!1){const h=a?o.disableMultiStrokeFill:o.disableMultiStroke,r=R(t,e,s,n,o,!0,!1);if(h)return r;const i=R(t,e,s,n,o,!0,!0);return r.concat(i)}function R(t,e,s,n,o,a,h){const r=Math.pow(t-s,2)+Math.pow(e-n,2),i=Math.sqrt(r);let c=1;c=i<200?1:i>500?.4:-.0016668*i+1.233334;let l=o.maxRandomnessOffset||0;l*l*100>r&&(l=i/10);const u=l/2,p=.2+.2*W(o);let f=o.bowing*o.maxRandomnessOffset*(n-e)/200,d=o.bowing*o.maxRandomnessOffset*(t-s)/200;f=G(f,o,c),d=G(d,o,c);const g=[],M=()=>G(u,o,c),k=()=>G(l,o,c),b=o.preserveVertices;return a&&(h?g.push({op:"move",data:[t+(b?0:M()),e+(b?0:M())]}):g.push({op:"move",data:[t+(b?0:G(l,o,c)),e+(b?0:G(l,o,c))]})),h?g.push({op:"bcurveTo",data:[f+t+(s-t)*p+M(),d+e+(n-e)*p+M(),f+t+2*(s-t)*p+M(),d+e+2*(n-e)*p+M(),s+(b?0:M()),n+(b?0:M())]}):g.push({op:"bcurveTo",data:[f+t+(s-t)*p+k(),d+e+(n-e)*p+k(),f+t+2*(s-t)*p+k(),d+e+2*(n-e)*p+k(),s+(b?0:k()),n+(b?0:k())]}),g}function j(t,e,s){if(!t.length)return[];const n=[];n.push([t[0][0]+G(e,s),t[0][1]+G(e,s)]),n.push([t[0][0]+G(e,s),t[0][1]+G(e,s)]);for(let o=1;o<t.length;o++)n.push([t[o][0]+G(e,s),t[o][1]+G(e,s)]),o===t.length-1&&n.push([t[o][0]+G(e,s),t[o][1]+G(e,s)]);return q(n,null,s)}function q(t,e,s){const n=t.length,o=[];if(n>3){const a=[],h=1-s.curveTightness;o.push({op:"move",data:[t[1][0],t[1][1]]});for(let e=1;e+2<n;e++){const s=t[e];a[0]=[s[0],s[1]],a[1]=[s[0]+(h*t[e+1][0]-h*t[e-1][0])/6,s[1]+(h*t[e+1][1]-h*t[e-1][1])/6],a[2]=[t[e+1][0]+(h*t[e][0]-h*t[e+2][0])/6,t[e+1][1]+(h*t[e][1]-h*t[e+2][1])/6],a[3]=[t[e+1][0],t[e+1][1]],o.push({op:"bcurveTo",data:[a[1][0],a[1][1],a[2][0],a[2][1],a[3][0],a[3][1]]})}if(e&&2===e.length){const t=s.maxRandomnessOffset;o.push({op:"lineTo",data:[e[0]+G(t,s),e[1]+G(t,s)]})}}else 3===n?(o.push({op:"move",data:[t[1][0],t[1][1]]}),o.push({op:"bcurveTo",data:[t[1][0],t[1][1],t[2][0],t[2][1],t[2][0],t[2][1]]})):2===n&&o.push(...R(t[0][0],t[0][1],t[1][0],t[1][1],s,!0,!0));return o}function F(t,e,s,n,o,a,h,r){const i=[],c=[];if(0===r.roughness){t/=4,c.push([e+n*Math.cos(-t),s+o*Math.sin(-t)]);for(let a=0;a<=2*Math.PI;a+=t){const t=[e+n*Math.cos(a),s+o*Math.sin(a)];i.push(t),c.push(t)}c.push([e+n*Math.cos(0),s+o*Math.sin(0)]),c.push([e+n*Math.cos(t),s+o*Math.sin(t)])}else{const l=G(.5,r)-Math.PI/2;c.push([G(a,r)+e+.9*n*Math.cos(l-t),G(a,r)+s+.9*o*Math.sin(l-t)]);const u=2*Math.PI+l-.01;for(let h=l;h<u;h+=t){const t=[G(a,r)+e+n*Math.cos(h),G(a,r)+s+o*Math.sin(h)];i.push(t),c.push(t)}c.push([G(a,r)+e+n*Math.cos(l+2*Math.PI+.5*h),G(a,r)+s+o*Math.sin(l+2*Math.PI+.5*h)]),c.push([G(a,r)+e+.98*n*Math.cos(l+h),G(a,r)+s+.98*o*Math.sin(l+h)]),c.push([G(a,r)+e+.9*n*Math.cos(l+.5*h),G(a,r)+s+.9*o*Math.sin(l+.5*h)])}return[c,i]}function V(t,e,s,n,o,a,h,r,i){const c=a+G(.1,i),l=[];l.push([G(r,i)+e+.9*n*Math.cos(c-t),G(r,i)+s+.9*o*Math.sin(c-t)]);for(let a=c;a<=h;a+=t)l.push([G(r,i)+e+n*Math.cos(a),G(r,i)+s+o*Math.sin(a)]);return l.push([e+n*Math.cos(h),s+o*Math.sin(h)]),l.push([e+n*Math.cos(h),s+o*Math.sin(h)]),q(l,null,i)}function Z(t,e,s,n,o,a,h,r){const i=[],c=[r.maxRandomnessOffset||1,(r.maxRandomnessOffset||1)+.3];let l=[0,0];const u=r.disableMultiStroke?1:2,p=r.preserveVertices;for(let f=0;f<u;f++)0===f?i.push({op:"move",data:[h[0],h[1]]}):i.push({op:"move",data:[h[0]+(p?0:G(c[0],r)),h[1]+(p?0:G(c[0],r))]}),l=p?[o,a]:[o+G(c[f],r),a+G(c[f],r)],i.push({op:"bcurveTo",data:[t+G(c[f],r),e+G(c[f],r),s+G(c[f],r),n+G(c[f],r),l[0],l[1]]});return i}function Q(t){return[...t]}function H(t,e=0){const s=t.length;if(s<3)throw new Error("A curve must have at least three points.");const n=[];if(3===s)n.push(Q(t[0]),Q(t[1]),Q(t[2]),Q(t[2]));else{const s=[];s.push(t[0],t[0]);for(let e=1;e<t.length;e++)s.push(t[e]),e===t.length-1&&s.push(t[e]);const o=[],a=1-e;n.push(Q(s[0]));for(let t=1;t+2<s.length;t++){const e=s[t];o[0]=[e[0],e[1]],o[1]=[e[0]+(a*s[t+1][0]-a*s[t-1][0])/6,e[1]+(a*s[t+1][1]-a*s[t-1][1])/6],o[2]=[s[t+1][0]+(a*s[t][0]-a*s[t+2][0])/6,s[t+1][1]+(a*s[t][1]-a*s[t+2][1])/6],o[3]=[s[t+1][0],s[t+1][1]],n.push(o[1],o[2],o[3])}}return n}function N(t,e){return Math.pow(t[0]-e[0],2)+Math.pow(t[1]-e[1],2)}function B(t,e,s){const n=N(e,s);if(0===n)return N(t,e);let o=((t[0]-e[0])*(s[0]-e[0])+(t[1]-e[1])*(s[1]-e[1]))/n;return o=Math.max(0,Math.min(1,o)),N(t,J(e,s,o))}function J(t,e,s){return[t[0]+(e[0]-t[0])*s,t[1]+(e[1]-t[1])*s]}function K(t,e,s,n){const o=n||[];if(function(t,e){const s=t[e+0],n=t[e+1],o=t[e+2],a=t[e+3];let h=3*n[0]-2*s[0]-a[0];h*=h;let r=3*n[1]-2*s[1]-a[1];r*=r;let i=3*o[0]-2*a[0]-s[0];i*=i;let c=3*o[1]-2*a[1]-s[1];return c*=c,h<i&&(h=i),r<c&&(r=c),h+r}(t,e)<s){const s=t[e+0];if(o.length){(a=o[o.length-1],h=s,Math.sqrt(N(a,h)))>1&&o.push(s)}else o.push(s);o.push(t[e+3])}else{const n=.5,a=t[e+0],h=t[e+1],r=t[e+2],i=t[e+3],c=J(a,h,n),l=J(h,r,n),u=J(r,i,n),p=J(c,l,n),f=J(l,u,n),d=J(p,f,n);K([a,c,p,d],0,s,o),K([d,f,u,i],0,s,o)}var a,h;return o}function U(t,e){return X(t,0,t.length,e)}function X(t,e,s,n,o){const a=o||[],h=t[e],r=t[s-1];let i=0,c=1;for(let n=e+1;n<s-1;++n){const e=B(t[n],h,r);e>i&&(i=e,c=n)}return Math.sqrt(i)>n?(X(t,e,c+1,n,a),X(t,c,s,n,a)):(a.length||a.push(h),a.push(r)),a}function Y(t,e=.15,s){const n=[],o=(t.length-1)/3;for(let s=0;s<o;s++){K(t,3*s,e,n)}return s&&s>0?X(n,0,n.length,s):n}const tt="none";class et{constructor(t){this.defaultOptions={maxRandomnessOffset:2,roughness:1,bowing:1,stroke:"#000",strokeWidth:1,curveTightness:0,curveFitting:.95,curveStepCount:9,fillStyle:"hachure",fillWeight:-1,hachureAngle:-41,hachureGap:-1,dashOffset:-1,dashGap:-1,zigzagOffset:-1,seed:0,disableMultiStroke:!1,disableMultiStrokeFill:!1,preserveVertices:!1,fillShapeRoughnessGain:.8},this.config=t||{},this.config.options&&(this.defaultOptions=this._o(this.config.options))}static newSeed(){return Math.floor(Math.random()*2**31)}_o(t){return t?Object.assign({},this.defaultOptions,t):this.defaultOptions}_d(t,e,s){return{shape:t,sets:e||[],options:s||this.defaultOptions}}line(t,e,s,n,o){const a=this._o(o);return this._d("line",[v(t,e,s,n,a)],a)}rectangle(t,e,s,n,o){const a=this._o(o),h=[],r=O(t,e,s,n,a);if(a.fill){const o=[[t,e],[t+s,e],[t+s,e+n],[t,e+n]];"solid"===a.fillStyle?h.push(I([o],a)):h.push(C([o],a))}return a.stroke!==tt&&h.push(r),this._d("rectangle",h,a)}ellipse(t,e,s,n,o){const a=this._o(o),h=[],r=T(s,n,a),i=D(t,e,a,r);if(a.fill)if("solid"===a.fillStyle){const s=D(t,e,a,r).opset;s.type="fillPath",h.push(s)}else h.push(C([i.estimatedPoints],a));return a.stroke!==tt&&h.push(i.opset),this._d("ellipse",h,a)}circle(t,e,s,n){const o=this.ellipse(t,e,s,s,n);return o.shape="circle",o}linearPath(t,e){const s=this._o(e);return this._d("linearPath",[S(t,!1,s)],s)}arc(t,e,s,n,o,a,h=!1,r){const i=this._o(r),c=[],l=A(t,e,s,n,o,a,h,!0,i);if(h&&i.fill)if("solid"===i.fillStyle){const h=Object.assign({},i);h.disableMultiStroke=!0;const r=A(t,e,s,n,o,a,!0,!1,h);r.type="fillPath",c.push(r)}else c.push(function(t,e,s,n,o,a,h){const r=t,i=e;let c=Math.abs(s/2),l=Math.abs(n/2);c+=G(.01*c,h),l+=G(.01*l,h);let u=o,p=a;for(;u<0;)u+=2*Math.PI,p+=2*Math.PI;p-u>2*Math.PI&&(u=0,p=2*Math.PI);const f=(p-u)/h.curveStepCount,d=[];for(let t=u;t<=p;t+=f)d.push([r+c*Math.cos(t),i+l*Math.sin(t)]);return d.push([r+c*Math.cos(p),i+l*Math.sin(p)]),d.push([r,i]),C([d],h)}(t,e,s,n,o,a,i));return i.stroke!==tt&&c.push(l),this._d("arc",c,i)}curve(t,e){const s=this._o(e),n=[],o=L(t,s);if(s.fill&&s.fill!==tt)if("solid"===s.fillStyle){const e=L(t,Object.assign(Object.assign({},s),{disableMultiStroke:!0,roughness:s.roughness?s.roughness+s.fillShapeRoughnessGain:0}));n.push({type:"fillPath",ops:this._mergedShape(e.ops)})}else{const e=[],o=t;if(o.length){const t="number"==typeof o[0][0]?[o]:o;for(const n of t)n.length<3?e.push(...n):3===n.length?e.push(...Y(H([n[0],n[0],n[1],n[2]]),10,(1+s.roughness)/2)):e.push(...Y(H(n),10,(1+s.roughness)/2))}e.length&&n.push(C([e],s))}return s.stroke!==tt&&n.push(o),this._d("curve",n,s)}polygon(t,e){const s=this._o(e),n=[],o=S(t,!0,s);return s.fill&&("solid"===s.fillStyle?n.push(I([t],s)):n.push(C([t],s))),s.stroke!==tt&&n.push(o),this._d("polygon",n,s)}path(t,e){const s=this._o(e),n=[];if(!t)return this._d("path",n,s);t=(t||"").replace(/\n/g," ").replace(/(-\s)/g,"-").replace("/(ss)/g"," ");const o=s.fill&&"transparent"!==s.fill&&s.fill!==tt,a=s.stroke!==tt,h=!!(s.simplification&&s.simplification<1),r=function(t,e,s){const n=m(y(b(t))),o=[];let a=[],h=[0,0],r=[];const i=()=>{r.length>=4&&a.push(...Y(r,e)),r=[]},c=()=>{i(),a.length&&(o.push(a),a=[])};for(const{key:t,data:e}of n)switch(t){case"M":c(),h=[e[0],e[1]],a.push(h);break;case"L":i(),a.push([e[0],e[1]]);break;case"C":if(!r.length){const t=a.length?a[a.length-1]:h;r.push([t[0],t[1]])}r.push([e[0],e[1]]),r.push([e[2],e[3]]),r.push([e[4],e[5]]);break;case"Z":i(),a.push([h[0],h[1]])}if(c(),!s)return o;const l=[];for(const t of o){const e=U(t,s);e.length&&l.push(e)}return l}(t,1,h?4-4*(s.simplification||1):(1+s.roughness)/2),i=_(t,s);if(o)if("solid"===s.fillStyle)if(1===r.length){const e=_(t,Object.assign(Object.assign({},s),{disableMultiStroke:!0,roughness:s.roughness?s.roughness+s.fillShapeRoughnessGain:0}));n.push({type:"fillPath",ops:this._mergedShape(e.ops)})}else n.push(I(r,s));else n.push(C(r,s));return a&&(h?r.forEach((t=>{n.push(S(t,!1,s))})):n.push(i)),this._d("path",n,s)}opsToPath(t,e){let s="";for(const n of t.ops){const t="number"==typeof e&&e>=0?n.data.map((t=>+t.toFixed(e))):n.data;switch(n.op){case"move":s+=`M${t[0]} ${t[1]} `;break;case"bcurveTo":s+=`C${t[0]} ${t[1]}, ${t[2]} ${t[3]}, ${t[4]} ${t[5]} `;break;case"lineTo":s+=`L${t[0]} ${t[1]} `}}return s.trim()}toPaths(t){const e=t.sets||[],s=t.options||this.defaultOptions,n=[];for(const t of e){let e=null;switch(t.type){case"path":e={d:this.opsToPath(t),stroke:s.stroke,strokeWidth:s.strokeWidth,fill:tt};break;case"fillPath":e={d:this.opsToPath(t),stroke:tt,strokeWidth:0,fill:s.fill||tt};break;case"fillSketch":e=this.fillSketch(t,s)}e&&n.push(e)}return n}fillSketch(t,e){let s=e.fillWeight;return s<0&&(s=e.strokeWidth/2),{d:this.opsToPath(t),stroke:e.fill||tt,strokeWidth:s,fill:tt}}_mergedShape(t){return t.filter(((t,e)=>0===e||"move"!==t.op))}}class st{constructor(t,e){this.canvas=t,this.ctx=this.canvas.getContext("2d"),this.gen=new et(e)}draw(t){const e=t.sets||[],s=t.options||this.getDefaultOptions(),n=this.ctx,o=t.options.fixedDecimalPlaceDigits;for(const a of e)switch(a.type){case"path":n.save(),n.strokeStyle="none"===s.stroke?"transparent":s.stroke,n.lineWidth=s.strokeWidth,s.strokeLineDash&&n.setLineDash(s.strokeLineDash),s.strokeLineDashOffset&&(n.lineDashOffset=s.strokeLineDashOffset),this._drawToContext(n,a,o),n.restore();break;case"fillPath":{n.save(),n.fillStyle=s.fill||"";const e="curve"===t.shape||"polygon"===t.shape||"path"===t.shape?"evenodd":"nonzero";this._drawToContext(n,a,o,e),n.restore();break}case"fillSketch":this.fillSketch(n,a,s)}}fillSketch(t,e,s){let n=s.fillWeight;n<0&&(n=s.strokeWidth/2),t.save(),s.fillLineDash&&t.setLineDash(s.fillLineDash),s.fillLineDashOffset&&(t.lineDashOffset=s.fillLineDashOffset),t.strokeStyle=s.fill||"",t.lineWidth=n,this._drawToContext(t,e,s.fixedDecimalPlaceDigits),t.restore()}_drawToContext(t,e,s,n="nonzero"){t.beginPath();for(const n of e.ops){const e="number"==typeof s&&s>=0?n.data.map((t=>+t.toFixed(s))):n.data;switch(n.op){case"move":t.moveTo(e[0],e[1]);break;case"bcurveTo":t.bezierCurveTo(e[0],e[1],e[2],e[3],e[4],e[5]);break;case"lineTo":t.lineTo(e[0],e[1])}}"fillPath"===e.type?t.fill(n):t.stroke()}get generator(){return this.gen}getDefaultOptions(){return this.gen.defaultOptions}line(t,e,s,n,o){const a=this.gen.line(t,e,s,n,o);return this.draw(a),a}rectangle(t,e,s,n,o){const a=this.gen.rectangle(t,e,s,n,o);return this.draw(a),a}ellipse(t,e,s,n,o){const a=this.gen.ellipse(t,e,s,n,o);return this.draw(a),a}circle(t,e,s,n){const o=this.gen.circle(t,e,s,n);return this.draw(o),o}linearPath(t,e){const s=this.gen.linearPath(t,e);return this.draw(s),s}polygon(t,e){const s=this.gen.polygon(t,e);return this.draw(s),s}arc(t,e,s,n,o,a,h=!1,r){const i=this.gen.arc(t,e,s,n,o,a,h,r);return this.draw(i),i}curve(t,e){const s=this.gen.curve(t,e);return this.draw(s),s}path(t,e){const s=this.gen.path(t,e);return this.draw(s),s}}const nt="http://www.w3.org/2000/svg";class ot{constructor(t,e){this.svg=t,this.gen=new et(e)}draw(t){const e=t.sets||[],s=t.options||this.getDefaultOptions(),n=this.svg.ownerDocument||window.document,o=n.createElementNS(nt,"g"),a=t.options.fixedDecimalPlaceDigits;for(const h of e){let e=null;switch(h.type){case"path":e=n.createElementNS(nt,"path"),e.setAttribute("d",this.opsToPath(h,a)),e.setAttribute("stroke",s.stroke),e.setAttribute("stroke-width",s.strokeWidth+""),e.setAttribute("fill","none"),s.strokeLineDash&&e.setAttribute("stroke-dasharray",s.strokeLineDash.join(" ").trim()),s.strokeLineDashOffset&&e.setAttribute("stroke-dashoffset",`${s.strokeLineDashOffset}`);break;case"fillPath":e=n.createElementNS(nt,"path"),e.setAttribute("d",this.opsToPath(h,a)),e.setAttribute("stroke","none"),e.setAttribute("stroke-width","0"),e.setAttribute("fill",s.fill||""),"curve"!==t.shape&&"polygon"!==t.shape||e.setAttribute("fill-rule","evenodd");break;case"fillSketch":e=this.fillSketch(n,h,s)}e&&o.appendChild(e)}return o}fillSketch(t,e,s){let n=s.fillWeight;n<0&&(n=s.strokeWidth/2);const o=t.createElementNS(nt,"path");return o.setAttribute("d",this.opsToPath(e,s.fixedDecimalPlaceDigits)),o.setAttribute("stroke",s.fill||""),o.setAttribute("stroke-width",n+""),o.setAttribute("fill","none"),s.fillLineDash&&o.setAttribute("stroke-dasharray",s.fillLineDash.join(" ").trim()),s.fillLineDashOffset&&o.setAttribute("stroke-dashoffset",`${s.fillLineDashOffset}`),o}get generator(){return this.gen}getDefaultOptions(){return this.gen.defaultOptions}opsToPath(t,e){return this.gen.opsToPath(t,e)}line(t,e,s,n,o){const a=this.gen.line(t,e,s,n,o);return this.draw(a)}rectangle(t,e,s,n,o){const a=this.gen.rectangle(t,e,s,n,o);return this.draw(a)}ellipse(t,e,s,n,o){const a=this.gen.ellipse(t,e,s,n,o);return this.draw(a)}circle(t,e,s,n){const o=this.gen.circle(t,e,s,n);return this.draw(o)}linearPath(t,e){const s=this.gen.linearPath(t,e);return this.draw(s)}polygon(t,e){const s=this.gen.polygon(t,e);return this.draw(s)}arc(t,e,s,n,o,a,h=!1,r){const i=this.gen.arc(t,e,s,n,o,a,h,r);return this.draw(i)}curve(t,e){const s=this.gen.curve(t,e);return this.draw(s)}path(t,e){const s=this.gen.path(t,e);return this.draw(s)}}var at={canvas:(t,e)=>new st(t,e),svg:(t,e)=>new ot(t,e),generator:t=>new et(t),newSeed:()=>et.newSeed()};
-window.rough=at;})();</script>
-<script>
+  <script>
 /* House style 1: page script. One file, no web requests. Keep it as it is; it reads the page and wires every part. */
 (function () {
   'use strict';
@@ -922,66 +1147,6 @@ window.rough=at;})();</script>
   addEventListener('beforeprint', function () { themeBeforePrint = curTheme(); root.setAttribute('data-theme', 'light'); });
   addEventListener('afterprint', function () { if (themeBeforePrint) setTheme(themeBeforePrint, false); });
 
-  /* ---------- drawings: sketch look (Rough.js, packed in the page) or clean look ----------
-     Page default: <html data-drawings="sketch"> or "clean". Customer pages: clean, and no Rough.js at all.
-     The reader can switch in the gear. The clean shapes stay in the page, so print and no-script still work. */
-  var SK = { roughness: 1, bowing: 1, seed: 7, strokeWidth: 1.5, fillStyle: 'solid' };
-  /* rounded boxes: one stroke, corners pinned; a second pass splits into loops on the curves */
-  var RR = { disableMultiStroke: true, preserveVertices: true, roughness: 0.7, fillShapeRoughnessGain: 0 };
-  function pointsOf(d) {
-    var t = d.match(/[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?/g) || [], i = 0, x = 0, y = 0, c = '', P = [];
-    function n() { return parseFloat(t[i++]); }
-    while (i < t.length) {
-      if (/[a-zA-Z]/.test(t[i])) c = t[i++];
-      if (c === 'M' || c === 'L') { x = n(); y = n(); } else if (c === 'm' || c === 'l') { x += n(); y += n(); }
-      else if (c === 'H') x = n(); else if (c === 'h') x += n(); else if (c === 'V') y = n(); else if (c === 'v') y += n();
-      else if (c === 'z' || c === 'Z') { continue; } else return null;
-      P.push([x, y]);
-    }
-    return P;
-  }
-  function roundRect(x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + w) + ' ' + (y + r) + 'V' + (y + h - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + w - r) + ' ' + (y + h) + 'H' + (x + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (y + h - r) + 'V' + (y + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y + 'Z'; }
-  function sketchSvg(svg) {
-    if (svg.dataset.sk) return; svg.dataset.sk = '1';
-    var g = window.rough.generator(), NS = 'http://www.w3.org/2000/svg';
-    $$('rect, path, line, circle, ellipse, polygon, polyline', svg).forEach(function (el) {
-      if (el.closest('text, defs, clipPath, mask')) return;
-      var a = function (k) { return el.getAttribute(k); };
-      var stroke = a('stroke') || 'none', fill = a('fill') || (el.tagName === 'path' ? 'var(--ink)' : 'none'), sw = parseFloat(a('stroke-width')) || 1;
-      var o = Object.assign({}, SK, { stroke: stroke === 'none' ? 'none' : stroke, strokeWidth: stroke === 'none' ? 0 : sw });
-      if (fill !== 'none') o.fill = fill;
-      var dash = a('stroke-dasharray');
-      var dr = null, tag = el.tagName;
-      if (tag === 'rect') { var x = +a('x') || 0, y = +a('y') || 0, w = +a('width'), h = +a('height'), r = +a('rx') || 0; dr = r ? g.path(roundRect(x, y, w, h, r), Object.assign({}, o, RR)) : g.rectangle(x, y, w, h, o); }
-      else if (tag === 'line') dr = g.line(+a('x1'), +a('y1'), +a('x2'), +a('y2'), o);
-      else if (tag === 'circle') dr = g.circle(+a('cx'), +a('cy'), 2 * +a('r'), o);
-      else if (tag === 'ellipse') dr = g.ellipse(+a('cx'), +a('cy'), 2 * +a('rx'), 2 * +a('ry'), o);
-      else if (tag === 'polygon' || tag === 'polyline') { var pts = (a('points') || '').trim().split(/[\s,]+/).map(Number), pp = []; for (var k = 0; k + 1 < pts.length; k += 2) pp.push([pts[k], pts[k + 1]]); dr = tag === 'polygon' ? g.polygon(pp, o) : g.linearPath(pp, o); }
-      else if (tag === 'path') {
-        var d = a('d') || '', tri = fill !== 'none' ? pointsOf(d) : null;
-        if (tri && tri.length === 3) {
-          /* an arrowhead: draw it as an open hand-drawn chevron */
-          var ang = tri.map(function (p, i) { var b = tri[(i + 1) % 3], c2 = tri[(i + 2) % 3], v1 = [b[0] - p[0], b[1] - p[1]], v2 = [c2[0] - p[0], c2[1] - p[1]]; return Math.acos((v1[0] * v2[0] + v1[1] * v2[1]) / (Math.hypot(v1[0], v1[1]) * Math.hypot(v2[0], v2[1]) || 1)); });
-          var ti = ang.indexOf(Math.min.apply(null, ang));
-          dr = g.linearPath([tri[(ti + 1) % 3], tri[ti], tri[(ti + 2) % 3]], Object.assign({}, SK, { stroke: fill, strokeWidth: 1.5 }));
-        } else dr = g.path(d, o);
-      }
-      if (!dr) return;
-      var grp = document.createElementNS(NS, 'g'); grp.setAttribute('class', 'sk');
-      g.toPaths(dr).forEach(function (p) { var pe = document.createElementNS(NS, 'path'); pe.setAttribute('d', p.d); pe.setAttribute('stroke', p.stroke); pe.setAttribute('stroke-width', p.strokeWidth); pe.setAttribute('fill', p.fill || 'none'); if (dash && (!p.fill || p.fill === 'none')) pe.setAttribute('stroke-dasharray', dash); grp.appendChild(pe); });
-      el.setAttribute('data-clean', ''); el.parentNode.insertBefore(grp, el);
-    });
-  }
-  function drawStyle(st, save) {
-    var want = st === 'sketch' && window.rough ? 'sketch' : 'clean';
-    $$('.fig-box > svg, .vw-pan > svg, .vw-map > svg').forEach(function (svg) { if (want === 'sketch') sketchSvg(svg); svg.classList.toggle('is-sketch', want === 'sketch'); });
-    root.dataset.drawNow = want; if (save) store('hs-drawings', st);
-    $$('[data-draw-set]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.drawSet === want)); });
-  }
-  drawStyle(store('hs-drawings') || root.dataset.drawings || 'clean', false);
-  $$('[data-draw-set]').forEach(function (b) { b.addEventListener('click', function () { drawStyle(b.dataset.drawSet, true); }); });
-  if (!window.rough) $$('[data-draw-set]').forEach(function (b) { b.closest('.draw-row') && (b.closest('.draw-row').hidden = true); });
-
   /* ---------- drawings: never shrink below their own width; scroll instead ---------- */
   function vb(svg) { var v = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number); return v.length === 4 && v[2] > 0 && v[3] > 0 ? { w: v[2], h: v[3] } : null; }
   $$('.fig-box > svg').forEach(function (svg) {
@@ -1083,6 +1248,212 @@ window.rough=at;})();</script>
     matchMedia('print').addEventListener('change', function (e) { if (e.matches) { eng.reset(); paint(); } });
     labelFull(); paint();
   });
+  /* ================= visual toolbox (1.1): isometric 3D, moving data, scenes, linked words, expand =================
+     All opt-in through classes and data attributes; see PARTS.md. Nothing here loads from the web. */
+  var NS = 'http://www.w3.org/2000/svg';
+  function mk(tag, a, parent, before) { var e = document.createElementNS(NS, tag); for (var k in a) e.setAttribute(k, a[k]); if (parent) parent.insertBefore(e, before || null); return e; }
+  function nums(s) { return String(s || '').trim().split(/[\s,]+/).filter(Boolean).map(Number); }
+  function ease(k) { return k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; }
+  function watch(el, cb) { if (!('IntersectionObserver' in window)) { cb(true); return; } new IntersectionObserver(function (es) { cb(es[0].isIntersecting); }, { rootMargin: '80px' }).observe(el); }
+  function pathOf(el) { return !el ? null : el.tagName === 'path' ? el : $('path', el); }
+
+  /* ---------- isometric 3D: <svg class="iso" data-iso="unit originX originY"> ----------
+     Children describe the scene in floor units; the script draws the faces.
+       <g data-floor="x0 y0 x1 y1"/>                          a floor plate with a grid
+       <g data-box="x y w d h" class="tone-teal" data-label="Orders" data-sub="service"/>   a block (optional data-z lifts it)
+       <g data-cyl="x y w h" class="tone-rose" data-label="Postgres"/>                        a cylinder, w = width
+       <g class="ed" data-route="x,y x,y ..."/>               a line on the floor (add data-flow to send packets)
+       <text data-at="x y z">                                 any text, placed at a 3D point
+     Blocks are sorted back to front, so the order you write them in does not matter. */
+  function isoBuild(svg) {
+    var o = nums(svg.getAttribute('data-iso')), U = o[0] || 40, OX = o[1] || 0, OY = o[2] || 0, CO = Math.cos(Math.PI / 6);
+    function P(x, y, z) { return [+(OX + (x - y) * CO * U).toFixed(1), +(OY + (x + y) * .5 * U - (z || 0) * U).toFixed(1)]; }
+    function pts(a) { return a.map(function (p) { return p.join(','); }).join(' '); }
+    /* labels sit above the highest point of the top face, so they never cover it */
+    function label(g, cx, cy, top, lift) {
+      var t = P(cx, cy, top), y = t[1] - lift, l = g.getAttribute('data-label'), sb = g.getAttribute('data-sub');
+      if (l) mk('text', { class: 'iso-lb', x: t[0], y: y - (sb ? 25 : 8), 'text-anchor': 'middle' }, g).textContent = l;
+      if (sb) mk('text', { class: 'iso-sb', x: t[0], y: y - 8, 'text-anchor': 'middle' }, g).textContent = sb;
+    }
+    $$('[data-floor]', svg).forEach(function (g) {
+      var f = nums(g.getAttribute('data-floor')), x0 = f[0], y0 = f[1], x1 = f[2], y1 = f[3];
+      mk('polygon', { class: 'iso-floor', points: pts([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)]) }, g);
+      var grid = mk('path', { class: 'iso-grid', d: '' }, g), d = '';
+      for (var x = Math.ceil(x0); x <= x1; x++) d += 'M' + P(x, y0) + 'L' + P(x, y1);
+      for (var y = Math.ceil(y0); y <= y1; y++) d += 'M' + P(x0, y) + 'L' + P(x1, y);
+      grid.setAttribute('d', d);
+    });
+    var lifted = [];
+    $$('[data-route]', svg).forEach(function (g) {
+      /* points are "x,y" on the floor, or "x,y,z" in the air; a line in the air is sorted in with the blocks */
+      var z = +g.getAttribute('data-z') || .02, raw = g.getAttribute('data-route').trim().split(/\s+/).map(nums);
+      var p = raw.map(function (v) { return P(v[0], v[1], v.length > 2 ? v[2] : z); });
+      mk('path', { class: 'iso-route', d: 'M' + p.map(function (q) { return q.join(' '); }).join('L') }, g, g.firstChild);
+      if (raw.some(function (v) { return v.length > 2; })) {
+        var sx = 0, sy = 0, low = Infinity;
+        raw.forEach(function (v) { sx += v[0]; sy += v[1]; low = Math.min(low, v.length > 2 ? v[2] : z); });
+        lifted.push({ g: g, k: (sx + sy) / raw.length + low });
+      }
+    });
+    var solids = $$('[data-box], [data-cyl]', svg).map(function (g) {
+      var cyl = g.hasAttribute('data-cyl'), v = nums(g.getAttribute(cyl ? 'data-cyl' : 'data-box')), z = +g.getAttribute('data-z') || 0;
+      var x = v[0], y = v[1], w = v[2], d = cyl ? v[2] : v[3], h = cyl ? v[3] : v[4];
+      g.classList.add('iso-node');
+      if (cyl) {
+        var cx = x + w / 2, cy = y + d / 2, r = w / 2, rx = r * Math.SQRT2 * CO * U, ry = r * Math.SQRT2 * .5 * U, b = P(cx, cy, z), t = P(cx, cy, z + h);
+        mk('path', { class: 'iso-r', d: 'M' + (b[0] - rx) + ' ' + t[1] + 'L' + (b[0] - rx) + ' ' + b[1] + 'A' + rx + ' ' + ry + ' 0 0 0 ' + (b[0] + rx) + ' ' + b[1] + 'L' + (b[0] + rx) + ' ' + t[1] + 'Z' }, g);
+        [1 / 3, 2 / 3].forEach(function (f) { var yy = b[1] - (b[1] - t[1]) * f; mk('path', { class: 'iso-ring', d: 'M' + (b[0] - rx) + ' ' + yy + 'A' + rx + ' ' + ry + ' 0 0 0 ' + (b[0] + rx) + ' ' + yy }, g); });
+        mk('ellipse', { class: 'iso-t', cx: b[0], cy: t[1], rx: rx, ry: ry }, g);
+        label(g, cx, cy, z + h, ry);
+      } else {
+        mk('polygon', { class: 'iso-l', points: pts([P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h)]) }, g);
+        mk('polygon', { class: 'iso-r', points: pts([P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h)]) }, g);
+        mk('polygon', { class: 'iso-t', points: pts([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)]) }, g);
+        label(g, x + w / 2, y + d / 2, z + h, (w + d) / 4 * U);
+      }
+      return { g: g, k: x + w / 2 + y + d / 2 + z };
+    });
+    /* back to front: later in the file draws on top */
+    solids.concat(lifted).sort(function (a, b) { return a.k - b.k; }).forEach(function (s) { s.g.parentNode.appendChild(s.g); });
+    $$('text[data-at]', svg).forEach(function (t) { var v = nums(t.getAttribute('data-at')), p = P(v[0], v[1], v[2]); t.setAttribute('x', p[0]); t.setAttribute('y', p[1]); t.parentNode.appendChild(t); });
+  }
+  $$('svg.iso').forEach(isoBuild);
+
+  /* ---------- moving data: data-flow on an edge sends lit packets along it ----------
+     data-flow="2" packets, data-flow-speed="2.4" seconds a trip, data-flow-back runs it the other way.
+     Packets run while the drawing is on screen. Reduced motion and print get a still, lit line instead. */
+  var flows = [];
+  function packet(parent, before, big) {
+    var g = mk('g', { class: 'pkt' + (big ? ' pkt-hero' : ''), opacity: 0 }, parent, before);
+    mk('circle', { class: 'pkt-halo', r: big ? 15 : 10 }, g); mk('circle', { class: 'pkt-glow', r: big ? 9 : 6.5 }, g); mk('circle', { class: 'pkt-core', r: big ? 5 : 3.6 }, g);
+    return g;
+  }
+  function place(path, t, g) { var L = path.getTotalLength(), p = path.getPointAtLength(L * Math.max(0, Math.min(1, t))); g.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')'); }
+  $$('svg [data-flow]').forEach(function (el, i) {
+    var path = pathOf(el), svg = el.ownerSVGElement; if (!path || !svg) return;
+    el.classList.add('flow');
+    if (reduce) { el.classList.add('flow-still'); return; }
+    var n = Math.max(1, parseInt(el.getAttribute('data-flow'), 10) || 1), f = { path: path, svg: svg, sp: (parseFloat(el.getAttribute('data-flow-speed')) || 2.4) * 1000, back: el.hasAttribute('data-flow-back'), off: (i * .37) % 1, pk: [] };
+    for (var k = 0; k < n; k++) f.pk.push(packet(el.parentNode, el.nextSibling));
+    flows.push(f);
+  });
+  if (flows.length) {
+    var seen = new Map();
+    flows.forEach(function (f) { if (!seen.has(f.svg)) { seen.set(f.svg, false); watch(f.svg, function (v) { seen.set(f.svg, v); }); } });
+    (function tick(ts) {
+      flows.forEach(function (f) {
+        if (!seen.get(f.svg)) return;
+        f.pk.forEach(function (g, k) { var t = ((ts / f.sp) + f.off + k / f.pk.length) % 1; g.setAttribute('opacity', Math.min(1, Math.min(t, 1 - t) * 8).toFixed(2)); place(f.path, f.back ? 1 - t : t, g); });
+      });
+      requestAnimationFrame(tick);
+    })(0);
+  }
+
+  /* ---------- linked words: data-hl="key" on words and on shapes lights them up together ---------- */
+  $$('[data-hl]').forEach(function (el) {
+    var key = el.getAttribute('data-hl'), all = function () { return $$('[data-hl="' + key + '"]'); };
+    if (!(el instanceof SVGElement)) { el.classList.add('hl'); if (!el.hasAttribute('tabindex')) el.tabIndex = 0; }
+    var on = function () { all().forEach(function (x) { x.classList.add('hl-on'); }); }, off = function () { all().forEach(function (x) { x.classList.remove('hl-on'); }); };
+    el.addEventListener('mouseenter', on); el.addEventListener('mouseleave', off); el.addEventListener('focus', on); el.addEventListener('blur', off);
+  });
+
+  /* ---------- scenes: <figure class="fig scene"> with an <ol class="scene-steps"> ----------
+     Each <li> is one step: data-edge="id" sends a packet along [data-edge=id] (data-back reverses it),
+     data-from / data-node light up [data-node=…] shapes, data-show="#a, .b" reveals .reveal shapes.
+     Without the script, and in print, the steps stay a numbered list under the drawing. */
+  $$('.scene').forEach(function (fig) {
+    var svg = $('.fig-box > svg', fig), list = $('.scene-steps', fig); if (!svg || !list) return;
+    var steps = $$('li', list); if (!steps.length) return;
+    fig.classList.add('scene-js');
+    var ui = document.createElement('div'); ui.className = 'scene-ui';
+    ui.innerHTML = '<div class="scene-bar" role="group" aria-label="Scene controls"><button type="button" class="scene-play">▶ Play</button><button type="button" class="scene-prev" aria-label="Back one step">‹</button><button type="button" class="scene-next" aria-label="Next step">›</button><span class="scene-dots" aria-hidden="true"></span><span class="scene-count"></span></div><p class="scene-say" aria-live="polite"></p>';
+    list.parentNode.insertBefore(ui, list);
+    var dots = $('.scene-dots', ui), say = $('.scene-say', ui), count = $('.scene-count', ui), play = $('.scene-play', ui);
+    steps.forEach(function (li, k) { var b = document.createElement('i'); b.title = 'Step ' + (k + 1); b.addEventListener('click', function () { stop(); go(k, true); }); dots.appendChild(b); });
+    var hero = packet(svg, null, true), i = -1, playing = false, busy = 0, intro = say.innerHTML = fig.getAttribute('data-intro') || 'Press Play to watch it run, or step through it.';
+    function nodes(sel) { return (sel || '').split(/\s+/).filter(Boolean).reduce(function (a, id) { return a.concat($$('[data-node="' + id + '"]', svg)); }, []); }
+    function paint(k) {
+      $$('.hot', svg).forEach(function (x) { x.classList.remove('hot'); });
+      $$('.reveal', svg).forEach(function (x) { x.classList.remove('shown'); });
+      for (var j = 0; j <= k; j++) { var sh = steps[j].getAttribute('data-show'); if (sh) $$(sh, svg).forEach(function (x) { x.classList.add('shown'); }); }
+      Array.prototype.forEach.call(dots.children, function (b, j) { b.className = j < k ? 'done' : j === k ? 'now' : ''; });
+      count.textContent = k < 0 ? steps.length + ' steps' : (k + 1) + ' / ' + steps.length;
+      say.innerHTML = k < 0 ? intro : steps[k].innerHTML;
+      fig.classList.toggle('playing', playing);
+    }
+    function go(k, animate) {
+      i = k; paint(k); var li = steps[k], id = busy = busy + 1;
+      var e = li.getAttribute('data-edge'), path = e && pathOf($('[data-edge="' + e + '"]', svg)), back = li.hasAttribute('data-back');
+      nodes(li.getAttribute('data-from')).forEach(function (x) { x.classList.add('hot'); });
+      return new Promise(function (res) {
+        function land() { if (id !== busy) return res(); hero.setAttribute('opacity', 0); $$('.hot', svg).forEach(function (x) { x.classList.remove('hot'); }); nodes(li.getAttribute('data-node')).forEach(function (x) { x.classList.add('hot'); }); res(); }
+        if (!path || !animate || reduce) { if (path) { hero.setAttribute('opacity', 1); place(path, back ? 0 : 1, hero); } return setTimeout(land, reduce ? 0 : 60); }
+        var t0 = performance.now(), dur = Math.max(700, Math.min(1600, path.getTotalLength() * 3.2));
+        hero.setAttribute('opacity', 1);
+        (function f(now) { if (id !== busy) return res(); var q = Math.min(1, (now - t0) / dur); place(path, back ? 1 - ease(q) : ease(q), hero); if (q < 1) requestAnimationFrame(f); else land(); })(t0);
+      });
+    }
+    function stop() { playing = false; play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); }
+    function run() {
+      if (!playing) return;
+      if (i >= steps.length - 1) { stop(); return; }
+      go(i + 1, true).then(function () { if (playing) setTimeout(run, 650); });
+    }
+    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); run(); });
+    $('.scene-next', ui).addEventListener('click', function () { stop(); if (i < steps.length - 1) go(i + 1, true); });
+    $('.scene-prev', ui).addEventListener('click', function () { stop(); if (i > 0) go(i - 1, false); else { i = -1; busy++; hero.setAttribute('opacity', 0); paint(-1); } });
+    paint(-1);
+  });
+
+  /* ---------- expand: every drawing opens in a full-window view with zoom and pan ----------
+     On a phone, a drawing too wide for the screen shows whole, small, with "Tap to expand". */
+  var narrow = matchMedia('(max-width: 600px)');
+  $$('.fig').forEach(function (fig) {
+    var box = $('.fig-box', fig), svg = box && $(':scope > svg', box), v = svg && vb(svg); if (!v) return;
+    box.classList.add('xp-ready');
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'fig-x'; btn.setAttribute('aria-label', 'Expand drawing'); btn.title = 'Expand (zoom and pan)'; btn.innerHTML = '<span aria-hidden="true">⤢</span><span class="fig-x-t">Expand</span>';
+    box.appendChild(btn);
+    var minW = svg.style.minWidth;
+    function peek() { var on = narrow.matches && parseFloat(minW) > box.clientWidth + 1; fig.classList.toggle('peek', on); svg.style.minWidth = on ? '0' : minW; }
+    peek(); narrow.addEventListener('change', peek); if ('ResizeObserver' in window) new ResizeObserver(peek).observe(box);
+    btn.addEventListener('click', function (e) { e.stopPropagation(); open(fig); });
+    box.addEventListener('click', function (e) { if (fig.classList.contains('peek') && !e.target.closest('button, a, [data-hl]')) open(fig); });
+  });
+  function open(fig) {
+    var box = $('.fig-box', fig), svg = $(':scope > svg', box), v = vb(svg), ui = $('.scene-ui', fig), back = document.activeElement;
+    var cap = $('figcaption', fig), keep = document.createElement('div');
+    keep.style.height = box.getBoundingClientRect().height - 26 + 'px'; svg.parentNode.insertBefore(keep, svg);
+    var uiHome = ui && ui.parentNode, uiNext = ui && ui.nextSibling;
+    var ov = document.createElement('div'); ov.className = 'xp'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', (svg.getAttribute('aria-label') || 'Drawing') + ', expanded');
+    ov.innerHTML = '<div class="xp-bar"><span class="xp-title"></span><button type="button" data-x="out" aria-label="Zoom out">−</button><button type="button" data-x="in" aria-label="Zoom in">+</button><button type="button" data-x="reset" aria-label="Fit to window">↺</button><button type="button" data-x="close" class="xp-close" aria-label="Close (Esc)">✕</button></div><div class="xp-stage"><div class="xp-pan"></div></div>';
+    $('.xp-title', ov).textContent = cap ? cap.textContent : '';
+    var stage = $('.xp-stage', ov), pan = $('.xp-pan', ov);
+    pan.style.width = v.w + 'px'; pan.style.height = v.h + 'px';
+    var oldStyle = svg.getAttribute('style'); svg.setAttribute('style', 'width:100%;height:100%;max-width:none;min-width:0');
+    pan.appendChild(svg); if (ui) ov.appendChild(ui);
+    document.body.appendChild(ov); root.classList.add('vw-lock');
+    var eng = Engine(stage, pan, { w: v.w, h: v.h, max: 6, onchange: function () {} });
+    requestAnimationFrame(function () { eng.refit(); eng.reset(); });
+    var ro = 'ResizeObserver' in window ? new ResizeObserver(function () { eng.refit(); }) : null; if (ro) ro.observe(stage);
+    function close() {
+      if (ro) ro.disconnect(); document.removeEventListener('keydown', key, true);
+      if (oldStyle === null) svg.removeAttribute('style'); else svg.setAttribute('style', oldStyle);
+      keep.parentNode.insertBefore(svg, keep); keep.remove(); if (ui) uiHome.insertBefore(ui, uiNext);
+      ov.remove(); root.classList.remove('vw-lock'); if (back && back.focus) back.focus({ preventScroll: true });
+    }
+    function key(e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === '+' || e.key === '=') eng.zoomAt(1.4, stage.clientWidth / 2, stage.clientHeight / 2, true);
+      else if (e.key === '-') eng.zoomAt(1 / 1.4, stage.clientWidth / 2, stage.clientHeight / 2, true);
+      else if (e.key === '0') eng.reset(true);
+      else if (e.key === 'Tab') { var f = $$('button', ov); if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); } }
+    }
+    document.addEventListener('keydown', key, true);
+    ov.addEventListener('click', function (e) { var b = e.target.closest('[data-x]'); if (!b) return; var a = b.getAttribute('data-x'), c = [stage.clientWidth / 2, stage.clientHeight / 2];
+      if (a === 'close') close(); else if (a === 'in') eng.zoomAt(1.4, c[0], c[1], true); else if (a === 'out') eng.zoomAt(1 / 1.4, c[0], c[1], true); else eng.reset(true); });
+    stage.addEventListener('wheel', function (e) { e.preventDefault(); var b = stage.getBoundingClientRect(); if (e.ctrlKey || e.metaKey) eng.zoomAt(Math.exp(-e.deltaY * .01), e.clientX - b.left, e.clientY - b.top); else eng.panBy(-e.deltaX, -e.deltaY); }, { passive: false });
+    $('.xp-close', ov).focus();
+  }
 })();
 
 </script>

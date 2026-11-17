@@ -1,6 +1,6 @@
 /* House style tokens (house style 1). Picked in a design bake-off, Oct 2026.
    Round 1 colors: B Burnt Sienna. Round 2 fonts: E, Adobe Source Serif 4 + Source Sans 3 + Source Code Pro, packed in renamed as Snell Serif, Snell Sans and Snell Mono (OFL: subsets may not keep the reserved name "Source").
-   Round 3 size: B Default. Round 5 drawings: sketch A2+B1+C2+D3, clean E1. Round 7 motion: B Highlight only.
+   Round 3 size: B Default. Round 5 drawings: clean E1 (the sketch look was dropped in 1.1). Round 7 motion: B Highlight only.
    Every color, font and size on a page comes from here. Never write a raw hex color in a page body. */
 :root {
   /* colors, light */
@@ -17,6 +17,13 @@
   --warn: #8f5a07;
   --warn-soft: #f7e8c8;
   --code-bg: #f1e7d2;
+  /* diagram hues (1.1): color means something, at most 3 per drawing. Each has a line color and a soft fill. */
+  --teal: #1f7a72; --teal-soft: #d6ece8;
+  --violet: #6a4fa3; --violet-soft: #e6dff3;
+  --ochre: #a06b08; --ochre-soft: #f5e7c6;
+  --rose: #b0456a; --rose-soft: #f6dde5;
+  --slate: #4f6170; --slate-soft: #e0e5e9;
+  --glow: #f07a2a;   /* lit packets and the hot node in moving drawings */
   --shadow: 0 1px 2px rgba(40,30,20,.06), 0 6px 20px rgba(40,30,20,.06);
   color-scheme: light;
 
@@ -24,7 +31,6 @@
   --font-display: "Snell Serif", Charter, Georgia, serif;
   --font-body: "Snell Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Snell Mono", ui-monospace, Menlo, Consolas, monospace;
-  --font-hand: "Bradley Hand", "Segoe Print", "Segoe Script", "Comic Sans MS", cursive; /* sketch edge labels only; local fonts */
 
   /* size and spacing */
   --size-body: 17px; --leading: 1.6; --measure: 61ch; --measure-lede: 60ch;
@@ -42,6 +48,7 @@
     --bg: #1a120c; --surface: #241a12; --sunk: #2d2218; --ink: #f6ead8; --muted: #b9a58d;
     --line: #41331f; --accent: #f0743a; --accent-soft: #43241a; --go: #6fcb90; --go-soft: #1d3324;
     --warn: #ecb04e; --warn-soft: #3b2c14; --code-bg: #2d2218;
+    --teal: #5fc8bb; --teal-soft: #17302d; --violet: #b39ae8; --violet-soft: #2a2140; --ochre: #e3b24f; --ochre-soft: #3a2c12; --rose: #ee8db0; --rose-soft: #3d1f2a; --slate: #a7b8c6; --slate-soft: #232b31; --glow: #ffa65c;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
     color-scheme: dark;
   }
@@ -50,6 +57,7 @@
   --bg: #1a120c; --surface: #241a12; --sunk: #2d2218; --ink: #f6ead8; --muted: #b9a58d;
   --line: #41331f; --accent: #f0743a; --accent-soft: #43241a; --go: #6fcb90; --go-soft: #1d3324;
   --warn: #ecb04e; --warn-soft: #3b2c14; --code-bg: #2d2218;
+  --teal: #5fc8bb; --teal-soft: #17302d; --violet: #b39ae8; --violet-soft: #2a2140; --ochre: #e3b24f; --ochre-soft: #3a2c12; --rose: #ee8db0; --rose-soft: #3d1f2a; --slate: #a7b8c6; --slate-soft: #232b31; --glow: #ffa65c;
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
   color-scheme: dark;
 }

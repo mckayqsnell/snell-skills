@@ -5,8 +5,8 @@ Classes and the smallest markup for each part. Copy from here instead of reading
 ## Page frame
 
 ```html
-<html lang="en" data-drawings="sketch">            <!-- "clean" for customer pages -->
-<html lang="en" data-drawings="sketch" data-width="full">   <!-- see below -->
+<html lang="en">
+<html lang="en" data-width="full">   <!-- see below -->
 <meta name="plan-file" content="plans/2026-10-19-topic.html">
 <div class="wrap"><nav class="toc"><div class="label">Contents</div><ol id="toc-list"></ol></nav><main> … </main></div>
 ```
@@ -125,13 +125,78 @@ Code that does not exist yet: put "(sketch)" in the head. Escape `<` as `&lt;`.
   <figcaption>What to notice.</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure>
 ```
 
-Class markers inside the SVG: `bx` box shape, `bt` box title, `gp` group frame, `gl` group label, `ed` an edge (`<g>` with the line path and the head path), `el` edge label (drawn in the hand font in the sketch look).
+The page adds an Expand button to every drawing by itself. Add `data-span="wide"` to the `<figure>` to let it reach past the text on a big screen (up to 1000 wide in the SVG).
+
+Class markers inside the SVG: `bx` box shape, `bt` box title, `gp` group frame, `gl` group label, `ed` an edge (`<g>` with the line path and the head path), `el` edge label. Copy examples from `house-style.html`.
 
 Box: `<rect class="bx" x y width height rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>`.
 Head: `<path d="M x y L … L … z" fill="var(--ink)"/>`, a 10 px triangle.
 Halo on every label: `stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"`.
 
+**Tones.** `class="tone-teal"` on a shape or `<g>` sets `--tone` (line) and `--tone-soft` (fill). Tones: `plain`, `accent`, `go`, `warn`, `teal`, `violet`, `ochre`, `rose`, `slate`. Write `fill="var(--tone-soft)" stroke="var(--tone)"` on the shapes inside.
+
 Wider than 1000: use the viewer. Copy the `.vw` block from `house-style.html` and put the SVG inside `.vw-pan`.
+
+### Moving data
+
+Add `data-flow` to an edge's `<g class="ed">` (or to a `<path>`). Lit packets run along its line while the drawing is on screen.
+
+```html
+<g class="ed" data-flow="2" data-flow-speed="2.4"> <path d="M140 85H220" …/> <path d="…" fill="var(--ink)"/> </g>
+```
+
+`data-flow="2"`: 2 packets. `data-flow-speed`: seconds a trip (default 2.4). `data-flow-back`: run it the other way. For a path that is only a track, give it `stroke="none"`.
+
+### Isometric 3D
+
+Write positions in floor units. The page draws the faces, sorts them back to front, and adds the labels.
+
+```html
+<svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="…" font-family="var(--font-body)">
+  <g data-floor="-0.6 -0.6 17 8"/>                                          <!-- x0 y0 x1 y1 -->
+  <g class="ed" data-edge="a-b" data-route="0.8,3.4 4.2,3.4" data-flow/>     <!-- points x,y on the floor, or x,y,z in the air -->
+  <g data-node="a" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/>   <!-- x y w d h -->
+  <g data-node="b" class="tone-teal" data-box="3.4 2.6 1.6 1.6 1.2" data-z="0" data-label="API"/>              <!-- data-z lifts it -->
+  <g data-node="db" class="tone-rose" data-cyl="6.8 2.6 1.6 1.3" data-label="Postgres"/>                       <!-- x y width h -->
+  <text class="iso-lb" data-at="6.4 0 2.8">Any label</text>                                                    <!-- x y z -->
+</svg>
+```
+
+`data-iso="unit originX originY"`: one floor cell is `unit` pixels wide; the origin is where floor point 0,0 lands. x runs down to the right, y runs down to the left. Keep 1 floor cell between blocks. Check the drawing in the browser and move the origin until nothing is cut off.
+
+### Scenes: press Play
+
+A drawing with Play, Back and Next. Each `<li>` is one step. Without the script, and in print, the steps read as a numbered list.
+
+```html
+<figure class="fig scene" data-span="wide" data-intro="Press Play to follow one order.">
+  <div class="fig-box"><svg …> shapes with data-node="…", edges with data-edge="…" </svg></div>
+  <ol class="scene-steps">
+    <li data-edge="a-b" data-from="a" data-node="b">The browser sends the order to the API.</li>
+    <li data-edge="a-b" data-back data-from="b" data-node="a">The API answers.</li>
+    <li data-show="#cache">A cache appears in front of the API.</li>
+  </ol>
+  <figcaption>What to notice.</figcaption>
+</figure>
+```
+
+- `data-edge`: the edge the packet runs along. `data-back`: the other way.
+- `data-from`: the part that lights up while the packet moves. `data-node`: the part that lights up when it lands. Both take one or more names.
+- `data-show`: shapes to show from this step on. Give those shapes `class="reveal"` so they start hidden.
+- Works on flat and isometric drawings.
+
+### Linked words
+
+The same `data-hl` key on a word and on a shape lights up both when the reader points at either one.
+
+```html
+<p>Reads go to the <span data-hl="cache">cache</span> first.</p>
+<svg …><g data-hl="cache"> …the cache box… </g></svg>
+```
+
+### three.js (opt-in)
+
+Only after the reader said yes to a 3D scene they can turn. Copy `three-starter.html` whole, then edit `NODES`, `EDGES` and `STORY` in its last script. It adds about 800 KB and prints as a still picture.
 
 ## Explain parts
 

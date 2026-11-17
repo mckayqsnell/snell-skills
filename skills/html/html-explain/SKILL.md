@@ -20,7 +20,7 @@ If the answer fits in a few sentences, answer in chat and offer the page in one 
 ## 2. Who is it for?
 
 - **Default: the user.** Pitch it at a curious engineer who is new to this topic. Skip what they surely know. Read `settings.md` for anything it says about them.
-- **`for:"…"`** (e.g. `for:"Dad"`, `for:"a new hire"`, `for:"a customer"`): write for that person. No code unless they write code. If you can't tell what they already know, ask one question, then go. For a customer: `data-drawings="clean"`, delete the Rough.js `<script>`, and put no customer data in it.
+- **`for:"…"`** (e.g. `for:"Dad"`, `for:"a new hire"`, `for:"a customer"`): write for that person. No code unless they write code. If you can't tell what they already know, ask one question, then go. For a customer: put no customer data in it.
 - Don't grill. One question at most, only when the answer changes the page.
 
 ## 3. Get the facts right
@@ -32,12 +32,12 @@ If the answer fits in a few sentences, answer in chat and offer the page in one 
 ## 4. Write the page
 
 1. **Where it goes.** `explain/YYYY-MM-DD-topic.html` in the folder the user is working in. In a git repo, check with the page's own path, which works before the folder exists: `git check-ignore -q explain/<page>.html` exits 0 if it is ignored (fine). If not, `git ls-files explain/` prints something if pages are already committed there. If `explain/` is neither ignored nor already committed, say so before the page lands there; on a work repo, ask first. With `keep`, it goes to the knowledge folder instead (step 6).
-2. **Copy the whole file** with `cp kit/explain-template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the question boxes. Set `<title>` (`{{TOPIC}}`), `<meta name="page-file">` (the "still unclear" questions quote it), the top bar tag (`Explain · for {{me / who}} · {{DATE}}`: "me" when the reader is the user) and `data-drawings` on `<html>`. Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
+2. **Copy the whole file** with `cp kit/explain-template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the question boxes. Set `<title>` (`{{TOPIC}}`), `<meta name="page-file">` (the "still unclear" questions quote it) and the top bar tag (`Explain · for {{me / who}} · {{DATE}}`: "me" when the reader is the user). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
 3. **Shape: no fixed layout.** The template is a starter. Pick parts from PARTS.md for this topic, in the order that teaches best. Two explain pages should not look the same.
    - **Header:** the topic in 2–6 words, and a lede that holds the whole idea in 1–2 sentences.
    - **3–7 concept sections**, one idea each. The `h2` is the takeaway as a plain sentence ("A cache trades freshness for speed"), not a label ("Caching").
    - **ELI5 layers** (picture → real thing → where the picture breaks) for the 1–3 core ideas. Not for every section: it gets tiresome. All three layers are about the same idea: the real-thing layer says in real terms exactly what the picture showed, and nothing new. Pick a picture the reader already uses every day.
-   - **At least one drawing**, from the kit: flow, before/after, system map, sequence or timeline. Draw the mechanism, not decoration.
+   - **At least one drawing.** Start from "reference or intuition?" in HOUSE-STYLE.md: for "how does it work", draw the mechanism (isometric 3D, moving data, a scene with Play), not a box with its name. No decoration.
    - **A worked example with numbers** when the topic has numbers. Made-up numbers are fine if the example says so.
    - **Terms:** a `.vocab` line (`<dfn>`) where a term first shows up, and the same term in the glossary. On a technical topic, define the few core terms the page keeps using this way; the word check counts a term as explained only where it is defined in place, not for being in the glossary.
    - **A bigger idea** (`.idea`) when a detail ties to something that holds elsewhere.

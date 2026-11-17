@@ -111,14 +111,14 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 | :- | :- |
 | [html-plan](skills/html/html-plan/SKILL.md) | Plans a coding job as one page. Sizes the job first (below S, S, M, L), so a tiny job gets a ready-to-paste prompt and a big one gets phases, a build split and risks. You pick the decisions and paste one answer back. |
 | [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it: a picture first, then the real thing, then where the picture breaks. Ends with a recap, a glossary and a "what's still unclear?" box. |
-| [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, sketch-style drawings, a drawing viewer and a reply box. |
+| [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer and a reply box. |
 | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
 
 ## What a page has
 
 - **One file, offline.** Fonts and scripts are packed in. No CDNs, nothing to install to read it.
 - **Light and dark, phone and desktop.** A gear switches theme, text size and drawing style.
-- **Drawings that look hand-made.** Agents write plain SVG; the page draws it in a sketch style (customer pages stay clean). Big drawings get zoom, pan and a mini map.
+- **Drawings that move and stand up.** Agents write plain SVG, picked for the job: boxes and arrows to point at, isometric 3D, lit packets that show traffic, and scenes you press Play on. Every drawing opens full window with zoom and pan, and wide ones use a big screen. A real three.js scene is there too, when you ask for it.
 - **One reply to paste back.** Decisions sit next to a panel that builds your answer as you pick, and quotes your notes so the agent reads them as feedback, not orders.
 - **Plain words.** A built-in checker scores the writing; the skills aim for level 80 or better.
 
@@ -140,4 +140,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to make a change, rebuild the kit
 
 ## License
 
-[MIT](LICENSE) © McKay Snell. The kit packs in Latin subsets of Adobe's Source Serif 4, Source Sans 3 and Source Code Pro, renamed Snell Serif, Snell Sans and Snell Mono as their license requires (SIL Open Font License, see `kit/FONTS-LICENSE.txt`) and Rough.js (MIT, see `kit/ROUGH-LICENSE.txt`). The banner lettering is traced from [Parisienne](https://github.com/google/fonts/tree/main/ofl/parisienne) by Astigmatic (SIL Open Font License).
+[MIT](LICENSE) © McKay Snell. The kit packs in Latin subsets of Adobe's Source Serif 4, Source Sans 3 and Source Code Pro, renamed Snell Serif, Snell Sans and Snell Mono as their license requires (SIL Open Font License, see `kit/FONTS-LICENSE.txt`) and three.js (MIT, see `kit/THREE-LICENSE.txt`), used only by the opt-in `three-starter.html`. The banner lettering is traced from [Parisienne](https://github.com/google/fonts/tree/main/ofl/parisienne) by Astigmatic (SIL Open Font License).

@@ -12,15 +12,14 @@ look:
   motion: highlight             # round 7, pick B: 180 ms fades, one pulse on the next decision, smooth jumps; still under reduced motion
 
 drawings:
-  own_pages: sketch             # round 5: Rough.js, roughness 1, bowing 1, solid fill, 1.5 px lines, seed 7, hand font on edge labels
-  customer_pages: clean         # round 5, pick E1: plain SVG, 8 px corners, filled arrowheads; no Rough.js in the page
+  method: svg                   # 1.1: hand-written SVG only; Rough.js (sketch look) and Mermaid are gone
+  default_3d: isometric         # svg.iso: blocks, cylinders and routes in floor units
+  three_js: ask-first           # opt-in: ask the reader before using three-starter.html (about 800 KB)
+  motion: ambient               # packets run while on screen; scenes wait for Play; still for reduced motion and print
+  hues: 3                       # at most 3 hues in one drawing: teal, violet, ochre, rose, slate (plus accent, go, warn)
+  wide: 1000                    # data-span="wide" drawings can be up to 1000 wide; the page reaches up to 1400 px
   viewer: map                   # round 6, pick V3 on our own engine: zoom, pan, fullscreen, mini overview, for drawings wider than 1000
-  methods:                      # round 4b: hand-written SVG wins every kind today
-    flow: svg
-    system_map: svg             # weak spot: try a browser-drawn method once Playwright is installed (decision 35)
-    before_after: svg
-    sequence: svg
-    timeline: svg
+  expand: every-drawing         # every drawing gets an Expand button; on a phone, wide ones show whole with "Tap to expand"
 
 page_parts:                     # round 8
   decision_card: why-fold       # V3

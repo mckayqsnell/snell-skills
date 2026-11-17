@@ -47,7 +47,7 @@ A question you can answer by reading the code is not a question. Read the code.
 ## 3. Write the page
 
 1. **Where it goes.** `plans/YYYY-MM-DD-topic.html` in the project. Name it once, from the start. Before you write, check git with the page's own path, which works before the folder exists: `git check-ignore -q plans/<page>.html` exits 0 if it is ignored (fine). If not, `git ls-files plans/` prints something if plans are already committed there. If `plans/` is neither ignored nor already committed, tell the user before the page lands there. On a work repo or a page with customer context, ask first: an untracked page can get committed by accident.
-2. **Copy the whole file** with `cp kit/template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the response panel. Set `<title>`, `<meta name="plan-file">` (the response quotes it, so the agent knows which plan an answer is for), the top bar tag (`Plan · {{S, M or L}} · updated {{DATE}}`), and `data-drawings` on `<html>` (`sketch`; `clean` and no Rough.js script for customer pages). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
+2. **Copy the whole file** with `cp kit/template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the response panel. Set `<title>`, `<meta name="plan-file">` (the response quotes it, so the agent knows which plan an answer is for), the top bar tag (`Plan · {{S, M or L}} · updated {{DATE}}`). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
 3. **Fill it in.** Keep the `<style>` and `<script>` blocks. Delete parts the size doesn't need. Use only parts from `PARTS.md`.
 4. **Parts by size**, in this order:
 
@@ -74,12 +74,12 @@ A question you can answer by reading the code is not a question. Read the code.
 
 ## 4. Drawings
 
-Write plain SVG in the clean look; the page draws the sketch look itself. Copy an example from `kit/house-style.html` (flow, before/after, system map, sequence, timeline) and keep its class markers. Rules are in HOUSE-STYLE.md.
+Hand-written SVG, from the toolbox in HOUSE-STYLE.md: flat reference drawings, isometric 3D, moving data, scenes with Play, linked words. Pick what shows the change best. A plain flowchart is one choice, not the default. Copy markup from `kit/PARTS.md` and see the examples live in `kit/house-style.html`.
 
 - **S:** at most 1. **M:** 2: the main drawing, plus a sequence (calls over time) or a before/after (what changes). **L:** 3–4.
-- 3–8 boxes per drawing. More than that: split it.
-- 720 wide or less. Wider than 1000: use the viewer from the kit.
-- Draw what the user must decide or check, not decoration.
+- Draw what the user must decide or check, not decoration. Motion is welcome when it shows how the change behaves: a request's new path, a job moving off the request path, before and after.
+- 3–8 boxes in a column drawing, 720 wide or less. A wide drawing (`data-span="wide"`) can be up to 1000 wide with up to 12 boxes; it uses a big screen and the reader can Expand it. Wider than 1000: use the viewer.
+- A real 3D scene (three.js) is opt-in: ask first (see HOUSE-STYLE.md). The default 3D look is isometric SVG.
 
 ## 5. Decisions and the response panel
 
@@ -92,7 +92,7 @@ Write plain SVG in the clean look; the page draws the sketch look itself. Copy a
 
 ## 6. Check, then hand over
 
-1. **Check in a browser** if you have one (Playwright, or your own browser tool): desktop light, desktop dark, and phone at 390 px. No console errors. Nothing scrolls sideways except drawings and code in their own box. Pick an option and type a note: the response must change and quote the note. Look at the screenshots yourself.
+1. **Check in a browser** if you have one (Playwright, or your own browser tool): desktop light, desktop dark, a wide screen (1600 px), and phone at 390 px. No console errors. Open a drawing with Expand and press Play on any scene. Nothing scrolls sideways except drawings and code in their own box. Pick an option and type a note: the response must change and quote the note. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Do the read-through: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say it was checked by read-through.
 3. **Placeholders:** `grep -n '{{' plans/<page>.html` prints nothing.
 4. **Words:** `node kit/vocab-check.mjs plans/<page>.html --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80).

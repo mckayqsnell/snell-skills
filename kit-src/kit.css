@@ -180,10 +180,6 @@ ul.tight { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 .fig-box > svg { display: block; height: auto; max-width: none; margin: 0 auto; }
 .fig figcaption { font-size: var(--size-small); color: var(--muted); margin-top: 8px; }
 .fig .swipe { display: none; font-size: 13px; color: var(--muted); margin-top: 4px; }
-svg.is-sketch [data-clean] { display: none; }
-svg:not(.is-sketch) .sk { display: none; }
-svg.is-sketch text.el { font-family: var(--font-hand); font-weight: 400; }
-.style-pop .draw-row { display: grid; gap: var(--space-2); }
 .style-pop [hidden] { display: none; }
 .fig.scrolls .swipe { display: block; }
 
@@ -329,12 +325,99 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 .unclear pre { margin: 0; padding: var(--space-3); font: 13px/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow: auto; }
 .unclear pre:empty { display: none; }
 
+/* ================= visual toolbox (1.1) ================= */
+/* Tones: put one class on a shape or group; its shapes read --tone (line) and --tone-soft (fill). */
+.tone-plain { --tone: var(--muted); --tone-soft: var(--surface); }
+.tone-accent { --tone: var(--accent); --tone-soft: var(--accent-soft); }
+.tone-go { --tone: var(--go); --tone-soft: var(--go-soft); }
+.tone-warn { --tone: var(--warn); --tone-soft: var(--warn-soft); }
+.tone-teal { --tone: var(--teal); --tone-soft: var(--teal-soft); }
+.tone-violet { --tone: var(--violet); --tone-soft: var(--violet-soft); }
+.tone-ochre { --tone: var(--ochre); --tone-soft: var(--ochre-soft); }
+.tone-rose { --tone: var(--rose); --tone-soft: var(--rose-soft); }
+.tone-slate { --tone: var(--slate); --tone-soft: var(--slate-soft); }
+
+/* Wide figures: on a big screen they reach past the text column to the right. */
+@media (min-width: 1240px) {
+  .fig[data-span="wide"], .vw[data-span="wide"] { width: min(1400px, max(100%, calc(50vw + 200px))); max-width: none; }
+}
+
+/* Isometric 3D (svg.iso). The script draws the faces; colors come from the tone. */
+svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
+.iso-floor { fill: var(--sunk); stroke: var(--line); stroke-width: 1; }
+.iso-grid { fill: none; stroke: var(--line); stroke-width: .75; opacity: .8; }
+.iso-node polygon, .iso-node path, .iso-node ellipse { stroke: var(--tone); stroke-width: 1.5; stroke-linejoin: round; }
+.iso-t { fill: var(--tone-soft); transition: filter var(--motion-slow) var(--ease); }
+.iso-l { fill: color-mix(in oklab, var(--tone) 26%, var(--tone-soft)); }
+.iso-r { fill: color-mix(in oklab, var(--tone) 46%, var(--tone-soft)); }
+.iso-ring { fill: none; stroke-width: 1 !important; opacity: .5; }
+.iso-lb, .iso-sb { fill: var(--ink); font: 600 15px var(--font-body); paint-order: stroke; stroke: var(--halo, var(--surface)); stroke-width: 4px; stroke-linejoin: round; }
+.iso-sb { fill: var(--muted); font-weight: 400; font-size: 13px; }
+.iso-route { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; }
+
+/* Moving data: lit packets on [data-flow] edges. */
+.pkt { pointer-events: none; }
+.pkt-halo { fill: var(--glow); opacity: .14; }
+.pkt-glow { fill: var(--glow); opacity: .32; }
+.pkt-core { fill: var(--glow); }
+.pkt-hero .pkt-core { fill: var(--surface); stroke: var(--glow); stroke-width: 3; }
+.flow-still path, path.flow-still { stroke: var(--glow) !important; }
+.scene.playing .pkt:not(.pkt-hero) { opacity: .25 !important; }
+
+/* The hot node in a scene, and linked words. */
+svg .hot { filter: drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 2px var(--glow)); }
+svg .hot :is(rect, .iso-t) { stroke: var(--glow) !important; }
+svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
+.hl { border-bottom: 2px solid color-mix(in oklab, var(--glow) 55%, transparent); cursor: help; border-radius: 2px; transition: background var(--motion-fast) var(--ease); }
+.hl.hl-on, .hl:focus-visible { background: color-mix(in oklab, var(--glow) 22%, transparent); outline: none; }
+.scene-js .reveal { opacity: 0; transition: opacity var(--motion-slow) var(--ease); }
+.scene-js .reveal.shown { opacity: 1; }
+
+/* Scenes: Play, step and the line that says what is happening. */
+.scene-ui { margin-top: 10px; display: grid; gap: 6px; }
+.scene-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.scene-bar button { font: 600 14px var(--font-body); min-height: 36px; min-width: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.scene-bar button:hover { background: var(--sunk); }
+.scene-bar .scene-play, .scene-bar .scene-play:hover { background: var(--accent); border-color: var(--accent); color: var(--surface); min-width: 96px; }
+.scene-bar .scene-play:hover { filter: brightness(1.08); }
+.scene-dots { display: flex; gap: 5px; margin-left: 6px; }
+.scene-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); cursor: pointer; transition: background var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease); }
+.scene-dots i.done { background: var(--muted); }
+.scene-dots i.now { background: var(--glow); transform: scale(1.35); }
+.scene-count { font: 500 12.5px var(--font-mono); color: var(--muted); margin-left: auto; }
+.scene-say { min-height: 3.2em; font-size: 15.5px; max-width: 72ch; }
+.scene-js .scene-steps { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.scene-steps { margin: 10px 0 0; padding-left: 22px; font-size: 15px; display: grid; gap: 4px; }
+
+/* Expand: a button on every drawing, and the full-window view it opens. */
+.fig-box.xp-ready { position: relative; }
+.fig-x { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 6px; font: 600 12.5px var(--font-body); color: var(--muted); background: color-mix(in oklab, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer; opacity: .75; transition: opacity var(--motion-fast) var(--ease); z-index: 2; }
+.fig-x span:first-child { font-size: 15px; line-height: 1; }
+.fig-box:hover .fig-x, .fig-x:focus-visible { opacity: 1; color: var(--ink); }
+.fig.peek .fig-box { cursor: zoom-in; }
+.fig.peek .fig-x { opacity: 1; color: var(--ink); }
+.fig.peek .fig-x-t::after { content: " · tap"; }
+.xp { position: fixed; inset: 0; z-index: 1000; background: var(--bg); display: flex; flex-direction: column; --halo: var(--bg); animation: xp-in var(--motion-fast) var(--ease); }
+@keyframes xp-in { from { opacity: 0; transform: scale(.985); } }
+.xp-bar { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.xp-title { flex: 1; min-width: 0; font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xp-bar button { font: 600 18px/1 var(--font-body); min-width: var(--tap); min-height: var(--tap); border: 0; background: transparent; color: var(--ink); border-radius: 8px; cursor: pointer; }
+.xp-bar button:hover { background: var(--sunk); }
+.xp-stage { position: relative; flex: 1; overflow: hidden; cursor: grab; touch-action: none; }
+.xp-stage.grab { cursor: grabbing; }
+.xp-pan { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.xp-pan.anim { transition: transform var(--motion-fast) ease-out; }
+.xp-pan > svg { display: block; }
+.xp .scene-ui { padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); margin: 0; }
+
 @page { margin: 0; }
 @media print {
   html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: var(--bg); }
   /* zero page margin so the page color runs to the edge; the padding repeats on every printed page */
   body { padding: 14mm 15mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-  .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag { display: none !important; }
+  .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag, .fig-x, .scene-ui, .pkt { display: none !important; }
+  .scene-js .scene-steps { position: static; width: auto; height: auto; clip: auto; white-space: normal; overflow: visible; }
+  .scene-js .reveal { opacity: 1; } .fig[data-span] { width: auto; }
   .wrap { display: block; max-width: none; padding: 0; } main { max-width: none; }
   section { padding-top: 32px; }
   section.folded > :not(.part):not(h2) { display: revert !important; }
