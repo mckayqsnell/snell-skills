@@ -353,7 +353,7 @@ svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
 .iso-ring { fill: none; stroke-width: 1 !important; opacity: .5; }
 .iso-lb, .iso-sb { fill: var(--ink); font: 600 15px var(--font-body); paint-order: stroke; stroke: var(--halo, var(--surface)); stroke-width: 4px; stroke-linejoin: round; }
 .iso-sb { fill: var(--muted); font-weight: 400; font-size: 13px; }
-.iso-route { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; }
+.iso-route { fill: none; stroke: var(--tone); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; }
 
 /* Moving data: lit packets on [data-flow] edges. */
 .pkt { pointer-events: none; }
@@ -362,7 +362,7 @@ svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
 .pkt-core { fill: var(--glow); }
 .pkt-hero .pkt-core { fill: var(--surface); stroke: var(--glow); stroke-width: 3; }
 .flow-still path, path.flow-still { stroke: var(--glow) !important; }
-.scene.playing .pkt:not(.pkt-hero) { opacity: .25 !important; }
+svg.scene-on .pkt:not(.pkt-hero) { opacity: .25 !important; }
 
 /* The hot node in a scene, and linked words. */
 svg .hot { filter: drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 2px var(--glow)); }
@@ -370,8 +370,9 @@ svg .hot :is(rect, .iso-t) { stroke: var(--glow) !important; }
 svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
 .hl { border-bottom: 2px solid color-mix(in oklab, var(--glow) 55%, transparent); cursor: help; border-radius: 2px; transition: background var(--motion-fast) var(--ease); }
 .hl.hl-on, .hl:focus-visible { background: color-mix(in oklab, var(--glow) 22%, transparent); outline: none; }
-.scene-js .reveal { opacity: 0; transition: opacity var(--motion-slow) var(--ease); }
-.scene-js .reveal.shown { opacity: 1; }
+/* on the svg, not the figure, so they still hold when the drawing moves into the Expand view */
+svg.scene-svg .reveal { opacity: 0; transition: opacity var(--motion-slow) var(--ease); }
+svg.scene-svg .reveal.shown { opacity: 1; }
 
 /* Scenes: Play, step and the line that says what is happening. */
 .scene-ui { margin-top: 10px; display: grid; gap: 6px; }
@@ -417,7 +418,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
   body { padding: 14mm 15mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag, .fig-x, .scene-ui, .pkt { display: none !important; }
   .scene-js .scene-steps { position: static; width: auto; height: auto; clip: auto; white-space: normal; overflow: visible; }
-  .scene-js .reveal { opacity: 1; } .fig[data-span] { width: auto; }
+  svg.scene-svg .reveal { opacity: 1; } .fig[data-span] { width: auto; }
   .wrap { display: block; max-width: none; padding: 0; } main { max-width: none; }
   section { padding-top: 32px; }
   section.folded > :not(.part):not(h2) { display: revert !important; }

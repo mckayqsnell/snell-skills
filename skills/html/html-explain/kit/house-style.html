@@ -432,7 +432,7 @@ svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
 .iso-ring { fill: none; stroke-width: 1 !important; opacity: .5; }
 .iso-lb, .iso-sb { fill: var(--ink); font: 600 15px var(--font-body); paint-order: stroke; stroke: var(--halo, var(--surface)); stroke-width: 4px; stroke-linejoin: round; }
 .iso-sb { fill: var(--muted); font-weight: 400; font-size: 13px; }
-.iso-route { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; }
+.iso-route { fill: none; stroke: var(--tone); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .6; }
 
 /* Moving data: lit packets on [data-flow] edges. */
 .pkt { pointer-events: none; }
@@ -441,7 +441,7 @@ svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
 .pkt-core { fill: var(--glow); }
 .pkt-hero .pkt-core { fill: var(--surface); stroke: var(--glow); stroke-width: 3; }
 .flow-still path, path.flow-still { stroke: var(--glow) !important; }
-.scene.playing .pkt:not(.pkt-hero) { opacity: .25 !important; }
+svg.scene-on .pkt:not(.pkt-hero) { opacity: .25 !important; }
 
 /* The hot node in a scene, and linked words. */
 svg .hot { filter: drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 2px var(--glow)); }
@@ -449,8 +449,9 @@ svg .hot :is(rect, .iso-t) { stroke: var(--glow) !important; }
 svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
 .hl { border-bottom: 2px solid color-mix(in oklab, var(--glow) 55%, transparent); cursor: help; border-radius: 2px; transition: background var(--motion-fast) var(--ease); }
 .hl.hl-on, .hl:focus-visible { background: color-mix(in oklab, var(--glow) 22%, transparent); outline: none; }
-.scene-js .reveal { opacity: 0; transition: opacity var(--motion-slow) var(--ease); }
-.scene-js .reveal.shown { opacity: 1; }
+/* on the svg, not the figure, so they still hold when the drawing moves into the Expand view */
+svg.scene-svg .reveal { opacity: 0; transition: opacity var(--motion-slow) var(--ease); }
+svg.scene-svg .reveal.shown { opacity: 1; }
 
 /* Scenes: Play, step and the line that says what is happening. */
 .scene-ui { margin-top: 10px; display: grid; gap: 6px; }
@@ -496,7 +497,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
   body { padding: 14mm 15mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   .toc, .gear, .style-pop, .fold-btn, .fold-all, .respond, .unclear, .vw-bar, .vw-foot, .vw-hint, .swipe, .beta-flag, .fig-x, .scene-ui, .pkt { display: none !important; }
   .scene-js .scene-steps { position: static; width: auto; height: auto; clip: auto; white-space: normal; overflow: visible; }
-  .scene-js .reveal { opacity: 1; } .fig[data-span] { width: auto; }
+  svg.scene-svg .reveal { opacity: 1; } .fig[data-span] { width: auto; }
   .wrap { display: block; max-width: none; padding: 0; } main { max-width: none; }
   section { padding-top: 32px; }
   section.folded > :not(.part):not(h2) { display: revert !important; }
@@ -824,7 +825,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
 &lt;rect class="gp" x="10" y="10" width="490" height="230" rx="12" fill="var(--sunk)" stroke="var(--muted)" stroke-width="1.25"/&gt;&lt;text class="gl" x="24" y="32" font-size="13" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Request path&lt;/text&gt;&lt;rect class="gp" x="525" y="10" width="445" height="230" rx="12" fill="none" stroke="var(--muted)" stroke-width="1.25" stroke-dasharray="6 5"/&gt;&lt;text class="gl" x="539" y="32" font-size="13" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Later, off the request path&lt;/text&gt;&lt;rect class="bx" x="30" y="60" width="110" height="50" rx="8" fill="var(--slate-soft)" stroke="var(--slate)" stroke-width="1.5"/&gt;&lt;text class="bt" x="85" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--slate-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Browser&lt;/text&gt;&lt;rect class="bx" x="190" y="60" width="115" height="50" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/&gt;&lt;text class="bt" x="247.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--accent-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;API&lt;/text&gt;&lt;rect class="bx" x="355" y="60" width="120" height="50" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/&gt;&lt;text class="bt" x="415" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Orders&lt;/text&gt;&lt;rect class="bx" x="355" y="160" width="120" height="50" rx="8" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="1.5"/&gt;&lt;text class="bt" x="415" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--rose-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Postgres&lt;/text&gt;&lt;rect class="bx" x="565" y="60" width="135" height="50" rx="8" fill="var(--ochre-soft)" stroke="var(--ochre)" stroke-width="1.5"/&gt;&lt;text class="bt" x="632.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--ochre-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Queue&lt;/text&gt;&lt;rect class="bx" x="775" y="60" width="135" height="50" rx="8" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/&gt;&lt;text class="bt" x="842.5" y="90" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--teal-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Worker&lt;/text&gt;&lt;rect class="bx" x="775" y="160" width="135" height="50" rx="8" fill="var(--go-soft)" stroke="var(--go)" stroke-width="1.5"/&gt;&lt;text class="bt" x="842.5" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)" stroke="var(--go-soft)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;Email sent&lt;/text&gt;&lt;g class="ed" data-flow="2"&gt;&lt;path d="M140 85L181 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M190 85L180 90L180 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="165" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;POST&lt;/text&gt;&lt;g class="ed" data-flow="2"&gt;&lt;path d="M305 85L346 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M355 85L345 90L345 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="330" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;route&lt;/text&gt;&lt;g class="ed" data-flow="1"&gt;&lt;path d="M415 110L415 151" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M415 160L410 150L420 150z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="427" y="140" text-anchor="start" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--sunk)" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;insert&lt;/text&gt;&lt;g class="ed" data-flow="1" data-flow-speed="3.2"&gt;&lt;path d="M475 85L556 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M565 85L555 90L555 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="520" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;job&lt;/text&gt;&lt;g class="ed" data-flow="1" data-flow-speed="3.2"&gt;&lt;path d="M700 85L766 85" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M775 85L765 90L765 80z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="737" y="74" text-anchor="middle" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;pick up&lt;/text&gt;&lt;g class="ed" data-flow="1" data-flow-speed="3.2"&gt;&lt;path d="M842 110L842 151" fill="none" stroke="var(--ink)" stroke-width="1.5"/&gt;&lt;path d="M842 160L837 150L847 150z" fill="var(--ink)"/&gt;&lt;/g&gt;&lt;text class="el" x="854" y="140" text-anchor="start" font-size="13" font-weight="500" fill="var(--muted)" stroke="var(--halo, var(--surface))" stroke-width="4" paint-order="stroke" stroke-linejoin="round"&gt;send&lt;/text&gt;
 &lt;/svg&gt;&lt;/div&gt;&lt;figcaption&gt;Packets show where traffic goes. Add data-flow to an edge.&lt;/figcaption&gt;&lt;p class="swipe"&gt;Swipe sideways to see the whole drawing.&lt;/p&gt;&lt;/figure&gt;</pre></div></div></details>
         <h3 style="margin-top:34px">Isometric 3D</h3><p style="margin-top:6px">The default 3D look. Write <code>data-box</code>, <code>data-cyl</code> and <code>data-route</code>; the script does the math.</p>
-  <div class="hs-live"><figure class="fig" style="margin:0"><div class="fig-box"><svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)">
+  <div class="hs-live"><figure class="fig" data-span="wide" style="margin:0"><div class="fig-box"><svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)">
   <g data-floor="-0.6 -0.6 17 8"/>
   <g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/>
   <g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/>
@@ -841,7 +842,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
   <g data-node="worker" class="tone-teal" data-box="14.4 2.6 1.6 1.6 1" data-label="Worker" data-sub="sends email"/>
   <g data-node="db" class="tone-rose" data-cyl="10.8 5.6 1.6 1.3" data-label="Postgres" data-sub="orders table"/>
 </svg></div><figcaption>Blocks, a cylinder and routes, written in floor units. The page draws the faces and sorts them.</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure></div>
-  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Isometric 3D</span><button type="button" class="btn-sm" data-copy="#src-27">Copy</button></div><pre id="src-27">&lt;figure class="fig" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)"&gt;
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Isometric 3D</span><button type="button" class="btn-sm" data-copy="#src-27">Copy</button></div><pre id="src-27">&lt;figure class="fig" data-span="wide" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)"&gt;
   &lt;g data-floor="-0.6 -0.6 17 8"/&gt;
   &lt;g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/&gt;
   &lt;g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/&gt;
@@ -1271,7 +1272,8 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
     function pts(a) { return a.map(function (p) { return p.join(','); }).join(' '); }
     /* labels sit above the highest point of the top face, so they never cover it */
     function label(g, cx, cy, top, lift) {
-      var t = P(cx, cy, top), y = t[1] - lift, l = g.getAttribute('data-label'), sb = g.getAttribute('data-sub');
+      /* data-label-dy moves the label up (or down, if negative) by that many pixels */
+      var t = P(cx, cy, top), y = t[1] - lift - (+g.getAttribute('data-label-dy') || 0), l = g.getAttribute('data-label'), sb = g.getAttribute('data-sub');
       if (l) mk('text', { class: 'iso-lb', x: t[0], y: y - (sb ? 25 : 8), 'text-anchor': 'middle' }, g).textContent = l;
       if (sb) mk('text', { class: 'iso-sb', x: t[0], y: y - 8, 'text-anchor': 'middle' }, g).textContent = sb;
     }
@@ -1334,7 +1336,8 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
     el.classList.add('flow');
     if (reduce) { el.classList.add('flow-still'); return; }
     var n = Math.max(1, parseInt(el.getAttribute('data-flow'), 10) || 1), f = { path: path, svg: svg, sp: (parseFloat(el.getAttribute('data-flow-speed')) || 2.4) * 1000, back: el.hasAttribute('data-flow-back'), off: (i * .37) % 1, pk: [] };
-    for (var k = 0; k < n; k++) f.pk.push(packet(el.parentNode, el.nextSibling));
+    /* packets live inside the edge's group, so a hidden (.reveal) edge hides its packets too */
+    for (var k = 0; k < n; k++) f.pk.push(el.tagName === 'g' ? packet(el) : packet(el.parentNode, el.nextSibling));
     flows.push(f);
   });
   if (flows.length) {
@@ -1364,7 +1367,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
   $$('.scene').forEach(function (fig) {
     var svg = $('.fig-box > svg', fig), list = $('.scene-steps', fig); if (!svg || !list) return;
     var steps = $$('li', list); if (!steps.length) return;
-    fig.classList.add('scene-js');
+    fig.classList.add('scene-js'); svg.classList.add('scene-svg');
     var ui = document.createElement('div'); ui.className = 'scene-ui';
     ui.innerHTML = '<div class="scene-bar" role="group" aria-label="Scene controls"><button type="button" class="scene-play">▶ Play</button><button type="button" class="scene-prev" aria-label="Back one step">‹</button><button type="button" class="scene-next" aria-label="Next step">›</button><span class="scene-dots" aria-hidden="true"></span><span class="scene-count"></span></div><p class="scene-say" aria-live="polite"></p>';
     list.parentNode.insertBefore(ui, list);
@@ -1379,7 +1382,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
       Array.prototype.forEach.call(dots.children, function (b, j) { b.className = j < k ? 'done' : j === k ? 'now' : ''; });
       count.textContent = k < 0 ? steps.length + ' steps' : (k + 1) + ' / ' + steps.length;
       say.innerHTML = k < 0 ? intro : steps[k].innerHTML;
-      fig.classList.toggle('playing', playing);
+      fig.classList.toggle('playing', playing); svg.classList.toggle('scene-on', playing);
     }
     function go(k, animate) {
       i = k; paint(k); var li = steps[k], id = busy = busy + 1;
@@ -1393,13 +1396,13 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
         (function f(now) { if (id !== busy) return res(); var q = Math.min(1, (now - t0) / dur); place(path, back ? 1 - ease(q) : ease(q), hero); if (q < 1) requestAnimationFrame(f); else land(); })(t0);
       });
     }
-    function stop() { playing = false; play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); }
+    function stop() { playing = false; play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); svg.classList.remove('scene-on'); }
     function run() {
       if (!playing) return;
       if (i >= steps.length - 1) { stop(); return; }
       go(i + 1, true).then(function () { if (playing) setTimeout(run, 650); });
     }
-    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); run(); });
+    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); svg.classList.add('scene-on'); run(); });
     $('.scene-next', ui).addEventListener('click', function () { stop(); if (i < steps.length - 1) go(i + 1, true); });
     $('.scene-prev', ui).addEventListener('click', function () { stop(); if (i > 0) go(i - 1, false); else { i = -1; busy++; hero.setAttribute('opacity', 0); paint(-1); } });
     paint(-1);
@@ -1417,7 +1420,7 @@ svg .hl-on { filter: drop-shadow(0 0 5px var(--glow)); }
     function peek() { var on = narrow.matches && parseFloat(minW) > box.clientWidth + 1; fig.classList.toggle('peek', on); svg.style.minWidth = on ? '0' : minW; }
     peek(); narrow.addEventListener('change', peek); if ('ResizeObserver' in window) new ResizeObserver(peek).observe(box);
     btn.addEventListener('click', function (e) { e.stopPropagation(); open(fig); });
-    box.addEventListener('click', function (e) { if (fig.classList.contains('peek') && !e.target.closest('button, a, [data-hl]')) open(fig); });
+    box.addEventListener('click', function (e) { if (fig.classList.contains('peek') && !e.target.closest('button, a')) open(fig); });
   });
   function open(fig) {
     var box = $('.fig-box', fig), svg = $(':scope > svg', box), v = vb(svg), ui = $('.scene-ui', fig), back = document.activeElement;

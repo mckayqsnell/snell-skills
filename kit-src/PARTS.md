@@ -162,7 +162,7 @@ Write positions in floor units. The page draws the faces, sorts them back to fro
 </svg>
 ```
 
-`data-iso="unit originX originY"`: one floor cell is `unit` pixels wide; the origin is where floor point 0,0 lands. x runs down to the right, y runs down to the left. Keep 1 floor cell between blocks. Check the drawing in the browser and move the origin until nothing is cut off.
+`data-iso="unit originX originY"`: one floor cell is `unit` pixels wide; the origin is where floor point 0,0 lands. On screen, a bigger x moves right and down; a bigger y moves left and down. Keep 2 floor cells between blocks so labels don't land on a neighbor; if one still does, `data-label-dy="20"` lifts it 20 px (negative moves it down). A tone class on a route colors its line (`class="ed tone-warn"` for a rejected path). Most isometric maps are wider than 720: give the figure `data-span="wide"`. Check the drawing in the browser and move the origin until nothing is cut off.
 
 ### Scenes: press Play
 

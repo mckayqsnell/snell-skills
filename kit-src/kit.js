@@ -315,7 +315,8 @@
     function pts(a) { return a.map(function (p) { return p.join(','); }).join(' '); }
     /* labels sit above the highest point of the top face, so they never cover it */
     function label(g, cx, cy, top, lift) {
-      var t = P(cx, cy, top), y = t[1] - lift, l = g.getAttribute('data-label'), sb = g.getAttribute('data-sub');
+      /* data-label-dy moves the label up (or down, if negative) by that many pixels */
+      var t = P(cx, cy, top), y = t[1] - lift - (+g.getAttribute('data-label-dy') || 0), l = g.getAttribute('data-label'), sb = g.getAttribute('data-sub');
       if (l) mk('text', { class: 'iso-lb', x: t[0], y: y - (sb ? 25 : 8), 'text-anchor': 'middle' }, g).textContent = l;
       if (sb) mk('text', { class: 'iso-sb', x: t[0], y: y - 8, 'text-anchor': 'middle' }, g).textContent = sb;
     }
@@ -378,7 +379,8 @@
     el.classList.add('flow');
     if (reduce) { el.classList.add('flow-still'); return; }
     var n = Math.max(1, parseInt(el.getAttribute('data-flow'), 10) || 1), f = { path: path, svg: svg, sp: (parseFloat(el.getAttribute('data-flow-speed')) || 2.4) * 1000, back: el.hasAttribute('data-flow-back'), off: (i * .37) % 1, pk: [] };
-    for (var k = 0; k < n; k++) f.pk.push(packet(el.parentNode, el.nextSibling));
+    /* packets live inside the edge's group, so a hidden (.reveal) edge hides its packets too */
+    for (var k = 0; k < n; k++) f.pk.push(el.tagName === 'g' ? packet(el) : packet(el.parentNode, el.nextSibling));
     flows.push(f);
   });
   if (flows.length) {
@@ -408,7 +410,7 @@
   $$('.scene').forEach(function (fig) {
     var svg = $('.fig-box > svg', fig), list = $('.scene-steps', fig); if (!svg || !list) return;
     var steps = $$('li', list); if (!steps.length) return;
-    fig.classList.add('scene-js');
+    fig.classList.add('scene-js'); svg.classList.add('scene-svg');
     var ui = document.createElement('div'); ui.className = 'scene-ui';
     ui.innerHTML = '<div class="scene-bar" role="group" aria-label="Scene controls"><button type="button" class="scene-play">▶ Play</button><button type="button" class="scene-prev" aria-label="Back one step">‹</button><button type="button" class="scene-next" aria-label="Next step">›</button><span class="scene-dots" aria-hidden="true"></span><span class="scene-count"></span></div><p class="scene-say" aria-live="polite"></p>';
     list.parentNode.insertBefore(ui, list);
@@ -423,7 +425,7 @@
       Array.prototype.forEach.call(dots.children, function (b, j) { b.className = j < k ? 'done' : j === k ? 'now' : ''; });
       count.textContent = k < 0 ? steps.length + ' steps' : (k + 1) + ' / ' + steps.length;
       say.innerHTML = k < 0 ? intro : steps[k].innerHTML;
-      fig.classList.toggle('playing', playing);
+      fig.classList.toggle('playing', playing); svg.classList.toggle('scene-on', playing);
     }
     function go(k, animate) {
       i = k; paint(k); var li = steps[k], id = busy = busy + 1;
@@ -437,13 +439,13 @@
         (function f(now) { if (id !== busy) return res(); var q = Math.min(1, (now - t0) / dur); place(path, back ? 1 - ease(q) : ease(q), hero); if (q < 1) requestAnimationFrame(f); else land(); })(t0);
       });
     }
-    function stop() { playing = false; play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); }
+    function stop() { playing = false; play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); svg.classList.remove('scene-on'); }
     function run() {
       if (!playing) return;
       if (i >= steps.length - 1) { stop(); return; }
       go(i + 1, true).then(function () { if (playing) setTimeout(run, 650); });
     }
-    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); run(); });
+    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); svg.classList.add('scene-on'); run(); });
     $('.scene-next', ui).addEventListener('click', function () { stop(); if (i < steps.length - 1) go(i + 1, true); });
     $('.scene-prev', ui).addEventListener('click', function () { stop(); if (i > 0) go(i - 1, false); else { i = -1; busy++; hero.setAttribute('opacity', 0); paint(-1); } });
     paint(-1);
@@ -461,7 +463,7 @@
     function peek() { var on = narrow.matches && parseFloat(minW) > box.clientWidth + 1; fig.classList.toggle('peek', on); svg.style.minWidth = on ? '0' : minW; }
     peek(); narrow.addEventListener('change', peek); if ('ResizeObserver' in window) new ResizeObserver(peek).observe(box);
     btn.addEventListener('click', function (e) { e.stopPropagation(); open(fig); });
-    box.addEventListener('click', function (e) { if (fig.classList.contains('peek') && !e.target.closest('button, a, [data-hl]')) open(fig); });
+    box.addEventListener('click', function (e) { if (fig.classList.contains('peek') && !e.target.closest('button, a')) open(fig); });
   });
   function open(fig) {
     var box = $('.fig-box', fig), svg = $(':scope > svg', box), v = vb(svg), ui = $('.scene-ui', fig), back = document.activeElement;

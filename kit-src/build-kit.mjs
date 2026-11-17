@@ -265,7 +265,7 @@ export function buildKit(OUT) {
         <div class="part">3D and motion</div><h2>Drawings that move, stack and answer back</h2>
         <p class="section-intro">For "how does it work" pages. Packets run while a drawing is on screen. Scenes wait for Play. Reduced motion and print get a still drawing. Wide ones reach past the text on a big screen.</p>
         ${demo('Live map (wide)', wideFig(LIVE, 'Packets show where traffic goes. Add data-flow to an edge.'), 'A reference drawing that shows traffic. <code>data-span="wide"</code> lets it use a big screen.')}
-        ${demo('Isometric 3D', fig(ISO, 'Blocks, a cylinder and routes, written in floor units. The page draws the faces and sorts them.'), 'The default 3D look. Write <code>data-box</code>, <code>data-cyl</code> and <code>data-route</code>; the script does the math.')}
+        ${demo('Isometric 3D', wideFig(ISO, 'Blocks, a cylinder and routes, written in floor units. The page draws the faces and sorts them.'), 'The default 3D look. Write <code>data-box</code>, <code>data-cyl</code> and <code>data-route</code>; the script does the math.')}
         ${demo('Scene: press Play', sceneFig(ISO, SCENE_STEPS, 'One request, step by step. Without the script it reads as a numbered list.'), 'Each list item is a step: an edge to run, the node that lights up. Press Play, or step with ‹ and ›.')}
         ${demo('Stacked layers', fig(STACK, 'Lines can rise between layers: give a route points with a height.'), 'Depth for layers: a request goes down through the stack.')}
         ${demo('Intuition: draw the mechanism', fig(BELT, 'A queue drawn as what it acts like, not as a box called "queue".'), 'When the reader wants to feel how it works, draw a picture of the mechanism.')}
