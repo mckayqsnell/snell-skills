@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # html-to-pdf.sh: turn a house-style page into a PDF that matches it, using headless Chrome
-# (the same engine as the browser's Print). The page script runs first, so sketch drawings are in.
+# (the same engine as the browser's Print). The page script runs first, so folds and drawings are ready.
 # Usage: html-to-pdf.sh <page.html> [out.pdf]     out defaults to the page path with .pdf
 # Set CHROME=/path/to/chrome to pick the browser yourself.
 set -euo pipefail
@@ -48,7 +48,7 @@ trap 'rm -f "$TMP_OUT"' EXIT
 PDF_ARG="$TMP_OUT"
 if command -v cygpath >/dev/null 2>&1; then PDF_ARG="$(cygpath -w "$TMP_OUT")"; fi
 
-# --virtual-time-budget lets the page script finish (folds, sketch drawings) before printing.
+# --virtual-time-budget lets the page script finish (folds, drawings) before printing.
 # Backgrounds print because the page CSS sets print-color-adjust: exact.
 if ! "$BROWSER" --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=4000 \
      --print-to-pdf="$PDF_ARG" "$URL" >/dev/null 2>&1; then

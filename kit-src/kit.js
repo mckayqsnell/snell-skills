@@ -191,66 +191,6 @@
   addEventListener('beforeprint', function () { themeBeforePrint = curTheme(); root.setAttribute('data-theme', 'light'); });
   addEventListener('afterprint', function () { if (themeBeforePrint) setTheme(themeBeforePrint, false); });
 
-  /* ---------- drawings: sketch look (Rough.js, packed in the page) or clean look ----------
-     Page default: <html data-drawings="sketch"> or "clean". Customer pages: clean, and no Rough.js at all.
-     The reader can switch in the gear. The clean shapes stay in the page, so print and no-script still work. */
-  var SK = { roughness: 1, bowing: 1, seed: 7, strokeWidth: 1.5, fillStyle: 'solid' };
-  /* rounded boxes: one stroke, corners pinned; a second pass splits into loops on the curves */
-  var RR = { disableMultiStroke: true, preserveVertices: true, roughness: 0.7, fillShapeRoughnessGain: 0 };
-  function pointsOf(d) {
-    var t = d.match(/[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?/g) || [], i = 0, x = 0, y = 0, c = '', P = [];
-    function n() { return parseFloat(t[i++]); }
-    while (i < t.length) {
-      if (/[a-zA-Z]/.test(t[i])) c = t[i++];
-      if (c === 'M' || c === 'L') { x = n(); y = n(); } else if (c === 'm' || c === 'l') { x += n(); y += n(); }
-      else if (c === 'H') x = n(); else if (c === 'h') x += n(); else if (c === 'V') y = n(); else if (c === 'v') y += n();
-      else if (c === 'z' || c === 'Z') { continue; } else return null;
-      P.push([x, y]);
-    }
-    return P;
-  }
-  function roundRect(x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + w) + ' ' + (y + r) + 'V' + (y + h - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + w - r) + ' ' + (y + h) + 'H' + (x + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (y + h - r) + 'V' + (y + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y + 'Z'; }
-  function sketchSvg(svg) {
-    if (svg.dataset.sk) return; svg.dataset.sk = '1';
-    var g = window.rough.generator(), NS = 'http://www.w3.org/2000/svg';
-    $$('rect, path, line, circle, ellipse, polygon, polyline', svg).forEach(function (el) {
-      if (el.closest('text, defs, clipPath, mask')) return;
-      var a = function (k) { return el.getAttribute(k); };
-      var stroke = a('stroke') || 'none', fill = a('fill') || (el.tagName === 'path' ? 'var(--ink)' : 'none'), sw = parseFloat(a('stroke-width')) || 1;
-      var o = Object.assign({}, SK, { stroke: stroke === 'none' ? 'none' : stroke, strokeWidth: stroke === 'none' ? 0 : sw });
-      if (fill !== 'none') o.fill = fill;
-      var dash = a('stroke-dasharray');
-      var dr = null, tag = el.tagName;
-      if (tag === 'rect') { var x = +a('x') || 0, y = +a('y') || 0, w = +a('width'), h = +a('height'), r = +a('rx') || 0; dr = r ? g.path(roundRect(x, y, w, h, r), Object.assign({}, o, RR)) : g.rectangle(x, y, w, h, o); }
-      else if (tag === 'line') dr = g.line(+a('x1'), +a('y1'), +a('x2'), +a('y2'), o);
-      else if (tag === 'circle') dr = g.circle(+a('cx'), +a('cy'), 2 * +a('r'), o);
-      else if (tag === 'ellipse') dr = g.ellipse(+a('cx'), +a('cy'), 2 * +a('rx'), 2 * +a('ry'), o);
-      else if (tag === 'polygon' || tag === 'polyline') { var pts = (a('points') || '').trim().split(/[\s,]+/).map(Number), pp = []; for (var k = 0; k + 1 < pts.length; k += 2) pp.push([pts[k], pts[k + 1]]); dr = tag === 'polygon' ? g.polygon(pp, o) : g.linearPath(pp, o); }
-      else if (tag === 'path') {
-        var d = a('d') || '', tri = fill !== 'none' ? pointsOf(d) : null;
-        if (tri && tri.length === 3) {
-          /* an arrowhead: draw it as an open hand-drawn chevron */
-          var ang = tri.map(function (p, i) { var b = tri[(i + 1) % 3], c2 = tri[(i + 2) % 3], v1 = [b[0] - p[0], b[1] - p[1]], v2 = [c2[0] - p[0], c2[1] - p[1]]; return Math.acos((v1[0] * v2[0] + v1[1] * v2[1]) / (Math.hypot(v1[0], v1[1]) * Math.hypot(v2[0], v2[1]) || 1)); });
-          var ti = ang.indexOf(Math.min.apply(null, ang));
-          dr = g.linearPath([tri[(ti + 1) % 3], tri[ti], tri[(ti + 2) % 3]], Object.assign({}, SK, { stroke: fill, strokeWidth: 1.5 }));
-        } else dr = g.path(d, o);
-      }
-      if (!dr) return;
-      var grp = document.createElementNS(NS, 'g'); grp.setAttribute('class', 'sk');
-      g.toPaths(dr).forEach(function (p) { var pe = document.createElementNS(NS, 'path'); pe.setAttribute('d', p.d); pe.setAttribute('stroke', p.stroke); pe.setAttribute('stroke-width', p.strokeWidth); pe.setAttribute('fill', p.fill || 'none'); if (dash && (!p.fill || p.fill === 'none')) pe.setAttribute('stroke-dasharray', dash); grp.appendChild(pe); });
-      el.setAttribute('data-clean', ''); el.parentNode.insertBefore(grp, el);
-    });
-  }
-  function drawStyle(st, save) {
-    var want = st === 'sketch' && window.rough ? 'sketch' : 'clean';
-    $$('.fig-box > svg, .vw-pan > svg, .vw-map > svg').forEach(function (svg) { if (want === 'sketch') sketchSvg(svg); svg.classList.toggle('is-sketch', want === 'sketch'); });
-    root.dataset.drawNow = want; if (save) store('hs-drawings', st);
-    $$('[data-draw-set]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.drawSet === want)); });
-  }
-  drawStyle(store('hs-drawings') || root.dataset.drawings || 'clean', false);
-  $$('[data-draw-set]').forEach(function (b) { b.addEventListener('click', function () { drawStyle(b.dataset.drawSet, true); }); });
-  if (!window.rough) $$('[data-draw-set]').forEach(function (b) { b.closest('.draw-row') && (b.closest('.draw-row').hidden = true); });
-
   /* ---------- drawings: never shrink below their own width; scroll instead ---------- */
   function vb(svg) { var v = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number); return v.length === 4 && v[2] > 0 && v[3] > 0 ? { w: v[2], h: v[3] } : null; }
   $$('.fig-box > svg').forEach(function (svg) {
@@ -352,4 +292,216 @@
     matchMedia('print').addEventListener('change', function (e) { if (e.matches) { eng.reset(); paint(); } });
     labelFull(); paint();
   });
+  /* ================= visual toolbox (1.1): isometric 3D, moving data, scenes, linked words, expand =================
+     All opt-in through classes and data attributes; see PARTS.md. Nothing here loads from the web. */
+  var NS = 'http://www.w3.org/2000/svg';
+  function mk(tag, a, parent, before) { var e = document.createElementNS(NS, tag); for (var k in a) e.setAttribute(k, a[k]); if (parent) parent.insertBefore(e, before || null); return e; }
+  function nums(s) { return String(s || '').trim().split(/[\s,]+/).filter(Boolean).map(Number); }
+  function ease(k) { return k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; }
+  function watch(el, cb) { if (!('IntersectionObserver' in window)) { cb(true); return; } new IntersectionObserver(function (es) { cb(es[0].isIntersecting); }, { rootMargin: '80px' }).observe(el); }
+  function pathOf(el) { return !el ? null : el.tagName === 'path' ? el : $('path', el); }
+
+  /* ---------- isometric 3D: <svg class="iso" data-iso="unit originX originY"> ----------
+     Children describe the scene in floor units; the script draws the faces.
+       <g data-floor="x0 y0 x1 y1"/>                          a floor plate with a grid
+       <g data-box="x y w d h" class="tone-teal" data-label="Orders" data-sub="service"/>   a block (optional data-z lifts it)
+       <g data-cyl="x y w h" class="tone-rose" data-label="Postgres"/>                        a cylinder, w = width
+       <g class="ed" data-route="x,y x,y ..."/>               a line on the floor (add data-flow to send packets)
+       <text data-at="x y z">                                 any text, placed at a 3D point
+     Blocks are sorted back to front, so the order you write them in does not matter. */
+  function isoBuild(svg) {
+    var o = nums(svg.getAttribute('data-iso')), U = o[0] || 40, OX = o[1] || 0, OY = o[2] || 0, CO = Math.cos(Math.PI / 6);
+    function P(x, y, z) { return [+(OX + (x - y) * CO * U).toFixed(1), +(OY + (x + y) * .5 * U - (z || 0) * U).toFixed(1)]; }
+    function pts(a) { return a.map(function (p) { return p.join(','); }).join(' '); }
+    /* labels sit above the highest point of the top face, so they never cover it */
+    function label(g, cx, cy, top, lift) {
+      /* data-label-dy moves the label up (or down, if negative) by that many pixels */
+      var t = P(cx, cy, top), y = t[1] - lift - (+g.getAttribute('data-label-dy') || 0), l = g.getAttribute('data-label'), sb = g.getAttribute('data-sub');
+      if (l) mk('text', { class: 'iso-lb', x: t[0], y: y - (sb ? 25 : 8), 'text-anchor': 'middle' }, g).textContent = l;
+      if (sb) mk('text', { class: 'iso-sb', x: t[0], y: y - 8, 'text-anchor': 'middle' }, g).textContent = sb;
+    }
+    $$('[data-floor]', svg).forEach(function (g) {
+      var f = nums(g.getAttribute('data-floor')), x0 = f[0], y0 = f[1], x1 = f[2], y1 = f[3];
+      mk('polygon', { class: 'iso-floor', points: pts([P(x0, y0), P(x1, y0), P(x1, y1), P(x0, y1)]) }, g);
+      var grid = mk('path', { class: 'iso-grid', d: '' }, g), d = '';
+      for (var x = Math.ceil(x0); x <= x1; x++) d += 'M' + P(x, y0) + 'L' + P(x, y1);
+      for (var y = Math.ceil(y0); y <= y1; y++) d += 'M' + P(x0, y) + 'L' + P(x1, y);
+      grid.setAttribute('d', d);
+    });
+    var lifted = [];
+    $$('[data-route]', svg).forEach(function (g) {
+      /* points are "x,y" on the floor, or "x,y,z" in the air; a line in the air is sorted in with the blocks */
+      var z = +g.getAttribute('data-z') || .02, raw = g.getAttribute('data-route').trim().split(/\s+/).map(nums);
+      var p = raw.map(function (v) { return P(v[0], v[1], v.length > 2 ? v[2] : z); });
+      mk('path', { class: 'iso-route', d: 'M' + p.map(function (q) { return q.join(' '); }).join('L') }, g, g.firstChild);
+      if (raw.some(function (v) { return v.length > 2; })) {
+        var sx = 0, sy = 0, low = Infinity;
+        raw.forEach(function (v) { sx += v[0]; sy += v[1]; low = Math.min(low, v.length > 2 ? v[2] : z); });
+        lifted.push({ g: g, k: (sx + sy) / raw.length + low });
+      }
+    });
+    var solids = $$('[data-box], [data-cyl]', svg).map(function (g) {
+      var cyl = g.hasAttribute('data-cyl'), v = nums(g.getAttribute(cyl ? 'data-cyl' : 'data-box')), z = +g.getAttribute('data-z') || 0;
+      var x = v[0], y = v[1], w = v[2], d = cyl ? v[2] : v[3], h = cyl ? v[3] : v[4];
+      g.classList.add('iso-node');
+      if (cyl) {
+        var cx = x + w / 2, cy = y + d / 2, r = w / 2, rx = r * Math.SQRT2 * CO * U, ry = r * Math.SQRT2 * .5 * U, b = P(cx, cy, z), t = P(cx, cy, z + h);
+        mk('path', { class: 'iso-r', d: 'M' + (b[0] - rx) + ' ' + t[1] + 'L' + (b[0] - rx) + ' ' + b[1] + 'A' + rx + ' ' + ry + ' 0 0 0 ' + (b[0] + rx) + ' ' + b[1] + 'L' + (b[0] + rx) + ' ' + t[1] + 'Z' }, g);
+        [1 / 3, 2 / 3].forEach(function (f) { var yy = b[1] - (b[1] - t[1]) * f; mk('path', { class: 'iso-ring', d: 'M' + (b[0] - rx) + ' ' + yy + 'A' + rx + ' ' + ry + ' 0 0 0 ' + (b[0] + rx) + ' ' + yy }, g); });
+        mk('ellipse', { class: 'iso-t', cx: b[0], cy: t[1], rx: rx, ry: ry }, g);
+        label(g, cx, cy, z + h, ry);
+      } else {
+        mk('polygon', { class: 'iso-l', points: pts([P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h)]) }, g);
+        mk('polygon', { class: 'iso-r', points: pts([P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h)]) }, g);
+        mk('polygon', { class: 'iso-t', points: pts([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)]) }, g);
+        label(g, x + w / 2, y + d / 2, z + h, (w + d) / 4 * U);
+      }
+      return { g: g, k: x + w / 2 + y + d / 2 + z };
+    });
+    /* back to front: later in the file draws on top */
+    solids.concat(lifted).sort(function (a, b) { return a.k - b.k; }).forEach(function (s) { s.g.parentNode.appendChild(s.g); });
+    $$('text[data-at]', svg).forEach(function (t) { var v = nums(t.getAttribute('data-at')), p = P(v[0], v[1], v[2]); t.setAttribute('x', p[0]); t.setAttribute('y', p[1]); t.parentNode.appendChild(t); });
+  }
+  $$('svg.iso').forEach(isoBuild);
+
+  /* ---------- moving data: data-flow on an edge sends lit packets along it ----------
+     data-flow="2" packets, data-flow-speed="2.4" seconds a trip, data-flow-back runs it the other way.
+     Packets run while the drawing is on screen. Reduced motion and print get a still, lit line instead. */
+  var flows = [];
+  function packet(parent, before, big) {
+    var g = mk('g', { class: 'pkt' + (big ? ' pkt-hero' : ''), opacity: 0 }, parent, before);
+    mk('circle', { class: 'pkt-halo', r: big ? 15 : 10 }, g); mk('circle', { class: 'pkt-glow', r: big ? 9 : 6.5 }, g); mk('circle', { class: 'pkt-core', r: big ? 5 : 3.6 }, g);
+    return g;
+  }
+  function place(path, t, g) { var L = path.getTotalLength(), p = path.getPointAtLength(L * Math.max(0, Math.min(1, t))); g.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')'); }
+  $$('svg [data-flow]').forEach(function (el, i) {
+    var path = pathOf(el), svg = el.ownerSVGElement; if (!path || !svg) return;
+    el.classList.add('flow');
+    if (reduce) { el.classList.add('flow-still'); return; }
+    var n = Math.max(1, parseInt(el.getAttribute('data-flow'), 10) || 1), f = { path: path, svg: svg, sp: (parseFloat(el.getAttribute('data-flow-speed')) || 2.4) * 1000, back: el.hasAttribute('data-flow-back'), off: (i * .37) % 1, pk: [] };
+    /* packets live inside the edge's group, so a hidden (.reveal) edge hides its packets too */
+    for (var k = 0; k < n; k++) f.pk.push(el.tagName === 'g' ? packet(el) : packet(el.parentNode, el.nextSibling));
+    flows.push(f);
+  });
+  if (flows.length) {
+    /* the loop runs only while at least one drawing with packets is on screen */
+    var seen = new Map(), looping = false;
+    function tick(ts) {
+      var any = false;
+      flows.forEach(function (f) {
+        if (!seen.get(f.svg)) return; any = true;
+        f.pk.forEach(function (g, k) { var t = ((ts / f.sp) + f.off + k / f.pk.length) % 1; g.setAttribute('opacity', Math.min(1, Math.min(t, 1 - t) * 8).toFixed(2)); place(f.path, f.back ? 1 - t : t, g); });
+      });
+      looping = any; if (any) requestAnimationFrame(tick);
+    }
+    flows.forEach(function (f) { if (!seen.has(f.svg)) { seen.set(f.svg, false); watch(f.svg, function (v) { seen.set(f.svg, v); if (v && !looping) { looping = true; requestAnimationFrame(tick); } }); } });
+  }
+
+  /* ---------- linked words: data-hl="key" on words and on shapes lights them up together ---------- */
+  $$('[data-hl]').forEach(function (el) {
+    var key = el.getAttribute('data-hl'), sel = '[data-hl="' + (window.CSS && CSS.escape ? CSS.escape(key) : key) + '"]', all = function () { return $$(sel); };
+    if (!(el instanceof SVGElement)) { el.classList.add('hl'); if (!el.hasAttribute('tabindex')) el.tabIndex = 0; }
+    var on = function () { all().forEach(function (x) { x.classList.add('hl-on'); }); }, off = function () { all().forEach(function (x) { x.classList.remove('hl-on'); }); };
+    el.addEventListener('mouseenter', on); el.addEventListener('mouseleave', off); el.addEventListener('focus', on); el.addEventListener('blur', off);
+  });
+
+  /* ---------- scenes: <figure class="fig scene"> with an <ol class="scene-steps"> ----------
+     Each <li> is one step: data-edge="id" sends a packet along [data-edge=id] (data-back reverses it),
+     data-from / data-node light up [data-node=…] shapes, data-show="#a, .b" reveals .reveal shapes.
+     Without the script, and in print, the steps stay a numbered list under the drawing. */
+  $$('.scene').forEach(function (fig) {
+    var svg = $('.fig-box > svg', fig), list = $('.scene-steps', fig); if (!svg || !list) return;
+    var steps = $$('li', list); if (!steps.length) return;
+    fig.classList.add('scene-js'); svg.classList.add('scene-svg');
+    var ui = document.createElement('div'); ui.className = 'scene-ui';
+    ui.innerHTML = '<div class="scene-bar" role="group" aria-label="Scene controls"><button type="button" class="scene-play">▶ Play</button><button type="button" class="scene-prev" aria-label="Back one step">‹</button><button type="button" class="scene-next" aria-label="Next step">›</button><span class="scene-dots" aria-hidden="true"></span><span class="scene-count"></span></div><p class="scene-say" aria-live="polite"></p>';
+    list.parentNode.insertBefore(ui, list);
+    var dots = $('.scene-dots', ui), say = $('.scene-say', ui), count = $('.scene-count', ui), play = $('.scene-play', ui);
+    steps.forEach(function (li, k) { var b = document.createElement('i'); b.title = 'Step ' + (k + 1); b.addEventListener('click', function () { stop(); go(k, true); }); dots.appendChild(b); });
+    var hero = packet(svg, null, true), i = -1, playing = false, busy = 0, timer = 0, intro = say.innerHTML = fig.getAttribute('data-intro') || 'Press Play to watch it run, or step through it.';
+    function nodes(sel) { return (sel || '').split(/\s+/).filter(Boolean).reduce(function (a, id) { return a.concat($$('[data-node="' + id + '"]', svg)); }, []); }
+    function paint(k) {
+      $$('.hot', svg).forEach(function (x) { x.classList.remove('hot'); });
+      $$('.reveal', svg).forEach(function (x) { x.classList.remove('shown'); });
+      for (var j = 0; j <= k; j++) { var sh = steps[j].getAttribute('data-show'); if (sh) $$(sh, svg).forEach(function (x) { x.classList.add('shown'); }); }
+      Array.prototype.forEach.call(dots.children, function (b, j) { b.className = j < k ? 'done' : j === k ? 'now' : ''; });
+      count.textContent = k < 0 ? steps.length + ' steps' : (k + 1) + ' / ' + steps.length;
+      say.innerHTML = k < 0 ? intro : steps[k].innerHTML;
+      fig.classList.toggle('playing', playing); svg.classList.toggle('scene-on', playing);
+    }
+    function go(k, animate) {
+      i = k; paint(k); var li = steps[k], id = busy = busy + 1;
+      var e = li.getAttribute('data-edge'), path = e && pathOf($('[data-edge="' + e + '"]', svg)), back = li.hasAttribute('data-back');
+      nodes(li.getAttribute('data-from')).forEach(function (x) { x.classList.add('hot'); });
+      return new Promise(function (res) {
+        function land() { if (id !== busy) return res(); hero.setAttribute('opacity', 0); $$('.hot', svg).forEach(function (x) { x.classList.remove('hot'); }); nodes(li.getAttribute('data-node')).forEach(function (x) { x.classList.add('hot'); }); res(); }
+        if (!path || !animate || reduce) { if (path) { hero.setAttribute('opacity', 1); place(path, back ? 0 : 1, hero); } return setTimeout(land, reduce ? 0 : 60); }
+        var t0 = performance.now(), dur = Math.max(700, Math.min(1600, path.getTotalLength() * 3.2));
+        hero.setAttribute('opacity', 1);
+        (function f(now) { if (id !== busy) return res(); var q = Math.min(1, (now - t0) / dur); place(path, back ? 1 - ease(q) : ease(q), hero); if (q < 1) requestAnimationFrame(f); else land(); })(t0);
+      });
+    }
+    function stop() { playing = false; clearTimeout(timer); play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); svg.classList.remove('scene-on'); }
+    function run() {
+      if (!playing) return;
+      if (i >= steps.length - 1) { stop(); return; }
+      go(i + 1, true).then(function () { if (playing) timer = setTimeout(run, 650); });
+    }
+    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } clearTimeout(timer); playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); svg.classList.add('scene-on'); run(); });
+    $('.scene-next', ui).addEventListener('click', function () { stop(); if (i < steps.length - 1) go(i + 1, true); });
+    $('.scene-prev', ui).addEventListener('click', function () { stop(); if (i > 0) go(i - 1, false); else { i = -1; busy++; hero.setAttribute('opacity', 0); paint(-1); } });
+    paint(-1);
+  });
+
+  /* ---------- expand: every drawing opens in a full-window view with zoom and pan ----------
+     On a phone, a drawing too wide for the screen shows whole, small, with "Tap to expand". */
+  var narrow = matchMedia('(max-width: 600px)');
+  $$('.fig').forEach(function (fig) {
+    var box = $('.fig-box', fig), svg = box && $(':scope > svg', box), v = svg && vb(svg); if (!v) return;
+    box.classList.add('xp-ready');
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'fig-x'; btn.setAttribute('aria-label', 'Expand drawing'); btn.title = 'Expand (zoom and pan)'; btn.innerHTML = '<span aria-hidden="true">⤢</span><span class="fig-x-t">Expand</span>';
+    box.appendChild(btn);
+    var minW = svg.style.minWidth;
+    function peek() { var on = narrow.matches && parseFloat(minW) > box.clientWidth + 1; fig.classList.toggle('peek', on); svg.style.minWidth = on ? '0' : minW; }
+    peek(); narrow.addEventListener('change', peek); if ('ResizeObserver' in window) new ResizeObserver(peek).observe(box);
+    btn.addEventListener('click', function (e) { e.stopPropagation(); open(fig); });
+    box.addEventListener('click', function (e) { if (fig.classList.contains('peek') && !e.target.closest('button, a')) open(fig); });
+  });
+  function open(fig) {
+    var box = $('.fig-box', fig), svg = $(':scope > svg', box), v = vb(svg), ui = $('.scene-ui', fig), back = document.activeElement;
+    var cap = $('figcaption', fig), keep = document.createElement('div');
+    keep.style.height = box.getBoundingClientRect().height - 26 + 'px'; svg.parentNode.insertBefore(keep, svg);
+    var uiHome = ui && ui.parentNode, uiNext = ui && ui.nextSibling;
+    var ov = document.createElement('div'); ov.className = 'xp'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', (svg.getAttribute('aria-label') || 'Drawing') + ', expanded');
+    ov.innerHTML = '<div class="xp-bar"><span class="xp-title"></span><button type="button" data-x="out" aria-label="Zoom out">−</button><button type="button" data-x="in" aria-label="Zoom in">+</button><button type="button" data-x="reset" aria-label="Fit to window">↺</button><button type="button" data-x="close" class="xp-close" aria-label="Close (Esc)">✕</button></div><div class="xp-stage"><div class="xp-pan"></div></div>';
+    $('.xp-title', ov).textContent = cap ? cap.textContent : '';
+    var stage = $('.xp-stage', ov), pan = $('.xp-pan', ov);
+    pan.style.width = v.w + 'px'; pan.style.height = v.h + 'px';
+    var oldStyle = svg.getAttribute('style'); svg.setAttribute('style', 'width:100%;height:100%;max-width:none;min-width:0');
+    pan.appendChild(svg); if (ui) ov.appendChild(ui);
+    var behind = Array.prototype.filter.call(document.body.children, function (c) { return !c.inert; });
+    behind.forEach(function (c) { c.inert = true; });
+    document.body.appendChild(ov); root.classList.add('vw-lock');
+    var eng = Engine(stage, pan, { w: v.w, h: v.h, max: 6, onchange: function () {} });
+    requestAnimationFrame(function () { eng.refit(); eng.reset(); });
+    var ro = 'ResizeObserver' in window ? new ResizeObserver(function () { eng.refit(); }) : null; if (ro) ro.observe(stage);
+    function close() {
+      if (ro) ro.disconnect(); document.removeEventListener('keydown', key, true);
+      if (oldStyle === null) svg.removeAttribute('style'); else svg.setAttribute('style', oldStyle);
+      keep.parentNode.insertBefore(svg, keep); keep.remove(); if (ui) uiHome.insertBefore(ui, uiNext);
+      behind.forEach(function (c) { c.inert = false; }); ov.remove(); root.classList.remove('vw-lock'); if (back && back.focus) back.focus({ preventScroll: true });
+    }
+    function key(e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === '+' || e.key === '=') eng.zoomAt(1.4, stage.clientWidth / 2, stage.clientHeight / 2, true);
+      else if (e.key === '-') eng.zoomAt(1 / 1.4, stage.clientWidth / 2, stage.clientHeight / 2, true);
+      else if (e.key === '0') eng.reset(true);
+      else if (e.key === 'Tab') { var f = $$('button', ov); if (!ov.contains(document.activeElement)) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); } else if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); } }
+    }
+    document.addEventListener('keydown', key, true);
+    ov.addEventListener('click', function (e) { var b = e.target.closest('[data-x]'); if (!b) return; var a = b.getAttribute('data-x'), c = [stage.clientWidth / 2, stage.clientHeight / 2];
+      if (a === 'close') close(); else if (a === 'in') eng.zoomAt(1.4, c[0], c[1], true); else if (a === 'out') eng.zoomAt(1 / 1.4, c[0], c[1], true); else eng.reset(true); });
+    stage.addEventListener('wheel', function (e) { e.preventDefault(); var b = stage.getBoundingClientRect(), m = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? stage.clientHeight : 1; if (e.ctrlKey || e.metaKey) eng.zoomAt(Math.exp(-e.deltaY * m * .01), e.clientX - b.left, e.clientY - b.top); else eng.panBy(-e.deltaX * m, -e.deltaY * m); }, { passive: false });
+    $('.xp-close', ov).focus();
+  }
 })();

@@ -1,6 +1,5 @@
-// Drawing examples for house style v0.2-beta. Written in the clean look (round 5 pick E1).
-// The page script turns them into the sketch look (round 5 pick A2+B1+C2+D3) when the page asks for sketch.
-// Class markers (read by the sketch step and by agents copying an example):
+// Drawing examples for the house style: plain, hand-written SVG that agents copy and adapt.
+// Class markers (read by agents copying an example):
 //   bx = box shape, bt = box title, gp = group frame, gl = group label, ed = one edge (line + head), el = edge label.
 // Rules: page colors only, text >= 12 px, every label has a halo the color of what is behind it, nothing touches.
 const halo = (bg = 'var(--halo, var(--surface))') => `stroke="${bg}" stroke-width="4" paint-order="stroke" stroke-linejoin="round"`;
@@ -101,3 +100,78 @@ export const BIG = svg(1600, 620, 'Big system map: the skill repo, two install p
   edge([[950, 428], [1180, 95]], 'adds plugin', [1060, 300]) +
   edge([[1265, 400], [1265, 120]], 'read by', [1277, 270], 'start', undefined, false, 'var(--sunk)') +
   edge([[1465, 120], [1465, 400]], 'writes', [1477, 270], 'start', undefined, false, 'var(--sunk)'));
+
+// ---------------- 1.1: moving, 3D and linked drawings ----------------
+// The new hues for box(): every tone is a line color plus its soft fill.
+for (const t of ['teal', 'violet', 'ochre', 'rose', 'slate']) TONE[t] = [`var(--${t}-soft)`, `var(--${t})`];
+const flowing = (s, n = 1, extra = '') => s.replace('<g class="ed">', `<g class="ed" data-flow="${n}"${extra}>`);
+
+// Live system map: a reference drawing (boxes and arrows) with packets moving on the busy paths. Wide.
+export const LIVE = svg(980, 250, 'Live map: requests flow from the browser through the API to orders and Postgres; jobs flow through a queue to a worker',
+  group(10, 10, 490, 230, 'Request path') + group(525, 10, 445, 230, 'Later, off the request path', true) +
+  box(30, 60, 110, 50, 'Browser', 'slate') + box(190, 60, 115, 50, 'API', 'accent') + box(355, 60, 120, 50, 'Orders', 'teal') +
+  box(355, 160, 120, 50, 'Postgres', 'rose') + box(565, 60, 135, 50, 'Queue', 'ochre') + box(775, 60, 135, 50, 'Worker', 'teal') +
+  box(775, 160, 135, 50, 'Email sent', 'go') +
+  flowing(edge([[140, 85], [190, 85]], 'POST', [165, 74], 'middle', undefined, false, 'var(--sunk)'), 2) +
+  flowing(edge([[305, 85], [355, 85]], 'route', [330, 74], 'middle', undefined, false, 'var(--sunk)'), 2) +
+  flowing(edge([[415, 110], [415, 160]], 'insert', [427, 140], 'start', undefined, false, 'var(--sunk)'), 1) +
+  flowing(edge([[475, 85], [565, 85]], 'job', [520, 74]), 1, ' data-flow-speed="3.2"') +
+  flowing(edge([[700, 85], [775, 85]], 'pick up', [737, 74]), 1, ' data-flow-speed="3.2"') +
+  flowing(edge([[842, 110], [842, 160]], 'send', [854, 140], 'start'), 1, ' data-flow-speed="3.2"'));
+
+// Isometric system map, the 3D look. Written in floor units; the page draws the faces.
+// data-node and data-edge names let a scene light them up.
+const ISO_BODY = `<g data-floor="-0.6 -0.6 17 8"/>
+  <g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/>
+  <g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/>
+  <g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/>
+  <g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/>
+  <g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/>
+  <g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/>
+  <g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/>
+  <g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/>
+  <g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/>
+  <g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/>
+  <g data-node="orders" class="tone-teal" data-box="6.8 2.6 1.6 1.6 1.7" data-label="Orders" data-sub="service"/>
+  <g data-node="queue" class="tone-ochre" data-box="10.2 2.8 2.8 1.2 0.5" data-label="Queue" data-sub="jobs wait here"/>
+  <g data-node="worker" class="tone-teal" data-box="14.4 2.6 1.6 1.6 1" data-label="Worker" data-sub="sends email"/>
+  <g data-node="db" class="tone-rose" data-cyl="10.8 5.6 1.6 1.3" data-label="Postgres" data-sub="orders table"/>`;
+export const ISO = `<svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="3D map: browser, API gateway, auth, orders, queue, worker and Postgres, with requests moving between them" font-family="var(--font-body)">
+  ${ISO_BODY}
+</svg>`;
+export const SCENE_STEPS = `<ol class="scene-steps">
+    <li data-edge="b-g" data-from="browser" data-node="gateway">The browser sends <code>POST /orders</code> to the API gateway.</li>
+    <li data-edge="g-a" data-from="gateway" data-node="auth">The gateway asks Auth if the token is good.</li>
+    <li data-edge="g-a" data-back data-from="auth" data-node="gateway">Auth says yes. The gateway passes the request on.</li>
+    <li data-edge="g-o" data-from="gateway" data-node="orders">The Orders service gets the request.</li>
+    <li data-edge="o-d" data-from="orders" data-node="db">Orders writes one row to Postgres.</li>
+    <li data-edge="o-q" data-from="orders" data-node="queue">Orders puts a "send receipt" job on the queue, then answers the browser at once.</li>
+    <li data-edge="q-w" data-from="queue" data-node="worker">Later, a worker picks up the job, off the request path.</li>
+    <li data-edge="w-d" data-from="worker" data-node="db">The worker reads the order and sends the email. Done.</li>
+  </ol>`;
+
+// Layers stacked in 3D: lines in the air ("x,y,z" points) carry a request down and back up.
+export const STACK = `<svg class="iso" data-iso="36 200 150" viewBox="0 0 600 360" role="img" aria-label="Three layers stacked: the page on top, the API in the middle, the database at the bottom, with a request moving down through them" font-family="var(--font-body)">
+  <g class="ed" data-route="3,2,2.6 3,2,1.8" data-flow data-flow-speed="1.6"/>
+  <g class="ed" data-route="3.6,2.6,1.3 3.6,2.6,0.5" data-flow data-flow-speed="1.6" data-flow-back/>
+  <g class="tone-slate" data-box="0 0 6 4 0.5" data-z="0"/>
+  <g class="tone-teal" data-box="0 0 6 4 0.5" data-z="1.3"/>
+  <g class="tone-accent" data-box="0 0 6 4 0.5" data-z="2.6"/>
+  <text class="iso-lb" data-at="6.4 0 2.8">Page</text>
+  <text class="iso-lb" data-at="6.4 0 1.5">API</text>
+  <text class="iso-lb" data-at="6.4 0 0.2">Database</text>
+</svg>`;
+
+// An intuition drawing: a queue is a conveyor belt. Draw the mechanism, not a box called "queue".
+export const BELT = svg(720, 230, 'A queue as a conveyor belt: the orders service drops jobs on the left, the worker takes them off on the right',
+  box(10, 40, 130, 56, 'Orders', 'teal', 'drops jobs') + box(580, 40, 130, 56, 'Worker', 'teal', 'takes one') +
+  `<rect x="160" y="120" width="400" height="26" rx="13" fill="var(--sunk)" stroke="var(--muted)" stroke-width="1.5"/>` +
+  [180, 260, 340, 420, 500, 540].map(x => `<circle cx="${x}" cy="133" r="7" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`).join('') +
+  `<g class="ed" data-flow="4" data-flow-speed="7"><path d="M150 108H570" fill="none" stroke="none"/></g>` +
+  edge([[75, 96], [75, 108], [150, 108]], '', null) + edge([[570, 108], [645, 108], [645, 96]], '', null) +
+  `<text x="360" y="185" text-anchor="middle" font-size="14" fill="var(--muted)" ${halo('var(--surface)')}>Jobs wait on the belt. If the worker is slow, the belt fills up; nothing is lost.</text>`);
+
+// Linked words: the same data-hl key on a word and on a shape lights both up.
+export const LINKED_SVG = svg(720, 110, 'Read path: browser asks the cache first, then the database on a miss',
+  box(10, 30, 130, 50, 'Browser') + `<g data-hl="cache">${box(290, 30, 130, 50, 'Cache', 'violet')}</g>` + `<g data-hl="db">${box(580, 30, 130, 50, 'Database', 'rose')}</g>` +
+  edge([[140, 55], [290, 55]], 'read', [215, 44]) + edge([[420, 55], [580, 55]], 'on a miss', [500, 44]));

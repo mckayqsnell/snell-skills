@@ -1,11 +1,11 @@
 ---
 name: html-house-style
-description: 'The shared look for HTML pages an agent makes for a person to read, such as reviews, reports, guides and one-off pages: colors, fonts, page parts, hand-drawn style drawings, a drawing viewer, a response box and the writing rules, all in one offline file. Use when the user asks for an HTML page, a "nice page" or a "page I can read" that is not a plan (use html-plan) or an explainer (use html-explain), or says to use the house style.'
+description: 'The shared look for HTML pages an agent makes for a person to read, such as reviews, reports, guides and one-off pages: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer, a response box and the writing rules, all in one offline file. Use when the user asks for an HTML page, a "nice page" or a "page I can read" that is not a plan (use html-plan) or an explainer (use html-explain), or says to use the house style.'
 ---
 
 # html-house-style
 
-One look for every page: warm paper colors, packed-in serif and sans fonts, folding sections, notes, tables that turn into cards on a phone, drawings in a hand-drawn sketch style, and a box that turns the reader's picks and notes into one reply to paste back. html-plan and html-explain use the same kit; this skill is for every other page.
+One look for every page: warm paper colors, packed-in serif and sans fonts, folding sections, notes, tables that turn into cards on a phone, drawings that can be flat, isometric 3D or moving, with an Expand button on each, and a box that turns the reader's picks and notes into one reply to paste back. html-plan and html-explain use the same kit; this skill is for every other page.
 
 Everything lives in `kit/`, the folder next to this SKILL.md. Use its full path when you run commands from the user's project. Start there:
 
@@ -17,4 +17,6 @@ Everything lives in `kit/`, the folder next to this SKILL.md. Use its full path 
 
 Defaults are in `kit/settings.md`. A `settings.md` in the project, then the user's own, wins over it.
 
-Pages that go to customers or outside people: set `data-drawings="clean"` on `<html>`, delete the Rough.js `<script>`, and put no customer data in the page.
+Pages that go to customers or outside people: put no customer data in the page.
+
+Drawings: read "Drawings" in HOUSE-STYLE.md first. Ask "reference or intuition?", then pick from the toolbox.

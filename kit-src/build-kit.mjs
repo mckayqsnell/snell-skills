@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FLOW, BEFORE_AFTER, MAP, SEQUENCE, TIMELINE, BIG } from './drawings.mjs';
+import { FLOW, BEFORE_AFTER, MAP, SEQUENCE, TIMELINE, BIG, LIVE, ISO, SCENE_STEPS, STACK, BELT, LINKED_SVG } from './drawings.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // Line endings are normalized to LF, so a CRLF checkout builds the same bytes.
@@ -20,15 +20,10 @@ const fonts = read(path.join(HERE, 'fonts.css'));
 const tokens = read(path.join(HERE, 'tokens.css'));
 const css = read(path.join(HERE, 'kit.css'));
 const js = read(path.join(HERE, 'kit.js'));
-const roughSrc = read(path.join(HERE, 'rough.mjs'));
-const roughVar = (roughSrc.match(/export\s*\{\s*(\w+)\s+as\s+default\s*\}\s*;?\s*$/) || [])[1];
-const rough = roughSrc.replace(/export\s*\{\s*\w+\s+as\s+default\s*\}\s*;?\s*$/, '');
-if (!roughVar) throw new Error('build-kit: could not find the default export in rough.mjs; check the Rough.js bundle');
-const roughScript = `<script>/* Rough.js 4.6.6 (MIT, Preet Shihn) for the sketch look. Leave it out on customer pages. */\n(function(){${rough}\nwindow.rough=${roughVar};})();</script>`;
 const VERSION = '1';
 
-const head = (title, { drawings = 'sketch', planFile = '' } = {}) => `<!doctype html>
-<html lang="en" data-drawings="${drawings}">
+const head = (title, { planFile = '' } = {}) => `<!doctype html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -43,7 +38,7 @@ ${css}
 </head>
 <body>
 `;
-const foot = (withRough = true) => `${withRough ? roughScript + '\n' : ''}<script>\n${js}\n</script>\n</body>\n</html>\n`;
+const foot = () => `<script>\n${js}\n</script>\n</body>\n</html>\n`;
 
 export function buildKit(OUT) {
   if (typeof OUT !== 'string' || !path.isAbsolute(OUT)) throw new Error(`build-kit: outDir must be an absolute path (got ${JSON.stringify(OUT)})`);
@@ -67,6 +62,7 @@ export function buildKit(OUT) {
   const pb = read(path.join(HERE, 'page-body.html'));
   if (!pb.includes(GEAR_MARK)) throw new Error('build-kit: page-body.html lost its gear placeholder');
   fs.writeFileSync(path.join(OUT, 'page.html'), head('{{TITLE}}') + pb.replace(GEAR_MARK, gearBlock) + '\n' + foot());
+
 
   // ---------- house-style.html ----------
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -179,11 +175,17 @@ export function buildKit(OUT) {
   const recap = `<ol class="recap" style="margin:0"><li>A cache keeps a fast copy of slow data.</li><li>Every copy can go stale; a TTL limits how stale.</li></ol>`;
   const glossary = `<dl class="glossary" style="margin:0"><dt>Cache</dt><dd>A fast copy of data that is slow to get.</dd><dt>TTL</dt><dd>How long a copy is trusted.</dd></dl>`;
   const unclearDemo = `<div class="unclear" style="margin:0"><p class="respond-help">Type a question under any section. Copy them all and paste them back to the agent.</p><div class="unclear-fields" style="display:none"></div><label>Anything else<textarea placeholder="Anything else? (optional)"></textarea></label><pre></pre><button type="button" class="btn-dark">Copy questions</button></div>`;
-  const sw = ['bg', 'surface', 'sunk', 'ink', 'muted', 'line', 'accent', 'accent-soft', 'go', 'go-soft', 'warn', 'warn-soft', 'code-bg'];
+  const sw = ['bg', 'surface', 'sunk', 'ink', 'muted', 'line', 'accent', 'accent-soft', 'go', 'go-soft', 'warn', 'warn-soft', 'code-bg', 'teal', 'teal-soft', 'violet', 'violet-soft', 'ochre', 'ochre-soft', 'rose', 'rose-soft', 'slate', 'slate-soft', 'glow'];
+  const wideFig = (svg, cap) => fig(svg, cap).replace('<figure class="fig"', '<figure class="fig" data-span="wide"');
+  const sceneFig = (svg, steps, cap) => `<figure class="fig scene" data-span="wide" style="margin:0"><div class="fig-box">${svg.replace(/aria-label="[^"]*"/, 'aria-label="One request, step by step, on the 3D map"').replace(/ data-flow(="[^"]*")?/g, '')}</div>
+  ${steps}
+  <figcaption>${cap}</figcaption></figure>`;
+  const linked = `<p>Reads go to the <span data-hl="cache">cache</span> first. On a miss, the <span data-hl="db">database</span> answers and the cache keeps a copy.</p>${fig(LINKED_SVG, 'The same data-hl key on a word and a shape links them.')}`;
   const swatches = `<div class="hs-sw">${sw.map((v) => `<div><i style="background:var(--${v})"></i><code>--${v}</code></div>`).join('')}</div>`;
   const hsCss = `<style>
   .hs-live { --halo: var(--surface); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-top: 10px; display: grid; gap: 10px; }
   .hs-live > * { min-width: 0; }
+  @media (min-width: 1240px) { .hs-live:has(> [data-span="wide"]) { width: min(1400px, max(100%, calc(50vw + 200px))); } .hs-live > [data-span="wide"] { width: auto; } }
   .hs-live .fig-box { padding: 12px 0; border: 0; background: none; }
   .hs-code { margin-top: 8px; max-width: none; }
   .hs-code pre { max-height: 320px; overflow: auto; }
@@ -203,11 +205,11 @@ export function buildKit(OUT) {
         <div class="part">House style</div>
         <h1>Every part, ready to copy</h1>
         <p class="lede">The look for our plan and explainer pages. Each part below is live, with its code folded under it. Start a page from <code>template.html</code>. Read the rules in <code>HOUSE-STYLE.md</code> and the class list in <code>PARTS.md</code>.</p>
-        <div class="meta"><span>Colors <b>Burnt Sienna</b></span><span>Fonts <b>Snell Serif · Snell Sans · Snell Mono</b></span><span>Text <b>17 px · 61 ch</b></span><span>Drawings <b>sketch, clean for customers</b></span></div>
+        <div class="meta"><span>Colors <b>Burnt Sienna</b></span><span>Fonts <b>Snell Serif · Snell Sans · Snell Mono</b></span><span>Text <b>17 px · 61 ch</b></span><span>Drawings <b>SVG: flat, 3D, moving</b></span></div>
       </header>
       <section id="look" data-toc="Colors + type" data-fold="open">
         <div class="part">Look</div><h2>Colors and type</h2>
-        <p class="section-intro">Use these variables. Never a raw hex color in the page body. The gear at the top right switches theme, text size and drawing style.</p>
+        <p class="section-intro">Use these variables. Never a raw hex color in the page body. The gear at the top right switches theme and text size. The second row is the drawing hues: color means something, at most 3 in one drawing.</p>
         ${swatches}
         <h3 style="margin-top:28px">Heading in Snell Serif</h3>
         <p style="margin-top:8px">Body text in Snell Sans at 17 px. Short sentences. Active voice. <code>Code in Snell Mono</code>.</p>
@@ -245,13 +247,23 @@ export function buildKit(OUT) {
       </section>
       <section id="drawings" data-toc="Drawings" data-fold="open">
         <div class="part">Drawings</div><h2>Drawings</h2>
-        <p class="section-intro">Write the clean SVG. The page draws it in the sketch look unless the page or the reader asks for clean. Switch in the gear to compare.</p>
+        <p class="section-intro">Reference drawings: boxes and arrows you can point at. Every drawing gets an Expand button that opens it full window. These are starting points, not templates.</p>
         ${demo('Flow', fig(FLOW, 'A left-to-right flow. 3–5 boxes.'))}
         ${demo('Before / after', fig(BEFORE_AFTER, 'Two dashed groups with one arrow between them.'))}
         ${demo('System map', fig(MAP, 'Groups for where things run. Arrows labeled with verbs.'))}
         ${demo('Sequence', fig(SEQUENCE, 'Who talks to whom, in order. Replies are green and dashed.'))}
         ${demo('Timeline', fig(TIMELINE, 'Phases on one line. Done is green, now is the accent color.'))}
         ${demo('Big drawing in the viewer', viewer(BIG, 'Big system map'), 'For drawings wider than 1000. Zoom, pan, fullscreen and a mini overview. Labels stay sharp at any zoom.')}
+      </section>
+      <section id="alive" data-toc="3D and motion" data-fold="open">
+        <div class="part">3D and motion</div><h2>Drawings that move, stack and answer back</h2>
+        <p class="section-intro">For "how does it work" pages. Packets run while a drawing is on screen. Scenes wait for Play. Reduced motion and print get a still drawing. Wide ones reach past the text on a big screen.</p>
+        ${demo('Live map (wide)', wideFig(LIVE, 'Packets show where traffic goes. Add data-flow to an edge.'), 'A reference drawing that shows traffic. <code>data-span="wide"</code> lets it use a big screen.')}
+        ${demo('Isometric 3D', wideFig(ISO, 'Blocks, a cylinder and routes, written in floor units. The page draws the faces and sorts them.'), 'The default 3D look. Write <code>data-box</code>, <code>data-cyl</code> and <code>data-route</code>; the script does the math.')}
+        ${demo('Scene: press Play', sceneFig(ISO, SCENE_STEPS, 'One request, step by step. Without the script it reads as a numbered list.'), 'Each list item is a step: an edge to run, the node that lights up. Press Play, or step with ‹ and ›.')}
+        ${demo('Stacked layers', fig(STACK, 'Lines can rise between layers: give a route points with a height.'), 'Depth for layers: a request goes down through the stack.')}
+        ${demo('Intuition: draw the mechanism', fig(BELT, 'A queue drawn as what it acts like, not as a box called "queue".'), 'When the reader wants to feel how it works, draw a picture of the mechanism.')}
+        ${demo('Linked words', linked, 'Hover a colored word: its shape lights up too, and the other way round.')}
       </section>
     </main>
   </div>
@@ -262,7 +274,7 @@ export function buildKit(OUT) {
   fs.writeFileSync(path.join(OUT, 'tokens.css'), tokens);
   for (const f of ['HOUSE-STYLE.md', 'PARTS.md', 'settings.md', 'html-to-pdf.sh']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   fs.chmodSync(path.join(OUT, 'html-to-pdf.sh'), 0o755);
-  for (const f of ['vocab-check.mjs', 'vocab-common-3000.txt', 'FONTS-LICENSE.txt', 'ROUGH-LICENSE.txt']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
+  for (const f of ['vocab-check.mjs', 'vocab-common-3000.txt', 'FONTS-LICENSE.txt']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   return fs.readdirSync(OUT).sort();
 }
 
