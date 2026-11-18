@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // Vocab checker (bake-off round 09; floor rule locked Oct 19, 2026). Usage:
-//   node vocab-check.mjs page.html|notes.md [--level 80] [--exact] [--json] [--verbose]
+//   node vocab-check.mjs page.html|notes.md [--level 80] [--reader engineer|general] [--exact] [--json] [--verbose]
+// --reader: who the page is for. engineer (the default) also counts vocab-engineer.txt as common words:
+// app, ticket, deploy, endpoint and the like. general switches that list off, for a non-technical reader.
+// Without the flag: <meta name="vocab-reader" content="general"> in the page, else vocab.reader in settings.md.
 // --level N passes when the score is N or more: the level is a floor, not a target.
 // --exact keeps the round 09 calibration rule instead: pass when within 5 of N.
 // Score 0-100 = 30% short sentences + 30% common words + 25% active voice + 15% no filler.
@@ -9,7 +12,19 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const COMMON = new Set(fs.readFileSync(path.join(here, 'vocab-common-3000.txt'), 'utf8').split(/\s+/).filter(Boolean));
+const words = (f) => new Set(fs.readFileSync(path.join(here, f), 'utf8').replace(/^#.*$/gm, '').split(/\s+/).filter(Boolean));
+const COMMON = words('vocab-common-3000.txt');
+const ENGINEER = words('vocab-engineer.txt');
+export const READERS = ['engineer', 'general'];
+
+// The reader from settings.md next to this file: `reader:` inside the `vocab:` block. Defaults to engineer.
+export function settingsReader(file = path.join(here, 'settings.md')) {
+  let src = '';
+  try { src = fs.readFileSync(file, 'utf8'); } catch { return 'engineer'; }
+  const block = /^vocab:\s*\n((?:[ \t]+.*\n?)*)/m.exec(src);
+  const m = block && /^\s+reader:\s*([a-z]+)/m.exec(block[1]);
+  return m && READERS.includes(m[1]) ? m[1] : 'engineer';
+}
 
 export const WEIGHTS = { short: 30, common: 30, active: 25, filler: 15 };
 export const MAX_WORDS = 20;            // STE: 20 words for steps, 25 for description
@@ -25,6 +40,9 @@ const ALLOW = new Set(`html pdf md css json api url cli npm repo repos redis mar
  halo arrowhead arrowheads hex js id ids vocab skill skills fold folds folded beta plain placeholder placeholders
  tab tabs toggle checkbox radio dropdown tooltip popover viewport layout rail`.split(/\s+/));
 
+// Acronyms every engineer knows. Any other acronym must be spelled out where it first shows up.
+export const ACRONYMS_KNOWN = new Set('api url html css json js http https sql ui id ids cli npm pdf svg md yaml ok'.split(' '));
+
 export const FILLER = ['leverage','leverages','leveraging','utilize','utilizes','utilizing','utilise','robust','seamless','seamlessly',
  'in order to','facilitate','facilitates','comprehensive','holistic','synergy','streamline','streamlines','cutting-edge',
  'state-of-the-art','empower','empowers','paradigm','it is important to note','it should be noted','basically','essentially',
@@ -33,7 +51,8 @@ export const FILLER = ['leverage','leverages','leveraging','utilize','utilizes',
  'ensure that','going forward','best practices','solution','solutions','functionality','methodology','approximately','individual','individuals'];
 
 const IRREG = new Set('known built made done seen given written shown run set kept held found taken chosen broken driven sent put left lost read told'.split(' '));
-const NOT_PASSIVE = new Set('open even often then token between listen frozen when seven eleven women children children kitchen'.split(' '));
+// codetoken: inline <code> becomes CODETOKEN, which ends in "en"; "the default is <code>30</code>" is not passive.
+const NOT_PASSIVE = new Set('open even often then token between listen frozen when seven eleven women children kitchen codetoken'.split(' '));
 const BE = '(?:is|are|was|were|be|been|being|am)';
 const PASSIVE = new RegExp(`\\b${BE}\\s+(?:\\w+ly\\s+)?(\\w+)\\b`, 'gi');
 
@@ -44,20 +63,20 @@ function decode(s) {
 
 // HTML -> { units: [text], glossed: Set }  Code/pre become the token CODE (counts as 1 word, not checked).
 export function prepare(html) {
-  // A term counts as explained only where the page defines it in place: <dfn>, <abbr> or a .term
-  // span, the way PARTS.md's .vocab line does. A glossary <dt> alone earns nothing, so stacking
-  // glossary entries can't lift the score; the glossary is for the reader, not for the checker.
-  const glossed = new Set();
+  // A term counts as explained only where the page defines it in place: a hover term
+  // (<dfn class="term"> or <abbr class="term"> with its .term-def card), a plain <dfn> or <abbr>,
+  // or a .term span. A glossary <dt> alone earns nothing, so stacking glossary entries can't
+  // lift the score; the glossary is for the reader, not for the checker.
+  // The words of a .term-def card are prose: they are scored as their own sentence, after the
+  // term's own line, and they gloss nothing.
+  const glossed = new Set(), cards = [];
+  const gloss = (s) => s.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
   html = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ');
   html = dropChrome(html);
-  html = html.replace(/<(dfn|abbr)\b[^>]*>([\s\S]*?)<\/\1>/gi, (m, t, inner) => {
-    inner.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
-    return ` ${inner} `;
-  });
-  html = html.replace(/<span[^>]*class="[^"]*\bterm\b[^"]*"[^>]*>([\s\S]*?)<\/span>/gi, (m, inner) => {
-    inner.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
-    return ` ${inner} `;
-  });
+  html = pullCards(html, cards);
+  html = html.replace(/<(dfn|abbr)\b[^>]*>([\s\S]*?)<\/\1>/gi, (m, t, inner) => { gloss(inner); return ` ${inner} `; });
+  html = html.replace(/<span\b[^>]*class="(?:[^"]*\s)?term(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/gi, (m, inner) => { gloss(inner); return ` ${inner} `; });
+  html += cards.map(c => `<p>${c}</p>`).join('');
   html = html.replace(/<(pre|code)\b[^>]*>[\s\S]*?<\/\1>/gi, ' CODETOKEN ');
   html = html.replace(/<\/?(p|li|td|th|tr|h[1-6]|div|section|ul|ol|table|caption|dt|dd|br|summary|details|blockquote|figcaption)\b[^>]*>/gi, '\n');
   html = html.replace(/<[^>]+>/g, ' ');   // a space, so words in neighbouring tags stay apart
@@ -73,6 +92,23 @@ export function prepare(html) {
 }
 
 // Page chrome is not prose: buttons, the contents nav, and anything marked data-vocab-skip (the style gear).
+// Takes every .term-def card out of the page, counting nested <span>s so a span inside a card
+// doesn't cut it short. The cards go into `cards`; each leaves a space behind.
+export function pullCards(html, cards) {
+  const open = /<span\b[^>]*class="(?:[^"]*\s)?term-def(?:\s[^"]*)?"[^>]*>/gi;
+  let out = '', from = 0, m;
+  while ((m = open.exec(html))) {
+    const start = m.index + m[0].length, tag = /<(\/?)span\b[^>]*>/gi;
+    tag.lastIndex = start;
+    let depth = 1, t, end = html.length, close = html.length;
+    while (depth && (t = tag.exec(html))) { depth += t[1] ? -1 : 1; if (!depth) { end = t.index; close = tag.lastIndex; } }
+    cards.push(html.slice(start, end));
+    out += html.slice(from, m.index) + ' ';
+    from = close; open.lastIndex = close;
+  }
+  return out + html.slice(from);
+}
+
 function dropChrome(html) {
   html = html.replace(/<(button|nav)\b[\s\S]*?<\/\1>/gi, ' ');
   for (let guard = 0; guard < 50; guard++) {
@@ -89,9 +125,10 @@ function dropChrome(html) {
 
 function wordsOf(s) { return s.split(/\s+/).filter(w => /[A-Za-z0-9]/.test(w)); }
 
-function isCommon(w, glossed) {
+function isCommon(w, glossed, extra) {
   w = w.toLowerCase();
-  if (COMMON.has(w) || ALLOW.has(w) || glossed.has(w)) return true;
+  const known = (x) => COMMON.has(x) || ALLOW.has(x) || glossed.has(x) || extra.has(x);
+  if (known(w)) return true;
   const stems = [];
   if (w.endsWith('ies')) stems.push(w.slice(0, -3) + 'y');
   if (w.endsWith('es')) stems.push(w.slice(0, -2));
@@ -102,11 +139,17 @@ function isCommon(w, glossed) {
   if (w.endsWith('er')) stems.push(w.slice(0, -2), w.slice(0, -1));
   if (w.endsWith('est')) stems.push(w.slice(0, -3));
   if (w.endsWith('ment')) stems.push(w.slice(0, -4));
-  return stems.some(x => x.length > 1 && (COMMON.has(x) || ALLOW.has(x) || glossed.has(x)));
+  return stems.some(x => x.length > 1 && known(x));
 }
 
+// opts.reader: 'engineer' or 'general'. Unset: the page's <meta name="vocab-reader">, else settings.md.
 export function score(html, opts = {}) {
+  const tag = (html.match(/<meta\b[^>]*>/gi) || []).find(t => /\bname=["']vocab-reader["']/i.test(t));
+  const meta = tag && /\bcontent=["']([a-z]+)["']/i.exec(tag);
+  const reader = opts.reader || (meta && READERS.includes(meta[1].toLowerCase()) ? meta[1].toLowerCase() : settingsReader());
+  const extra = reader === 'engineer' ? ENGINEER : new Set();
   const { units, glossed } = prepare(html);
+  const acronyms = new Map();
   let totalWords = 0, shortCount = 0, passiveCount = 0, vocabWords = 0, commonWords = 0;
   const hard = new Map(), longSents = [], passiveSents = [], fillerHits = [];
   for (const s of units) {
@@ -127,9 +170,13 @@ export function score(html, opts = {}) {
         p = p.replace(/['’]s$/, '').replace(/^['’]|['’]$/g, '');
         if (!/^[A-Za-z]{2,}$/.test(p)) return;
         if (i > 0 && /^[A-Z][a-z]/.test(p) && j === 0) return;
-        if (/^[A-Z]{2,}$/.test(p)) return;                 // acronyms
+        if (/^[A-Z]{2,}$/.test(p)) {                       // acronyms: not scored, listed when nothing explains them
+          const l = p.toLowerCase();
+          if (!glossed.has(l) && !ACRONYMS_KNOWN.has(l) && l !== 'codetoken') acronyms.set(p, (acronyms.get(p) || 0) + 1);
+          return;
+        }
         vocabWords++;
-        if (isCommon(p, glossed)) commonWords++; else hard.set(p.toLowerCase(), (hard.get(p.toLowerCase()) || 0) + 1);
+        if (isCommon(p, glossed, extra)) commonWords++; else hard.set(p.toLowerCase(), (hard.get(p.toLowerCase()) || 0) + 1);
       });
     });
   }
@@ -150,9 +197,11 @@ export function score(html, opts = {}) {
   const total = (WEIGHTS.short * short + WEIGHTS.common * common + WEIGHTS.active * active + WEIGHTS.filler * filler) / 100;
   return {
     score: Math.round(total * 10) / 10,
+    reader,
     parts: { short: r(short), common: r(common), commonPct: r(commonPct), active: r(active), filler: r(filler) },
     counts: { sentences: N, words: totalWords, shortSentences: shortCount, passive: passiveCount, vocabWords, commonWords, fillerHits: fillerCount, glossedTerms: glossed.size },
-    detail: { hard: [...hard.entries()].sort((a, b) => b[1] - a[1]).map(([w, n]) => w + (n > 1 ? 'x' + n : '')), longSents, passiveSents, fillerHits },
+    detail: { hard: [...hard.entries()].sort((a, b) => b[1] - a[1]).map(([w, n]) => w + (n > 1 ? 'x' + n : '')), longSents, passiveSents, fillerHits,
+      acronyms: [...acronyms.keys()] },
   };
 }
 const r = x => Math.round(x * 10) / 10;
@@ -171,21 +220,24 @@ export function mdToHtml(md) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  const li0 = args.indexOf('--level');
-  const file = args.find((a, i) => !a.startsWith('--') && i !== (li0 >= 0 ? li0 + 1 : -9));
-  if (!file) { console.error('usage: node vocab-check.mjs page.html [--level N] [--json] [--verbose]'); process.exit(2); }
+  const li0 = args.indexOf('--level'), ri = args.indexOf('--reader');
+  const file = args.find((a, i) => !a.startsWith('--') && i !== (li0 >= 0 ? li0 + 1 : -9) && i !== (ri >= 0 ? ri + 1 : -9));
+  if (!file) { console.error('usage: node vocab-check.mjs page.html [--level N] [--reader engineer|general] [--json] [--verbose]'); process.exit(2); }
+  const reader = ri >= 0 ? args[ri + 1] : undefined;
+  if (ri >= 0 && !READERS.includes(reader)) { console.error('vocab-check: --reader needs engineer or general'); process.exit(2); }
   let src;
   try { src = fs.readFileSync(file, 'utf8'); } catch (e) { console.error(`vocab-check: cannot read ${file} (${e.code})`); process.exit(2); }
   if (/\.md$/i.test(file)) src = mdToHtml(src);
-  const res = score(src);
+  const res = score(src, { reader });
   const li = args.indexOf('--level');
   const level = li >= 0 ? Number(args[li + 1]) : null;
   if (li >= 0 && !Number.isFinite(level)) { console.error('vocab-check: --level needs a number, e.g. --level 80'); process.exit(2); }
   if (args.includes('--json')) console.log(JSON.stringify(res, null, 1));
   else {
-    console.log(`score ${res.score}  (short ${res.parts.short} · common ${res.parts.common} · active ${res.parts.active} · filler ${res.parts.filler})`);
+    console.log(`score ${res.score}  reader ${res.reader}  (short ${res.parts.short} · common ${res.parts.common} · active ${res.parts.active} · filler ${res.parts.filler})`);
     console.log(JSON.stringify(res.counts));
-    if (args.includes('--verbose')) { console.log('hard:', res.detail.hard.join(', ')); console.log('long:', res.detail.longSents.join('\n      ')); console.log('passive:', res.detail.passiveSents.join('\n        ')); console.log('filler:', res.detail.fillerHits.join(', ')); }
+    if (res.detail.acronyms.length && !args.includes('--verbose')) console.log('spell these out where they first show up (an <abbr class="term"> card):', res.detail.acronyms.join(', '));
+    if (args.includes('--verbose')) { console.log('hard:', res.detail.hard.join(', ')); console.log('long:', res.detail.longSents.join('\n      ')); console.log('passive:', res.detail.passiveSents.join('\n        ')); console.log('filler:', res.detail.fillerHits.join(', ')); console.log('acronyms not spelled out (not scored):', res.detail.acronyms.join(', ')); }
   }
   if (level != null) {
     if (args.includes('--exact')) { const ok = Math.abs(res.score - level) <= 5; console.log(ok ? `PASS: within 5 of ${level}` : `FAIL: ${res.score} is not within 5 of ${level}`); process.exit(ok ? 0 : 1); }

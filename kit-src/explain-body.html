@@ -29,7 +29,8 @@
         <div class="layer real"><span class="lk">The real thing</span><p>{{The real term and what it does, in plain words.}}</p></div>
         <div class="layer breaks"><span class="lk">Where the picture breaks</span><p>{{One way the picture is wrong, so it doesn't mislead later.}}</p></div>
       </div>
-      <p class="vocab"><dfn>{{term}}</dfn>{{What it means, in one line.}}</p>
+      <!-- Hover terms: only real jargon this reader wouldn't know; spell out every acronym the first time. Never basic words like app or ticket. Each one also goes in the glossary. -->
+      <p>{{A sentence that uses}} <dfn class="term">{{term}}<span class="term-def">{{What it means, in one line.}}</span></dfn> {{where it first shows up.}}</p>
       <figure class="fig"><div class="fig-box">{{SVG}}</div><figcaption>{{What to notice.}}</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure>
       <div class="idea"><b>Bigger idea</b>{{How this detail ties to something that holds elsewhere too.}}</div>
     </section>

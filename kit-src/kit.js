@@ -374,6 +374,46 @@
     flows.forEach(function (f) { if (!seen.has(f.svg)) { seen.set(f.svg, false); watch(f.svg, function (v) { seen.set(f.svg, v); if (v && !looping) { looping = true; requestAnimationFrame(tick); } }); } });
   }
 
+  /* ---------- hover terms: a dotted word that shows its meaning on hover, focus or tap ---------- */
+  var terms = $$('.term').filter(function (t) { return $(':scope > .term-def', t); });
+  var lastPointer = 'mouse', canHover = matchMedia('(hover: hover)');
+  document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || 'mouse'; }, true);
+  function setOpen(t, on) { t.classList.toggle('open', on); }
+  function place(t) {
+    var card = $(':scope > .term-def', t);
+    t.style.setProperty('--term-dx', '0px'); t.classList.toggle('up', false);
+    var r = card.getBoundingClientRect(), w = document.documentElement.clientWidth, pad = 12, dx = 0;
+    if (r.right > w - pad) dx = w - pad - r.right;
+    if (r.left + dx < pad) dx = pad - r.left;
+    t.style.setProperty('--term-dx', Math.round(dx) + 'px');
+    if (r.bottom > innerHeight - pad && t.getBoundingClientRect().top > r.height + 2 * pad) t.classList.toggle('up', true);
+  }
+  function closeTerms(but) { terms.forEach(function (t) { if (t !== but && t.classList.contains('open')) setOpen(t, false); }); }
+  terms.forEach(function (t, i) {
+    var card = $(':scope > .term-def', t);
+    if (!card.id) card.id = 'term-def-' + (i + 1);
+    card.setAttribute('role', 'tooltip');
+    if (!t.hasAttribute('tabindex')) t.tabIndex = 0;
+    t.addEventListener('mouseenter', function () { t.classList.toggle('shut', false); place(t); });
+    t.addEventListener('mouseleave', function () { t.classList.toggle('shut', false); });
+    t.addEventListener('focus', function () { t.classList.toggle('shut', false); place(t); });
+    t.addEventListener('blur', function () { t.classList.toggle('shut', false); setOpen(t, false); });
+    t.addEventListener('click', function (e) {
+      if (lastPointer === 'mouse' && canHover.matches) return;   /* a mouse shows it on hover; a tap (or a mouse on a touch-first screen) toggles it */
+      e.preventDefault();
+      var on = !t.classList.contains('open');
+      closeTerms(t); setOpen(t, on); t.classList.toggle('shut', false);
+      if (on) place(t);
+    });
+  });
+  if (terms.length) {
+    document.addEventListener('click', function (e) { if (!e.target.closest('.term')) closeTerms(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      terms.forEach(function (t) { if (t.matches(':hover, :focus, .open')) { t.classList.toggle('shut', true); setOpen(t, false); } });
+    });
+  }
+
   /* ---------- linked words: data-hl="key" on words and on shapes lights them up together ---------- */
   $$('[data-hl]').forEach(function (el) {
     var key = el.getAttribute('data-hl'), sel = '[data-hl="' + (window.CSS && CSS.escape ? CSS.escape(key) : key) + '"]', all = function () { return $$(sel); };

@@ -20,7 +20,7 @@ If the answer fits in a few sentences, answer in chat and offer the page in one 
 ## 2. Who is it for?
 
 - **Default: the user.** Pitch it at a curious engineer who is new to this topic. Skip what they surely know. Read `settings.md` for anything it says about them.
-- **`for:"…"`** (e.g. `for:"Dad"`, `for:"a new hire"`, `for:"a customer"`): write for that person. No code unless they write code. If you can't tell what they already know, ask one question, then go. For a customer: put no customer data in it.
+- **`for:"…"`** (e.g. `for:"Dad"`, `for:"a new hire"`, `for:"a customer"`): write for that person. No code unless they write code. If they don't write code, put `<meta name="vocab-reader" content="general">` in the page: then the word check treats everyday software words (app, server, database) as hard words too. If you can't tell what they already know, ask one question, then go. For a customer: put no customer data in it.
 - Don't grill. One question at most, only when the answer changes the page.
 
 ## 3. Get the facts right
@@ -64,7 +64,7 @@ Mix them. Use what this topic needs and skip the rest. **Two explain pages shoul
 - **Sections that each say one idea.** The `h2` is the takeaway as a plain sentence ("A cache trades freshness for speed"), not a label ("Caching"). 3–7 of them is usual.
 - **A worked example with numbers** when the topic has numbers. Made-up numbers are fine if the example says so.
 - **Facts checked** (step 3), with sources in a folded "Sources" section when you looked anything up.
-- **Terms:** a `.vocab` line (`<dfn>`) where a term first shows up, and the same term in the glossary. On a technical topic, define the few core terms the page keeps using this way; the word check counts a term as explained only where it is defined in place, not for being in the glossary.
+- **Terms:** a hover term (`<dfn class="term">` or `<abbr class="term">`, see PARTS.md) where a term first shows up, and the same term in the glossary. Define only real jargon this reader wouldn't know. **Never define basic engineering words** (app, ticket, deploy, endpoint): the default reader is a software engineer. **Always spell out an acronym the first time,** unless every engineer knows it (API, URL). The word check counts a term as explained only where it is defined in place, not for being in the glossary.
 - **Say where it simplifies.** Every picture, drawing or scene leaves something out. Say what, in one line near it, so it doesn't mislead later.
 - **A bigger idea** (`.idea`) when a detail ties to something that holds elsewhere.
 - **End with:** a recap (3–5 takeaways), then "Questions you might have", then the glossary (folded).
@@ -79,7 +79,7 @@ Near the end, answer what a sharp reader would ask next. Write 4–8 questions: 
 
 ## 5. Check, then hand over
 
-1. **Browser check** if you have one: desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. Also a wide screen (1600 px or more). No console errors, no sideways scroll except drawings and code in their own box. Press Play on a scene and watch it to the end. Open one drawing with Expand. Open one question. Look at the screenshots yourself.
+1. **Browser check** if you have one: desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. Also a wide screen (1600 px or more). No console errors, no sideways scroll except drawings and code in their own box. Press Play on a scene and watch it to the end. Open one drawing with Expand. Open one question. Point at a hover term, then Tab to one and press Escape. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Read it through instead: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say you checked it by reading.
 3. **Placeholders:** `grep -n '{{' <page>` prints nothing.
 4. **Words:** `node kit/vocab-check.mjs <page> --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80). For `for:"…"` a non-technical reader, aim higher.
