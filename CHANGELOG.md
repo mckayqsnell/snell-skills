@@ -1,5 +1,32 @@
 # snell-skills
 
+## 1.1.0
+
+### Minor Changes
+
+- 4df0e3e: html-explain now has far more room to teach. Instead of a fixed recipe, its "Write the page" step hands the agent a toolbox and a way to choose: watch it run (a scene with Play), build it up, picture then the real thing (ELI5 layers, now one option among several), side by side, follow the numbers, or a tour of the map. It pushes the agent to draw the mechanism, with at least one moving or playable drawing when the topic has moving parts, and says two explain pages should not look alike.
+  
+  - **"Questions you might have"** replaces the "What's still unclear?" box: 4–8 questions a sharp reader would ask, each a fold that opens to a short answer and one evidence line (a `path:line` or a source link). No input boxes, no copy-back. Questions print open.
+  - The `.unclear` part, its script, its CSS and `data-no-unclear` are gone.
+  - `house-style.html` shows the new questions part and a scene that builds its picture step by step with `data-show`.
+- 98376b2: Pages now define words the way a good textbook does, and stop defining words every engineer knows.
+  
+  - **Hover terms** (`<dfn class="term">` and `<abbr class="term">` with a `.term-def` card): a light dotted line under the word. Hover, Tab or a tap on a phone shows a small card with the meaning; moving off, tapping again or Escape closes it. The page adds the ids, `role="tooltip"` and `aria-describedby`. In print and the PDF the meaning shows in small type in brackets after the word. The `.vocab` line stays as a fallback for the one term a section is about.
+  - **The reader is a software engineer by default** (`vocab.reader: engineer` in `settings.md`). `vocab-check.mjs` counts the new `vocab-engineer.txt` list (about 410 everyday software words: app, ticket, deploy, endpoint, customer, client, dashboard, email…) as common words. A page for a non-technical reader sets `<meta name="vocab-reader" content="general">`, or run the checker with `--reader general`.
+  - The guidance in HOUSE-STYLE.md, PARTS.md and the html-plan and html-explain skills: define only real jargon, always spell out an acronym the first time, never define basic engineering words. `--verbose` lists acronyms nothing spells out.
+  - **Fix:** inline `<code>` after "is" or "are" ("the default is `30`") no longer counts as passive voice.
+  - A hover term's card is scored as its own sentence and glosses nothing, so a long definition can't lift the score.
+- b8508c2: Drawings are now hand-written SVG only, with far more room to explain. Rough.js and the sketch look are gone (old pages keep working, since each one carries its own copy). New in the kit, all offline:
+  
+  - **Isometric 3D** (`svg.iso`): blocks, cylinders, stacked layers and routes written in floor units; the page draws the faces.
+  - **Moving data** (`data-flow`): lit packets run along an edge while the drawing is on screen.
+  - **Scenes** (`.scene`): Play, Back and Next through a system at work; a numbered list without the script and in print.
+  - **Linked words** (`data-hl`): a word and a shape light up together.
+  - **Expand** on every drawing (full window, zoom and pan), **wide** drawings (`data-span="wide"`) that use a big screen, and tap-to-expand on a phone.
+  - **Five diagram hues** (teal, violet, ochre, rose, slate) plus a glow color, tuned for light and dark.
+  - **Removed settings:** `drawings.own_pages`, `customer_pages` and `methods` are gone with the sketch look, along with the gear's drawing-style switch. A copy of `settings.md` that still sets them is ignored for those keys; nothing else changes.
+  - HOUSE-STYLE.md now starts drawings with "reference or intuition?" and a toolbox; `house-style.html` shows every new kind live.
+
 ## 1.0.3
 
 ### Patch Changes
