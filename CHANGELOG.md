@@ -1,5 +1,11 @@
 # snell-skills
 
+## 1.1.1
+
+### Patch Changes
+
+- 3a0c68e: Fix Play on scene drawings: it stopped partway with an error and later steps never showed, because the hover-term code reused the scene's function name. Every html skill's kit is fixed.
+
 ## 1.1.0
 
 ### Minor Changes
