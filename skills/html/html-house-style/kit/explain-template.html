@@ -1001,7 +1001,7 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   var lastPointer = 'mouse', canHover = matchMedia('(hover: hover)');
   document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || 'mouse'; }, true);
   function setOpen(t, on) { t.classList.toggle('open', on); }
-  function place(t) {
+  function placeTerm(t) {
     var card = $(':scope > .term-def', t);
     t.style.setProperty('--term-dx', '0px'); t.classList.toggle('up', false);
     var r = card.getBoundingClientRect(), w = document.documentElement.clientWidth, pad = 12, dx = 0;
@@ -1016,16 +1016,16 @@ svg.scene-svg .reveal.shown { opacity: 1; }
     if (!card.id) card.id = 'term-def-' + (i + 1);
     card.setAttribute('role', 'tooltip');
     if (!t.hasAttribute('tabindex')) t.tabIndex = 0;
-    t.addEventListener('mouseenter', function () { t.classList.toggle('shut', false); place(t); });
+    t.addEventListener('mouseenter', function () { t.classList.toggle('shut', false); placeTerm(t); });
     t.addEventListener('mouseleave', function () { t.classList.toggle('shut', false); });
-    t.addEventListener('focus', function () { t.classList.toggle('shut', false); place(t); });
+    t.addEventListener('focus', function () { t.classList.toggle('shut', false); placeTerm(t); });
     t.addEventListener('blur', function () { t.classList.toggle('shut', false); setOpen(t, false); });
     t.addEventListener('click', function (e) {
       if (lastPointer === 'mouse' && canHover.matches) return;   /* a mouse shows it on hover; a tap (or a mouse on a touch-first screen) toggles it */
       e.preventDefault();
       var on = !t.classList.contains('open');
       closeTerms(t); setOpen(t, on); t.classList.toggle('shut', false);
-      if (on) place(t);
+      if (on) placeTerm(t);
     });
   });
   if (terms.length) {

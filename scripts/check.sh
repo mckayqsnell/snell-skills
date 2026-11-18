@@ -9,7 +9,7 @@
 #      and plugin.json's "skills" list names every group folder
 #   4. shellcheck passes on every tracked .sh file
 #   5. no personal paths, emails or secrets are tracked
-#   6. the kit sync and word check tests pass
+#   6. the kit sync, word check and page script tests pass
 #   7. every skill's kit/ matches what kit-src/ builds (scripts/sync-kit.mjs --check)
 #   8. the html skills and the kit docs read at plain-language level 80 or better
 set -euo pipefail
@@ -110,8 +110,8 @@ if [ -n "$hits" ]; then
 fi
 echo "✅ clean"
 
-step "6/8 sync-kit and vocab-check tests"
-node --test scripts/sync-kit.test.mjs kit-src/vocab-check.test.mjs
+step "6/8 sync-kit, vocab-check and kit.js tests"
+node --test scripts/sync-kit.test.mjs kit-src/vocab-check.test.mjs kit-src/kit-js.test.mjs
 
 step "7/8 Every skill's kit/ matches kit-src/"
 node scripts/sync-kit.mjs --check

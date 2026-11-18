@@ -19,7 +19,7 @@
     "version-packages": "changeset version && node scripts/sync-version.mjs",
     "release": "changeset git-tag",
     "kit": "node scripts/sync-kit.mjs",
-    "test": "node --test scripts/sync-kit.test.mjs",
+    "test": "node --test scripts/sync-kit.test.mjs kit-src/vocab-check.test.mjs kit-src/kit-js.test.mjs",
     "check": "bash scripts/check.sh"
   },
   "devDependencies": {
