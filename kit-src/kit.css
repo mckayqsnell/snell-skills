@@ -362,6 +362,7 @@ svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
 .pkt-core { fill: var(--glow); }
 .pkt-hero .pkt-core { fill: var(--surface); stroke: var(--glow); stroke-width: 3; }
 .flow-still path, path.flow-still { stroke: var(--glow) !important; }
+@media print { .flow path, path.flow { stroke: var(--glow) !important; } }
 svg.scene-on .pkt:not(.pkt-hero) { opacity: .25 !important; }
 
 /* The hot node in a scene, and linked words. */

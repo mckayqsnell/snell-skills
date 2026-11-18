@@ -117,7 +117,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 ## What a page has
 
 - **One file, offline.** Fonts and scripts are packed in. No CDNs, nothing to install to read it.
-- **Light and dark, phone and desktop.** A gear switches theme, text size and drawing style.
+- **Light and dark, phone and desktop.** A gear switches theme and text size.
 - **Drawings that move and stand up.** Agents write plain SVG, picked for the job: boxes and arrows to point at, isometric 3D, lit packets that show traffic, and scenes you press Play on. Every drawing opens full window with zoom and pan, and wide ones use a big screen.
 - **One reply to paste back.** Decisions sit next to a panel that builds your answer as you pick, and quotes your notes so the agent reads them as feedback, not orders.
 - **Plain words.** A built-in checker scores the writing; the skills aim for level 80 or better.

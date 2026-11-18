@@ -10,4 +10,5 @@ Drawings are now hand-written SVG only, with far more room to explain. Rough.js 
 - **Linked words** (`data-hl`): a word and a shape light up together.
 - **Expand** on every drawing (full window, zoom and pan), **wide** drawings (`data-span="wide"`) that use a big screen, and tap-to-expand on a phone.
 - **Five diagram hues** (teal, violet, ochre, rose, slate) plus a glow color, tuned for light and dark.
+- **Removed settings:** `drawings.own_pages`, `customer_pages` and `methods` are gone with the sketch look, along with the gear's drawing-style switch. A copy of `settings.md` that still sets them is ignored for those keys; nothing else changes.
 - HOUSE-STYLE.md now starts drawings with "reference or intuition?" and a toolbox; `house-style.html` shows every new kind live.

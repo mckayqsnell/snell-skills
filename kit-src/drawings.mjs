@@ -1,6 +1,5 @@
-// Drawing examples for house style v0.2-beta. Written in the clean look (round 5 pick E1).
-// The page script turns them into the sketch look (round 5 pick A2+B1+C2+D3) when the page asks for sketch.
-// Class markers (read by the sketch step and by agents copying an example):
+// Drawing examples for the house style: plain, hand-written SVG that agents copy and adapt.
+// Class markers (read by agents copying an example):
 //   bx = box shape, bt = box title, gp = group frame, gl = group label, ed = one edge (line + head), el = edge label.
 // Rules: page colors only, text >= 12 px, every label has a halo the color of what is behind it, nothing touches.
 const halo = (bg = 'var(--halo, var(--surface))') => `stroke="${bg}" stroke-width="4" paint-order="stroke" stroke-linejoin="round"`;

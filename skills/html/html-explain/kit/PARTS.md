@@ -184,6 +184,7 @@ A drawing with Play, Back and Next. Each `<li>` is one step. Without the script,
 - `data-from`: the part that lights up while the packet moves. `data-node`: the part that lights up when it lands. Both take one or more names.
 - `data-show`: shapes to show from this step on. Give those shapes `class="reveal"` so they start hidden.
 - Works on flat and isometric drawings.
+- Leave `data-flow` off a scene's edges. Those packets would run before Play; during Play they only dim.
 
 ### Linked words
 

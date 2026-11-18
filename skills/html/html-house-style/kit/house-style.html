@@ -441,6 +441,7 @@ svg.iso { --tone: var(--muted); --tone-soft: var(--surface); }
 .pkt-core { fill: var(--glow); }
 .pkt-hero .pkt-core { fill: var(--surface); stroke: var(--glow); stroke-width: 3; }
 .flow-still path, path.flow-still { stroke: var(--glow) !important; }
+@media print { .flow path, path.flow { stroke: var(--glow) !important; } }
 svg.scene-on .pkt:not(.pkt-hero) { opacity: .25 !important; }
 
 /* The hot node in a scene, and linked words. */
@@ -862,13 +863,13 @@ svg.scene-svg .reveal.shown { opacity: 1; }
         <h3 style="margin-top:34px">Scene: press Play</h3><p style="margin-top:6px">Each list item is a step: an edge to run, the node that lights up. Press Play, or step with ‹ and ›.</p>
   <div class="hs-live"><figure class="fig scene" data-span="wide" style="margin:0"><div class="fig-box"><svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="One request, step by step, on the 3D map" font-family="var(--font-body)">
   <g data-floor="-0.6 -0.6 17 8"/>
-  <g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/>
-  <g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/>
-  <g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/>
-  <g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/>
-  <g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/>
-  <g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/>
-  <g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/>
+  <g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4"/>
+  <g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8"/>
+  <g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4"/>
+  <g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4"/>
+  <g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4"/>
+  <g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4"/>
+  <g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4"/>
   <g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/>
   <g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/>
   <g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/>
@@ -890,13 +891,13 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   <figcaption>One request, step by step. Without the script it reads as a numbered list.</figcaption></figure></div>
   <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Scene: press Play</span><button type="button" class="btn-sm" data-copy="#src-28">Copy</button></div><pre id="src-28">&lt;figure class="fig scene" data-span="wide" style="margin:0"&gt;&lt;div class="fig-box"&gt;&lt;svg class="iso" data-iso="42 330 80" viewBox="0 0 990 620" role="img" aria-label="One request, step by step, on the 3D map" font-family="var(--font-body)"&gt;
   &lt;g data-floor="-0.6 -0.6 17 8"/&gt;
-  &lt;g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4" data-flow/&gt;
-  &lt;g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8" data-flow/&gt;
-  &lt;g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4" data-flow/&gt;
-  &lt;g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4" data-flow/&gt;
-  &lt;g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4" data-flow/&gt;
-  &lt;g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4" data-flow/&gt;
-  &lt;g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4" data-flow/&gt;
+  &lt;g class="ed" data-edge="b-g" data-route="0.8,3.4 4.2,3.4"/&gt;
+  &lt;g class="ed" data-edge="g-a" data-route="4.2,3.4 4.2,0.8 7.6,0.8"/&gt;
+  &lt;g class="ed" data-edge="g-o" data-route="4.2,3.4 7.6,3.4"/&gt;
+  &lt;g class="ed" data-edge="o-d" data-route="7.6,3.4 7.6,6.4 11.6,6.4"/&gt;
+  &lt;g class="ed" data-edge="o-q" data-route="7.6,3.4 11.6,3.4"/&gt;
+  &lt;g class="ed" data-edge="q-w" data-route="11.6,3.4 15.2,3.4"/&gt;
+  &lt;g class="ed" data-edge="w-d" data-route="15.2,3.4 15.2,6.4 11.6,6.4"/&gt;
   &lt;g data-node="browser" class="tone-slate" data-box="0 2.6 1.6 1.6 0.6" data-label="Browser" data-sub="the user"/&gt;
   &lt;g data-node="gateway" class="tone-accent" data-box="3.4 2.6 1.6 1.6 1.2" data-label="API gateway" data-sub="routes"/&gt;
   &lt;g data-node="auth" class="tone-violet" data-box="6.8 0 1.6 1.6 1" data-label="Auth" data-sub="checks the token"/&gt;
@@ -1341,20 +1342,22 @@ svg.scene-svg .reveal.shown { opacity: 1; }
     flows.push(f);
   });
   if (flows.length) {
-    var seen = new Map();
-    flows.forEach(function (f) { if (!seen.has(f.svg)) { seen.set(f.svg, false); watch(f.svg, function (v) { seen.set(f.svg, v); }); } });
-    (function tick(ts) {
+    /* the loop runs only while at least one drawing with packets is on screen */
+    var seen = new Map(), looping = false;
+    function tick(ts) {
+      var any = false;
       flows.forEach(function (f) {
-        if (!seen.get(f.svg)) return;
+        if (!seen.get(f.svg)) return; any = true;
         f.pk.forEach(function (g, k) { var t = ((ts / f.sp) + f.off + k / f.pk.length) % 1; g.setAttribute('opacity', Math.min(1, Math.min(t, 1 - t) * 8).toFixed(2)); place(f.path, f.back ? 1 - t : t, g); });
       });
-      requestAnimationFrame(tick);
-    })(0);
+      looping = any; if (any) requestAnimationFrame(tick);
+    }
+    flows.forEach(function (f) { if (!seen.has(f.svg)) { seen.set(f.svg, false); watch(f.svg, function (v) { seen.set(f.svg, v); if (v && !looping) { looping = true; requestAnimationFrame(tick); } }); } });
   }
 
   /* ---------- linked words: data-hl="key" on words and on shapes lights them up together ---------- */
   $$('[data-hl]').forEach(function (el) {
-    var key = el.getAttribute('data-hl'), all = function () { return $$('[data-hl="' + key + '"]'); };
+    var key = el.getAttribute('data-hl'), sel = '[data-hl="' + (window.CSS && CSS.escape ? CSS.escape(key) : key) + '"]', all = function () { return $$(sel); };
     if (!(el instanceof SVGElement)) { el.classList.add('hl'); if (!el.hasAttribute('tabindex')) el.tabIndex = 0; }
     var on = function () { all().forEach(function (x) { x.classList.add('hl-on'); }); }, off = function () { all().forEach(function (x) { x.classList.remove('hl-on'); }); };
     el.addEventListener('mouseenter', on); el.addEventListener('mouseleave', off); el.addEventListener('focus', on); el.addEventListener('blur', off);
@@ -1373,7 +1376,7 @@ svg.scene-svg .reveal.shown { opacity: 1; }
     list.parentNode.insertBefore(ui, list);
     var dots = $('.scene-dots', ui), say = $('.scene-say', ui), count = $('.scene-count', ui), play = $('.scene-play', ui);
     steps.forEach(function (li, k) { var b = document.createElement('i'); b.title = 'Step ' + (k + 1); b.addEventListener('click', function () { stop(); go(k, true); }); dots.appendChild(b); });
-    var hero = packet(svg, null, true), i = -1, playing = false, busy = 0, intro = say.innerHTML = fig.getAttribute('data-intro') || 'Press Play to watch it run, or step through it.';
+    var hero = packet(svg, null, true), i = -1, playing = false, busy = 0, timer = 0, intro = say.innerHTML = fig.getAttribute('data-intro') || 'Press Play to watch it run, or step through it.';
     function nodes(sel) { return (sel || '').split(/\s+/).filter(Boolean).reduce(function (a, id) { return a.concat($$('[data-node="' + id + '"]', svg)); }, []); }
     function paint(k) {
       $$('.hot', svg).forEach(function (x) { x.classList.remove('hot'); });
@@ -1396,13 +1399,13 @@ svg.scene-svg .reveal.shown { opacity: 1; }
         (function f(now) { if (id !== busy) return res(); var q = Math.min(1, (now - t0) / dur); place(path, back ? 1 - ease(q) : ease(q), hero); if (q < 1) requestAnimationFrame(f); else land(); })(t0);
       });
     }
-    function stop() { playing = false; play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); svg.classList.remove('scene-on'); }
+    function stop() { playing = false; clearTimeout(timer); play.textContent = i >= steps.length - 1 ? '↺ Replay' : '▶ Play'; fig.classList.remove('playing'); svg.classList.remove('scene-on'); }
     function run() {
       if (!playing) return;
       if (i >= steps.length - 1) { stop(); return; }
-      go(i + 1, true).then(function () { if (playing) setTimeout(run, 650); });
+      go(i + 1, true).then(function () { if (playing) timer = setTimeout(run, 650); });
     }
-    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); svg.classList.add('scene-on'); run(); });
+    play.addEventListener('click', function () { if (playing) { stop(); return; } if (i >= steps.length - 1) { i = -1; paint(-1); } clearTimeout(timer); playing = true; play.textContent = '❚❚ Pause'; fig.classList.add('playing'); svg.classList.add('scene-on'); run(); });
     $('.scene-next', ui).addEventListener('click', function () { stop(); if (i < steps.length - 1) go(i + 1, true); });
     $('.scene-prev', ui).addEventListener('click', function () { stop(); if (i > 0) go(i - 1, false); else { i = -1; busy++; hero.setAttribute('opacity', 0); paint(-1); } });
     paint(-1);
@@ -1434,6 +1437,8 @@ svg.scene-svg .reveal.shown { opacity: 1; }
     pan.style.width = v.w + 'px'; pan.style.height = v.h + 'px';
     var oldStyle = svg.getAttribute('style'); svg.setAttribute('style', 'width:100%;height:100%;max-width:none;min-width:0');
     pan.appendChild(svg); if (ui) ov.appendChild(ui);
+    var behind = Array.prototype.filter.call(document.body.children, function (c) { return !c.inert; });
+    behind.forEach(function (c) { c.inert = true; });
     document.body.appendChild(ov); root.classList.add('vw-lock');
     var eng = Engine(stage, pan, { w: v.w, h: v.h, max: 6, onchange: function () {} });
     requestAnimationFrame(function () { eng.refit(); eng.reset(); });
@@ -1442,19 +1447,19 @@ svg.scene-svg .reveal.shown { opacity: 1; }
       if (ro) ro.disconnect(); document.removeEventListener('keydown', key, true);
       if (oldStyle === null) svg.removeAttribute('style'); else svg.setAttribute('style', oldStyle);
       keep.parentNode.insertBefore(svg, keep); keep.remove(); if (ui) uiHome.insertBefore(ui, uiNext);
-      ov.remove(); root.classList.remove('vw-lock'); if (back && back.focus) back.focus({ preventScroll: true });
+      behind.forEach(function (c) { c.inert = false; }); ov.remove(); root.classList.remove('vw-lock'); if (back && back.focus) back.focus({ preventScroll: true });
     }
     function key(e) {
       if (e.key === 'Escape') { e.preventDefault(); close(); }
       else if (e.key === '+' || e.key === '=') eng.zoomAt(1.4, stage.clientWidth / 2, stage.clientHeight / 2, true);
       else if (e.key === '-') eng.zoomAt(1 / 1.4, stage.clientWidth / 2, stage.clientHeight / 2, true);
       else if (e.key === '0') eng.reset(true);
-      else if (e.key === 'Tab') { var f = $$('button', ov); if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); } }
+      else if (e.key === 'Tab') { var f = $$('button', ov); if (!ov.contains(document.activeElement)) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); } else if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); } }
     }
     document.addEventListener('keydown', key, true);
     ov.addEventListener('click', function (e) { var b = e.target.closest('[data-x]'); if (!b) return; var a = b.getAttribute('data-x'), c = [stage.clientWidth / 2, stage.clientHeight / 2];
       if (a === 'close') close(); else if (a === 'in') eng.zoomAt(1.4, c[0], c[1], true); else if (a === 'out') eng.zoomAt(1 / 1.4, c[0], c[1], true); else eng.reset(true); });
-    stage.addEventListener('wheel', function (e) { e.preventDefault(); var b = stage.getBoundingClientRect(); if (e.ctrlKey || e.metaKey) eng.zoomAt(Math.exp(-e.deltaY * .01), e.clientX - b.left, e.clientY - b.top); else eng.panBy(-e.deltaX, -e.deltaY); }, { passive: false });
+    stage.addEventListener('wheel', function (e) { e.preventDefault(); var b = stage.getBoundingClientRect(), m = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? stage.clientHeight : 1; if (e.ctrlKey || e.metaKey) eng.zoomAt(Math.exp(-e.deltaY * m * .01), e.clientX - b.left, e.clientY - b.top); else eng.panBy(-e.deltaX * m, -e.deltaY * m); }, { passive: false });
     $('.xp-close', ov).focus();
   }
 })();

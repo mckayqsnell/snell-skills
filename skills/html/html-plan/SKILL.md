@@ -47,7 +47,7 @@ A question you can answer by reading the code is not a question. Read the code.
 ## 3. Write the page
 
 1. **Where it goes.** `plans/YYYY-MM-DD-topic.html` in the project. Name it once, from the start. Before you write, check git with the page's own path, which works before the folder exists: `git check-ignore -q plans/<page>.html` exits 0 if it is ignored (fine). If not, `git ls-files plans/` prints something if plans are already committed there. If `plans/` is neither ignored nor already committed, tell the user before the page lands there. On a work repo or a page with customer context, ask first: an untracked page can get committed by accident.
-2. **Copy the whole file** with `cp kit/template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the response panel. Set `<title>`, `<meta name="plan-file">` (the response quotes it, so the agent knows which plan an answer is for), the top bar tag (`Plan · {{S, M or L}} · updated {{DATE}}`). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
+2. **Copy the whole file** with `cp kit/template.html <page>`, then edit it in place. Never rebuild it from pieces: a lost `<main>` silently drops the contents and the response panel. Set `<title>`, `<meta name="plan-file">` (the response quotes it, so the agent knows which plan an answer is for) and the top bar tag (`Plan · {{S, M or L}} · updated {{DATE}}`). Every `{{…}}` in the file is a placeholder, including those outside the sections; none may be left.
 3. **Fill it in.** Keep the `<style>` and `<script>` blocks. Delete parts the size doesn't need. Use only parts from `PARTS.md`.
 4. **Parts by size**, in this order:
 

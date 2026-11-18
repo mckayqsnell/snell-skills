@@ -177,7 +177,7 @@ export function buildKit(OUT) {
   const unclearDemo = `<div class="unclear" style="margin:0"><p class="respond-help">Type a question under any section. Copy them all and paste them back to the agent.</p><div class="unclear-fields" style="display:none"></div><label>Anything else<textarea placeholder="Anything else? (optional)"></textarea></label><pre></pre><button type="button" class="btn-dark">Copy questions</button></div>`;
   const sw = ['bg', 'surface', 'sunk', 'ink', 'muted', 'line', 'accent', 'accent-soft', 'go', 'go-soft', 'warn', 'warn-soft', 'code-bg', 'teal', 'teal-soft', 'violet', 'violet-soft', 'ochre', 'ochre-soft', 'rose', 'rose-soft', 'slate', 'slate-soft', 'glow'];
   const wideFig = (svg, cap) => fig(svg, cap).replace('<figure class="fig"', '<figure class="fig" data-span="wide"');
-  const sceneFig = (svg, steps, cap) => `<figure class="fig scene" data-span="wide" style="margin:0"><div class="fig-box">${svg.replace(/aria-label="[^"]*"/, 'aria-label="One request, step by step, on the 3D map"')}</div>
+  const sceneFig = (svg, steps, cap) => `<figure class="fig scene" data-span="wide" style="margin:0"><div class="fig-box">${svg.replace(/aria-label="[^"]*"/, 'aria-label="One request, step by step, on the 3D map"').replace(/ data-flow(="[^"]*")?/g, '')}</div>
   ${steps}
   <figcaption>${cap}</figcaption></figure>`;
   const linked = `<p>Reads go to the <span data-hl="cache">cache</span> first. On a miss, the <span data-hl="db">database</span> answers and the cache keeps a copy.</p>${fig(LINKED_SVG, 'The same data-hl key on a word and a shape links them.')}`;

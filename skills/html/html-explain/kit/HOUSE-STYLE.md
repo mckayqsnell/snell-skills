@@ -61,7 +61,7 @@ See `PARTS.md` for classes and markup, and `house-style.html` to see them live. 
 
 ## Drawings
 
-Drawings are plain SVG, written by hand. No Mermaid, no drawing library. Every drawing gets an Expand button: the reader can open it full window, zoom and pan.
+Drawings are plain SVG, written by hand. No Mermaid, no drawing library. Every drawing in a `.fig` gets an Expand button (the viewer, `.vw`, has its own full window): the reader can open it full window, zoom and pan.
 
 ### First, pick the kind: reference or intuition?
 
@@ -86,13 +86,13 @@ All of these are in the kit already. See `PARTS.md` for markup and `house-style.
 
 ### Motion
 
-- Packets run while the drawing is on screen and stop when it scrolls away. Scenes wait for Play.
+- Packets run while the drawing is on screen and stop when it scrolls away. Scenes wait for Play: leave `data-flow` off a scene's drawing, so nothing moves until the reader asks.
 - Motion shows how the system behaves: traffic, order, waiting. Never motion just to move.
 - Reduced motion and print get a still drawing: no packets, and the busy lines are lit instead.
 
 ### Colors
 
-Color means something. Use at most 3 hues in one drawing, plus the plain colors. Put a tone class on a shape or a group (`tone-teal`), or use the variables yourself.
+Color means something. Use at most 3 hues in one drawing (teal, violet, ochre, rose, slate). The plain colors and accent, go and warn don't count toward the 3. Put a tone class on a shape or a group (`tone-teal`), or use the variables yourself.
 
 - `var(--surface)` for box fill, `var(--ink)` for lines and text, `var(--muted)` for labels and group frames.
 - `var(--accent)` and `var(--accent-soft)` for the one thing that matters most.
