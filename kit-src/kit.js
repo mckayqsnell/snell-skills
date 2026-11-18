@@ -376,9 +376,9 @@
 
   /* ---------- hover terms: a dotted word that shows its meaning on hover, focus or tap ---------- */
   var terms = $$('.term').filter(function (t) { return $(':scope > .term-def', t); });
-  var lastPointer = 'mouse';
+  var lastPointer = 'mouse', canHover = matchMedia('(hover: hover)');
   document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || 'mouse'; }, true);
-  function setOpen(t, on) { t.classList.toggle('open', on); t.setAttribute('aria-expanded', String(on)); }
+  function setOpen(t, on) { t.classList.toggle('open', on); }
   function place(t) {
     var card = $(':scope > .term-def', t);
     t.style.setProperty('--term-dx', '0px'); t.classList.toggle('up', false);
@@ -394,13 +394,12 @@
     if (!card.id) card.id = 'term-def-' + (i + 1);
     card.setAttribute('role', 'tooltip');
     if (!t.hasAttribute('tabindex')) t.tabIndex = 0;
-    t.setAttribute('aria-describedby', card.id);
     t.addEventListener('mouseenter', function () { t.classList.toggle('shut', false); place(t); });
     t.addEventListener('mouseleave', function () { t.classList.toggle('shut', false); });
     t.addEventListener('focus', function () { t.classList.toggle('shut', false); place(t); });
     t.addEventListener('blur', function () { t.classList.toggle('shut', false); setOpen(t, false); });
     t.addEventListener('click', function (e) {
-      if (lastPointer === 'mouse') return;                /* a mouse shows it on hover; a tap toggles it */
+      if (lastPointer === 'mouse' && canHover.matches) return;   /* a mouse shows it on hover; a tap (or a mouse on a touch-first screen) toggles it */
       e.preventDefault();
       var on = !t.classList.contains('open');
       closeTerms(t); setOpen(t, on); t.classList.toggle('shut', false);

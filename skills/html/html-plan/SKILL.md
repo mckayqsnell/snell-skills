@@ -68,9 +68,10 @@ A question you can answer by reading the code is not a question. Read the code.
 | Research (folded): finding + source | – | – | yes |
 | Open questions (open): only what nobody can answer yet | only if any | if any | if any |
 
-5. **Real over drawn.** Real paths and line numbers for code that exists. Code that does not exist yet says "(sketch)" in its title. Quote the user's own words; don't reword them.
-6. **Models in the build split** come from `settings.md`: by default the latest Opus on medium leads and the latest Sonnet on medium builds.
-7. A plan can hold a small drawing where it helps the user decide. If they need a lesson, link out: "→ /html-explain message queues".
+5. **Terms.** The reader is a software engineer: never define basic words (app, ticket, deploy). Define real jargon in place with a hover term, and spell out every acronym the first time (`<abbr class="term">`), except the ones every engineer knows (API, URL, HTML).
+6. **Real over drawn.** Real paths and line numbers for code that exists. Code that does not exist yet says "(sketch)" in its title. Quote the user's own words; don't reword them.
+7. **Models in the build split** come from `settings.md`: by default the latest Opus on medium leads and the latest Sonnet on medium builds.
+8. A plan can hold a small drawing where it helps the user decide. If they need a lesson, link out: "→ /html-explain message queues".
 
 ## 4. Drawings
 

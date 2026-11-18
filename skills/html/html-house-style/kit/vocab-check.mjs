@@ -40,6 +40,9 @@ const ALLOW = new Set(`html pdf md css json api url cli npm repo repos redis mar
  halo arrowhead arrowheads hex js id ids vocab skill skills fold folds folded beta plain placeholder placeholders
  tab tabs toggle checkbox radio dropdown tooltip popover viewport layout rail`.split(/\s+/));
 
+// Acronyms every engineer knows. Any other acronym must be spelled out where it first shows up.
+export const ACRONYMS_KNOWN = new Set('api url html css json js http https sql ui id ids cli npm pdf svg md yaml ok'.split(' '));
+
 export const FILLER = ['leverage','leverages','leveraging','utilize','utilizes','utilizing','utilise','robust','seamless','seamlessly',
  'in order to','facilitate','facilitates','comprehensive','holistic','synergy','streamline','streamlines','cutting-edge',
  'state-of-the-art','empower','empowers','paradigm','it is important to note','it should be noted','basically','essentially',
@@ -68,11 +71,11 @@ export function prepare(html) {
   // term's own line, and they gloss nothing.
   const glossed = new Set(), cards = [];
   const gloss = (s) => s.replace(/<[^>]+>/g, '').toLowerCase().split(/[^a-z'-]+/).filter(Boolean).forEach(w => glossed.add(w));
-  const pullCards = (inner) => inner.replace(/<span\b[^>]*class="(?:[^"]*\s)?term-def(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/gi, (m, def) => { cards.push(def); return ' '; });
   html = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ');
   html = dropChrome(html);
-  html = html.replace(/<(dfn|abbr)\b[^>]*>([\s\S]*?)<\/\1>/gi, (m, t, inner) => { inner = pullCards(inner); gloss(inner); return ` ${inner} `; });
-  html = html.replace(/<span\b[^>]*class="(?:[^"]*\s)?term(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/gi, (m, inner) => { inner = pullCards(inner); gloss(inner); return ` ${inner} `; });
+  html = pullCards(html, cards);
+  html = html.replace(/<(dfn|abbr)\b[^>]*>([\s\S]*?)<\/\1>/gi, (m, t, inner) => { gloss(inner); return ` ${inner} `; });
+  html = html.replace(/<span\b[^>]*class="(?:[^"]*\s)?term(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/gi, (m, inner) => { gloss(inner); return ` ${inner} `; });
   html += cards.map(c => `<p>${c}</p>`).join('');
   html = html.replace(/<(pre|code)\b[^>]*>[\s\S]*?<\/\1>/gi, ' CODETOKEN ');
   html = html.replace(/<\/?(p|li|td|th|tr|h[1-6]|div|section|ul|ol|table|caption|dt|dd|br|summary|details|blockquote|figcaption)\b[^>]*>/gi, '\n');
@@ -89,6 +92,23 @@ export function prepare(html) {
 }
 
 // Page chrome is not prose: buttons, the contents nav, and anything marked data-vocab-skip (the style gear).
+// Takes every .term-def card out of the page, counting nested <span>s so a span inside a card
+// doesn't cut it short. The cards go into `cards`; each leaves a space behind.
+export function pullCards(html, cards) {
+  const open = /<span\b[^>]*class="(?:[^"]*\s)?term-def(?:\s[^"]*)?"[^>]*>/gi;
+  let out = '', from = 0, m;
+  while ((m = open.exec(html))) {
+    const start = m.index + m[0].length, tag = /<(\/?)span\b[^>]*>/gi;
+    tag.lastIndex = start;
+    let depth = 1, t, end = html.length, close = html.length;
+    while (depth && (t = tag.exec(html))) { depth += t[1] ? -1 : 1; if (!depth) { end = t.index; close = tag.lastIndex; } }
+    cards.push(html.slice(start, end));
+    out += html.slice(from, m.index) + ' ';
+    from = close; open.lastIndex = close;
+  }
+  return out + html.slice(from);
+}
+
 function dropChrome(html) {
   html = html.replace(/<(button|nav)\b[\s\S]*?<\/\1>/gi, ' ');
   for (let guard = 0; guard < 50; guard++) {
@@ -124,7 +144,8 @@ function isCommon(w, glossed, extra) {
 
 // opts.reader: 'engineer' or 'general'. Unset: the page's <meta name="vocab-reader">, else settings.md.
 export function score(html, opts = {}) {
-  const meta = /<meta\b[^>]*name=["']vocab-reader["'][^>]*content=["']([a-z]+)["']/i.exec(html);
+  const tag = (html.match(/<meta\b[^>]*>/gi) || []).find(t => /\bname=["']vocab-reader["']/i.test(t));
+  const meta = tag && /\bcontent=["']([a-z]+)["']/i.exec(tag);
   const reader = opts.reader || (meta && READERS.includes(meta[1].toLowerCase()) ? meta[1].toLowerCase() : settingsReader());
   const extra = reader === 'engineer' ? ENGINEER : new Set();
   const { units, glossed } = prepare(html);
@@ -151,7 +172,7 @@ export function score(html, opts = {}) {
         if (i > 0 && /^[A-Z][a-z]/.test(p) && j === 0) return;
         if (/^[A-Z]{2,}$/.test(p)) {                       // acronyms: not scored, listed when nothing explains them
           const l = p.toLowerCase();
-          if (!glossed.has(l) && !extra.has(l) && !ALLOW.has(l) && l !== 'codetoken') acronyms.set(p, (acronyms.get(p) || 0) + 1);
+          if (!glossed.has(l) && !ACRONYMS_KNOWN.has(l) && l !== 'codetoken') acronyms.set(p, (acronyms.get(p) || 0) + 1);
           return;
         }
         vocabWords++;
@@ -215,6 +236,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   else {
     console.log(`score ${res.score}  reader ${res.reader}  (short ${res.parts.short} · common ${res.parts.common} · active ${res.parts.active} · filler ${res.parts.filler})`);
     console.log(JSON.stringify(res.counts));
+    if (res.detail.acronyms.length && !args.includes('--verbose')) console.log('spell these out where they first show up (an <abbr class="term"> card):', res.detail.acronyms.join(', '));
     if (args.includes('--verbose')) { console.log('hard:', res.detail.hard.join(', ')); console.log('long:', res.detail.longSents.join('\n      ')); console.log('passive:', res.detail.passiveSents.join('\n        ')); console.log('filler:', res.detail.fillerHits.join(', ')); console.log('acronyms not spelled out (not scored):', res.detail.acronyms.join(', ')); }
   }
   if (level != null) {

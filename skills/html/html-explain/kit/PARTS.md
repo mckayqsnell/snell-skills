@@ -214,7 +214,7 @@ Start from `explain-template.html`. It is a starter, not a layout: pick the part
 **Hover terms.** Define a word where it is used. It gets a light dotted line. Hover, Tab or a tap shows a small card with the meaning, and Escape closes it. The page adds the ids and the aria. In print, the meaning shows in small type in brackets after the word.
 
 ```html
-<p>Each copy has a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How long a copy is trusted.</span></abbr>, so old data goes away.</p>
+<p>Each copy has a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How long the cache keeps a copy.</span></abbr>, so old data goes away.</p>
 <p>The cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one.</span></dfn>.</p>
 ```
 

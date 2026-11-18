@@ -393,6 +393,9 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
   transition: opacity var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease), display var(--motion-fast) allow-discrete; }
 .term-def b:first-child { font-weight: 650; }
 .term.up > .term-def { top: auto; bottom: calc(100% + 8px); }
+/* an invisible bridge over the 8 px gap: moving the pointer onto the card keeps it open */
+.term-def::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
+.term.up > .term-def::before { top: auto; bottom: -10px; }
 @media (hover: hover) { .term:hover > .term-def { display: block; opacity: 1; transform: translateY(0); } }
 .term:focus-visible > .term-def, .term.open > .term-def { display: block; opacity: 1; transform: translateY(0); }
 @starting-style { .term:hover > .term-def, .term:focus-visible > .term-def, .term.open > .term-def { opacity: 0; transform: translateY(4px); } }
@@ -535,7 +538,7 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   /* Hover terms on paper: the meaning sits in small type right after the word, in brackets. */
   .term { text-decoration: none; outline: none !important; }
   .term-def, .term.shut > .term-def { position: static; display: inline !important; opacity: 1; transform: none; box-shadow: none; border: 0; background: none; padding: 0; width: auto; max-width: none; font-size: .8em; color: var(--muted); }
-  .term-def::before { content: " ("; } .term-def::after { content: ")"; }
+  .term-def::before { content: " ("; position: static; height: auto; } .term-def::after { content: ")"; }
   h2, h3, h4, .part { break-after: avoid; }
   .fig, .note, .layers, .vocab, .idea, .worked, .pair > div, .decision, .prog li, table tr, .codeblock, .q { break-inside: avoid; }
   .vw, .vw.is-full { position: static !important; overflow: visible; border: 0; }
@@ -770,11 +773,11 @@ svg.scene-svg .reveal.shown { opacity: 1; }
     &lt;div class="layer breaks"&gt;&lt;span class="lk"&gt;Where the picture breaks&lt;/span&gt;&lt;p&gt;A sticky note never goes stale on its own. A cache copy can: the real number changes and the note does not.&lt;/p&gt;&lt;/div&gt;
   &lt;/div&gt;</pre></div></div></details>
         <h3 style="margin-top:34px">Hover term</h3><p style="margin-top:6px">The main way to define a word. Point at a dotted word, Tab to it, or tap it on a phone: a small card shows what it means. Escape closes it. In print the meaning shows in brackets after the word. Define only real jargon, and spell out every acronym the first time. The term also goes in the glossary.</p>
-  <div class="hs-live"><p style="margin:0">Each cached copy carries a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How many seconds a cached copy is trusted before it is thrown away.</span></abbr>. When two writers race, the cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one, even if the older one held more data.</span></dfn>, so a slow writer can undo a fast one.</p></div>
-  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Hover term</span><button type="button" class="btn-sm" data-copy="#src-13">Copy</button></div><pre id="src-13">&lt;p style="margin:0"&gt;Each cached copy carries a &lt;abbr class="term"&gt;TTL&lt;span class="term-def"&gt;&lt;b&gt;Time to live.&lt;/b&gt; How many seconds a cached copy is trusted before it is thrown away.&lt;/span&gt;&lt;/abbr&gt;. When two writers race, the cache uses &lt;dfn class="term"&gt;last write wins&lt;span class="term-def"&gt;The newest write replaces the older one, even if the older one held more data.&lt;/span&gt;&lt;/dfn&gt;, so a slow writer can undo a fast one.&lt;/p&gt;</pre></div></div></details>
+  <div class="hs-live"><p style="margin:0">Each cached copy carries a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How many seconds the cache keeps a copy before it throws it away.</span></abbr>. When two writers race, the cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one, even if the older one held more data.</span></dfn>, so a slow writer can undo a fast one.</p></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Hover term</span><button type="button" class="btn-sm" data-copy="#src-13">Copy</button></div><pre id="src-13">&lt;p style="margin:0"&gt;Each cached copy carries a &lt;abbr class="term"&gt;TTL&lt;span class="term-def"&gt;&lt;b&gt;Time to live.&lt;/b&gt; How many seconds the cache keeps a copy before it throws it away.&lt;/span&gt;&lt;/abbr&gt;. When two writers race, the cache uses &lt;dfn class="term"&gt;last write wins&lt;span class="term-def"&gt;The newest write replaces the older one, even if the older one held more data.&lt;/span&gt;&lt;/dfn&gt;, so a slow writer can undo a fast one.&lt;/p&gt;</pre></div></div></details>
         <h3 style="margin-top:34px">Term on its own line</h3><p style="margin-top:6px">A fallback, for the one term a whole section is about. Most terms should be hover terms.</p>
-  <div class="hs-live"><p class="vocab" style="margin:0"><dfn>TTL</dfn>"Time to live": how many seconds a cached copy is trusted before it is thrown away.</p></div>
-  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Term on its own line</span><button type="button" class="btn-sm" data-copy="#src-14">Copy</button></div><pre id="src-14">&lt;p class="vocab" style="margin:0"&gt;&lt;dfn&gt;TTL&lt;/dfn&gt;"Time to live": how many seconds a cached copy is trusted before it is thrown away.&lt;/p&gt;</pre></div></div></details>
+  <div class="hs-live"><p class="vocab" style="margin:0"><dfn>TTL</dfn>"Time to live": how many seconds the cache keeps a copy before it throws it away.</p></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Term on its own line</span><button type="button" class="btn-sm" data-copy="#src-14">Copy</button></div><pre id="src-14">&lt;p class="vocab" style="margin:0"&gt;&lt;dfn&gt;TTL&lt;/dfn&gt;"Time to live": how many seconds the cache keeps a copy before it throws it away.&lt;/p&gt;</pre></div></div></details>
         <h3 style="margin-top:34px">Bigger idea</h3>
   <div class="hs-live"><div class="idea" style="margin:0"><b>Bigger idea</b>Every cache trades freshness for speed. The only question is how stale you can stand.</div></div>
   <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Bigger idea</span><button type="button" class="btn-sm" data-copy="#src-15">Copy</button></div><pre id="src-15">&lt;div class="idea" style="margin:0"&gt;&lt;b&gt;Bigger idea&lt;/b&gt;Every cache trades freshness for speed. The only question is how stale you can stand.&lt;/div&gt;</pre></div></div></details>
@@ -788,8 +791,8 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   <div class="hs-live"><ol class="recap" style="margin:0"><li>A cache keeps a fast copy of slow data.</li><li>Every copy can go stale; a TTL limits how stale.</li></ol></div>
   <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Recap</span><button type="button" class="btn-sm" data-copy="#src-18">Copy</button></div><pre id="src-18">&lt;ol class="recap" style="margin:0"&gt;&lt;li&gt;A cache keeps a fast copy of slow data.&lt;/li&gt;&lt;li&gt;Every copy can go stale; a TTL limits how stale.&lt;/li&gt;&lt;/ol&gt;</pre></div></div></details>
         <h3 style="margin-top:34px">Glossary</h3>
-  <div class="hs-live"><dl class="glossary" style="margin:0"><dt>Cache</dt><dd>A fast copy of data that is slow to get.</dd><dt>TTL</dt><dd>How long a copy is trusted.</dd></dl></div>
-  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Glossary</span><button type="button" class="btn-sm" data-copy="#src-19">Copy</button></div><pre id="src-19">&lt;dl class="glossary" style="margin:0"&gt;&lt;dt&gt;Cache&lt;/dt&gt;&lt;dd&gt;A fast copy of data that is slow to get.&lt;/dd&gt;&lt;dt&gt;TTL&lt;/dt&gt;&lt;dd&gt;How long a copy is trusted.&lt;/dd&gt;&lt;/dl&gt;</pre></div></div></details>
+  <div class="hs-live"><dl class="glossary" style="margin:0"><dt>Cache</dt><dd>A fast copy of data that is slow to get.</dd><dt>TTL</dt><dd>How long the cache keeps a copy.</dd></dl></div>
+  <details class="fold hs-code"><summary>Code</summary><div class="fold-body"><div class="codeblock" style="margin:0"><div class="codeblock-head"><span>Glossary</span><button type="button" class="btn-sm" data-copy="#src-19">Copy</button></div><pre id="src-19">&lt;dl class="glossary" style="margin:0"&gt;&lt;dt&gt;Cache&lt;/dt&gt;&lt;dd&gt;A fast copy of data that is slow to get.&lt;/dd&gt;&lt;dt&gt;TTL&lt;/dt&gt;&lt;dd&gt;How long the cache keeps a copy.&lt;/dd&gt;&lt;/dl&gt;</pre></div></div></details>
         <h3 style="margin-top:34px">Questions you might have</h3><p style="margin-top:6px">Near the end: 4–8 questions a sharp reader would ask next. Each opens to a short answer and one line of evidence.</p>
   <div class="hs-live"><div class="qs" style="margin:0">
     <details class="q" open><summary>What happens if the database changes while a copy is in the cache?</summary><div class="q-a"><p>The cache keeps handing out the old copy until its TTL runs out, or until the code that wrote the change also deletes the copy.</p><p class="q-ev"><b>Evidence</b><code>src/cache.ts:31</code> sets the TTL; the last step of the drawing above shows it.</p></div></details>
@@ -1400,9 +1403,9 @@ svg.scene-svg .reveal.shown { opacity: 1; }
 
   /* ---------- hover terms: a dotted word that shows its meaning on hover, focus or tap ---------- */
   var terms = $$('.term').filter(function (t) { return $(':scope > .term-def', t); });
-  var lastPointer = 'mouse';
+  var lastPointer = 'mouse', canHover = matchMedia('(hover: hover)');
   document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || 'mouse'; }, true);
-  function setOpen(t, on) { t.classList.toggle('open', on); t.setAttribute('aria-expanded', String(on)); }
+  function setOpen(t, on) { t.classList.toggle('open', on); }
   function place(t) {
     var card = $(':scope > .term-def', t);
     t.style.setProperty('--term-dx', '0px'); t.classList.toggle('up', false);
@@ -1418,13 +1421,12 @@ svg.scene-svg .reveal.shown { opacity: 1; }
     if (!card.id) card.id = 'term-def-' + (i + 1);
     card.setAttribute('role', 'tooltip');
     if (!t.hasAttribute('tabindex')) t.tabIndex = 0;
-    t.setAttribute('aria-describedby', card.id);
     t.addEventListener('mouseenter', function () { t.classList.toggle('shut', false); place(t); });
     t.addEventListener('mouseleave', function () { t.classList.toggle('shut', false); });
     t.addEventListener('focus', function () { t.classList.toggle('shut', false); place(t); });
     t.addEventListener('blur', function () { t.classList.toggle('shut', false); setOpen(t, false); });
     t.addEventListener('click', function (e) {
-      if (lastPointer === 'mouse') return;                /* a mouse shows it on hover; a tap toggles it */
+      if (lastPointer === 'mouse' && canHover.matches) return;   /* a mouse shows it on hover; a tap (or a mouse on a touch-first screen) toggles it */
       e.preventDefault();
       var on = !t.classList.contains('open');
       closeTerms(t); setOpen(t, on); t.classList.toggle('shut', false);
