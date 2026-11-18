@@ -118,7 +118,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 
 - **One file, offline.** Fonts and scripts are packed in. No CDNs, nothing to install to read it.
 - **Light and dark, phone and desktop.** A gear switches theme, text size and drawing style.
-- **Drawings that move and stand up.** Agents write plain SVG, picked for the job: boxes and arrows to point at, isometric 3D, lit packets that show traffic, and scenes you press Play on. Every drawing opens full window with zoom and pan, and wide ones use a big screen. A real three.js scene is there too, when you ask for it.
+- **Drawings that move and stand up.** Agents write plain SVG, picked for the job: boxes and arrows to point at, isometric 3D, lit packets that show traffic, and scenes you press Play on. Every drawing opens full window with zoom and pan, and wide ones use a big screen.
 - **One reply to paste back.** Decisions sit next to a panel that builds your answer as you pick, and quotes your notes so the agent reads them as feedback, not orders.
 - **Plain words.** A built-in checker scores the writing; the skills aim for level 80 or better.
 
@@ -140,4 +140,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to make a change, rebuild the kit
 
 ## License
 
-[MIT](LICENSE) © McKay Snell. The kit packs in Latin subsets of Adobe's Source Serif 4, Source Sans 3 and Source Code Pro, renamed Snell Serif, Snell Sans and Snell Mono as their license requires (SIL Open Font License, see `kit/FONTS-LICENSE.txt`) and three.js (MIT, see `kit/THREE-LICENSE.txt`), used only by the opt-in `three-starter.html`. The banner lettering is traced from [Parisienne](https://github.com/google/fonts/tree/main/ofl/parisienne) by Astigmatic (SIL Open Font License).
+[MIT](LICENSE) © McKay Snell. The kit packs in Latin subsets of Adobe's Source Serif 4, Source Sans 3 and Source Code Pro, renamed Snell Serif, Snell Sans and Snell Mono as their license requires (SIL Open Font License, see `kit/FONTS-LICENSE.txt`). The banner lettering is traced from [Parisienne](https://github.com/google/fonts/tree/main/ofl/parisienne) by Astigmatic (SIL Open Font License).

@@ -63,12 +63,6 @@ export function buildKit(OUT) {
   if (!pb.includes(GEAR_MARK)) throw new Error('build-kit: page-body.html lost its gear placeholder');
   fs.writeFileSync(path.join(OUT, 'page.html'), head('{{TITLE}}') + pb.replace(GEAR_MARK, gearBlock) + '\n' + foot());
 
-  // ---------- three-starter.html (opt-in 3D: only when the reader asked for a three.js scene) ----------
-  const thb = read(path.join(HERE, 'three-body.html'));
-  const THREE_MARK = '{{THREE: paste kit/three.min.js here as <script>…</script>}}';
-  if (!thb.includes(GEAR_MARK) || !thb.includes(THREE_MARK)) throw new Error('build-kit: three-body.html lost its gear or three.js placeholder');
-  const threeJs = read(path.join(HERE, 'three.min.js'));
-  fs.writeFileSync(path.join(OUT, 'three-starter.html'), head('{{TITLE}}').replace('<title>{{TITLE}}</title>', '<title>{{TITLE}}</title>\n<meta name="page-file" content="{{explain/topic.html}}">') + thb.replace(GEAR_MARK, gearBlock).replace(THREE_MARK, () => `<script>${threeJs}</script>`) + '\n' + foot());
 
   // ---------- house-style.html ----------
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -280,7 +274,7 @@ export function buildKit(OUT) {
   fs.writeFileSync(path.join(OUT, 'tokens.css'), tokens);
   for (const f of ['HOUSE-STYLE.md', 'PARTS.md', 'settings.md', 'html-to-pdf.sh']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   fs.chmodSync(path.join(OUT, 'html-to-pdf.sh'), 0o755);
-  for (const f of ['vocab-check.mjs', 'vocab-common-3000.txt', 'FONTS-LICENSE.txt', 'THREE-LICENSE.txt']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
+  for (const f of ['vocab-check.mjs', 'vocab-common-3000.txt', 'FONTS-LICENSE.txt']) fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   return fs.readdirSync(OUT).sort();
 }
 

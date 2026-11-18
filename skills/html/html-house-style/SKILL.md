@@ -19,4 +19,4 @@ Defaults are in `kit/settings.md`. A `settings.md` in the project, then the user
 
 Pages that go to customers or outside people: put no customer data in the page.
 
-Drawings: read "Drawings" in HOUSE-STYLE.md first. Ask "reference or intuition?", then pick from the toolbox. A three.js scene is opt-in: ask the reader first.
+Drawings: read "Drawings" in HOUSE-STYLE.md first. Ask "reference or intuition?", then pick from the toolbox.

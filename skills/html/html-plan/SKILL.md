@@ -79,7 +79,6 @@ Hand-written SVG, from the toolbox in HOUSE-STYLE.md: flat reference drawings, i
 - **S:** at most 1. **M:** 2: the main drawing, plus a sequence (calls over time) or a before/after (what changes). **L:** 3–4.
 - Draw what the user must decide or check, not decoration. Motion is welcome when it shows how the change behaves: a request's new path, a job moving off the request path, before and after.
 - 3–8 boxes in a column drawing, 720 wide or less. A wide drawing (`data-span="wide"`) can be up to 1000 wide with up to 12 boxes; it uses a big screen and the reader can Expand it. Wider than 1000: use the viewer.
-- A real 3D scene (three.js) is opt-in: ask first (see HOUSE-STYLE.md). The default 3D look is isometric SVG.
 
 ## 5. Decisions and the response panel
 

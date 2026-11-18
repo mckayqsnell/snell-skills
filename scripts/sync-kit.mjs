@@ -29,7 +29,6 @@ export const EXIT = Object.freeze({ OK: 0, DRIFT: 1, USAGE: 2 });
 export const REQUIRED = Object.freeze([
   "HOUSE-STYLE.md", "PARTS.md", "settings.md", "tokens.css", "template.html", "explain-template.html", "page.html",
   "house-style.html", "vocab-check.mjs", "vocab-common-3000.txt", "html-to-pdf.sh", "FONTS-LICENSE.txt",
-  "three-starter.html", "THREE-LICENSE.txt",
 ]);
 
 // A known, user-facing error: printed as one line, with no stack trace.

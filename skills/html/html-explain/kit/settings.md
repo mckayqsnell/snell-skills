@@ -12,9 +12,8 @@ look:
   motion: highlight             # round 7, pick B: 180 ms fades, one pulse on the next decision, smooth jumps; still under reduced motion
 
 drawings:
-  method: svg                   # 1.1: hand-written SVG only; Rough.js (sketch look) and Mermaid are gone
+  method: svg                   # 1.1: hand-written SVG only; Rough.js, Mermaid and three.js are not used
   default_3d: isometric         # svg.iso: blocks, cylinders and routes in floor units
-  three_js: ask-first           # opt-in: ask the reader before using three-starter.html (about 800 KB)
   motion: ambient               # packets run while on screen; scenes wait for Play; still for reduced motion and print
   hues: 3                       # at most 3 hues in one drawing: teal, violet, ochre, rose, slate (plus accent, go, warn)
   wide: 1000                    # data-span="wide" drawings can be up to 1000 wide; the page reaches up to 1400 px

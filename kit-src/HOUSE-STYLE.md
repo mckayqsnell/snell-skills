@@ -12,7 +12,6 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 | `PARTS.md` | Every part: its classes and a markup snippet. About 5 KB. | Always. Copy markup from here. |
 | `explain-template.html` | A starter for explain pages: header, one concept, recap, glossary, the "still unclear" box. Not a fixed layout. | Copy only. |
 | `page.html` | A plain starter for any other page (a review, report or guide): header, one open section, one folded section with a table. | Copy only. |
-| `three-starter.html` | Opt-in: a page with a three.js scene you can turn. About 1 MB. Only when the reader said yes to it. | Copy only. |
 | `template.html` | An empty plan page with every part. **Copy it; don't read it whole.** The fonts are packed in, so it is about 180 KB. | Copy only. Read just the `<body>` if you must. |
 | `house-style.html` | Every part and drawing, live, with code to copy. For people. | Open in a browser to look. |
 | `settings.md` | The defaults: colors, fonts, drawings, vocab, models, where pages go. | Read it. A project or user copy wins. |
@@ -84,7 +83,6 @@ All of these are in the kit already. See `PARTS.md` for markup and `house-style.
 - **Scenes** (`.scene`): a drawing with Play, Back and Next. Each step sends a packet, lights up a part, or shows a new shape. Use it to show the system at work, one step at a time.
 - **Linked words** (`data-hl`): a word in the text and a shape in the drawing light up together when you point at either one.
 - **Wide** (`data-span="wide"`): on a big screen the drawing reaches past the text column, up to 1400 px.
-- **three.js** (opt-in): a real 3D scene you can turn with the mouse. It adds about 800 KB to the page and prints as a still picture. **Ask the reader first**, in one line: "Want a 3D scene you can turn (three.js, about 800 KB)? Otherwise I'll draw it in isometric SVG." Only on a yes, start from `three-starter.html`.
 
 ### Motion
 

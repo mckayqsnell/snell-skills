@@ -194,10 +194,6 @@ The same `data-hl` key on a word and on a shape lights up both when the reader p
 <svg …><g data-hl="cache"> …the cache box… </g></svg>
 ```
 
-### three.js (opt-in)
-
-Only after the reader said yes to a 3D scene they can turn. Copy `three-starter.html` whole, then edit `NODES`, `EDGES` and `STORY` in its last script. It adds about 800 KB and prints as a still picture.
-
 ## Explain parts
 
 Start from `explain-template.html`. It is a starter, not a layout: pick the parts the topic needs, in the order that teaches best.
