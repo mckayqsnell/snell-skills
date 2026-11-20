@@ -26,7 +26,7 @@ The story scene plays the cut clip inside a camera. Its markup:
         <video id="story-video" class="clip screen-video" data-start="0" data-duration="51.4" src="assets/clips/story-cut.mp4" muted playsinline></video>
         <svg class="cursor" viewBox="0 0 24 24"><path d="M5 2.5v18.2l4.6-4.3 3 6.6 3.1-1.4-3-6.4h6.4z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
       </div></div></div>
-      <div class="caption" id="cap-1">It does <span class="accent">the thing</span></div>
+      <div class="caption lower" id="cap-1">It does <span class="accent">the thing</span></div>
     </div>
   </div>
   <script src="assets/demo-kit.js"></script>
@@ -36,9 +36,9 @@ The story scene plays the cut clip inside a camera. Its markup:
     var kit = DemoKit.scene(root, window.__demo['story-cut']);
     var tl = gsap.timeline({ paused: true });
     tl.fromTo(root.querySelector('.window'), { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 0);   // the window enters, never pops on
-    kit.shot(tl, 0, 0, { rect: { x: 0, y: 0, w: 1280, h: 720 }, z: 0.88 });   // start in the inset window
-    kit.caption(tl, root.querySelector('#cap-1'), 0.3, 2.0, 'words');
-    kit.shot(tl, 3.4, 0.8, { rect: INPUT_BOX, z: 1.2 });                      // a gentle punch-in on a logged box
+    kit.shot(tl, 0, 0, {});                                                   // the whole app, full frame
+    kit.caption(tl, root.querySelector('#cap-1'), 0.6, 2.4, 'pill');
+    kit.shot(tl, 3.4, 0.9, { rect: INPUT_BOX, z: 1.2 });                      // a gentle 20% punch-in on a logged box
     kit.cursor(tl, 51.4);                                                     // the drawn cursor, from the log
     window.__timelines['story'] = tl;
   </script>
@@ -47,24 +47,25 @@ The story scene plays the cut clip inside a camera. Its markup:
 
 ## The camera
 
-- `kit.shot(tl, at, dur, { rect, z, box, ease })` frames a rect (recording CSS px) at zoom `z`, inside the inset window or full frame (`box: 'full'`). Take every rect from a `box` event in `raw/<clip>.events.json` or measure it from a frame; never guess.
+- `kit.shot(tl, at, dur, { rect, z, box, ease })` frames a rect (recording CSS px) at zoom `z`, full frame (the default) or in the inset window (`box: 'inset'`). Take every rect from a `box` event in `raw/<clip>.events.json` or measure it from a frame; never guess.
 - **Write times as source times** in the raw take and map them with `kit.src(t)`: `kit.shot(tl, kit.src(41.4), 0.6, …)`. Changing a speed ramp then never knocks the camera off its target. A freeze (`t~hold`) maps from its exact `t`.
-- Moves: 0.55–0.7 s `power3.inOut`. Arrivals: `expo.out`. A zoom-through to the next scene: 0.38–0.4 s `power3.in` with a 6–8 px blur, landing on the button the cursor pressed (freeze that frame in the cut).
-- **Zoom gently.** Cap a punch-in at about 1.25× (1.4× only for a single line being typed), and keep at least about 60% of the app's width on screen, so the nav stays in view and the viewer always knows where they are. Make the first zoom the softest: the viewer hasn't seen the layout yet. Ease into a zoom over 0.7–0.9 s.
+- **Pace for a first-time viewer.** At most one camera move every 3 s; hold at least 2 s after each arrival before the next move or cut. Moves: 0.8–1.0 s `power3.inOut`. Arrivals: `expo.out`. A zoom-through to the next scene: 0.38–0.4 s `power3.in` with a 6–8 px blur, landing on the button the cursor pressed (freeze that frame in the cut).
+- **Zoom gently.** `z` is relative to the box: 1 shows the whole app, and `kit.shot` caps it at 1.3, so at least about three quarters of the app stays on screen and the viewer always knows where they are. Most punch-ins want 1.15–1.25; raise the cap (`DemoKit.setMaxZoom`) only for one line being typed. Make the first zoom the softest: the viewer hasn't seen the layout yet.
 - Push in to read (typing, an answer, a result), pull out to show a change across the page. Hold still while the viewer reads. The window should fill the frame whenever the UI is the subject: small UI floating in empty space reads as a mistake.
 - The cursor is counter-scaled, so it stays 40–70 px on screen at any zoom. The press is shown by a small squeeze; let the UI's own response be the click feedback, with no click rings.
 
 ## Captions and cards
 
-- One short line per beat, on the side of the frame the inset leaves free, with one accent word. Vary how they enter (`'words'`, `'line'`, `'ink'`); every caption entering the same way reads as a template.
-- Start a caption only after the camera's move into the inset has finished, so the window has cleared the caption's side of the frame.
+- **Full frame is the default** for every beat where the app is the subject: it is biggest, sharpest and uncropped. Use the inset window (`box: 'inset'`) only for a beat that needs room beside the app: the title over the first look, a big caption, the claim. Move in or out of it at a calm moment, not mid-action.
+- One short line per beat with one accent word. Over a full-frame shot: `class="caption lower"` with style `'pill'`, low in the frame, clear of what the viewer is reading (move it to the top if the action is at the bottom). Beside an inset: the plain `.caption` on the left, entering with `'words'`, `'line'` or `'ink'`; vary them, since every caption entering the same way reads as a template.
+- Start a beside-the-inset caption only after the move into the inset has finished, so the window has cleared that side.
 - Readable at 360 px wide: check one frame scaled down.
 - Title and end cards use the app's own logo and face. Search the registry (`/hyperframes-registry`) before you hand-build a card or a transition.
 - Banned by default: three cards in a row, a logo docked in a corner, titles that drift after they land, everything centered.
 
 ## Sound and music
 
-- `node recorder/sfx.mjs <cut>` writes `assets/audio/<cut>-ui.wav`; play it as an `<audio>` from the story scene's start. Key ticks often need about +10 dB over what sounds right on its own.
+- `node recorder/sfx.mjs <cut>` writes `assets/audio/<cut>-ui.wav`; play it as an `<audio>` from the story scene's start. It writes them about 5 dB under the samples' own level, so they sit under the picture; keep it there (`--gain 0.8` only if the critics can't see any onsets in `audio --json`).
 - Place impacts, whooshes and pops by hand on the frames that move. Trim leading silence and give impacts about a 1.15 s exponential fade (`silenceremove`, `afade curve=exp`), or the cut-off plays as a click. Leave out room tone: users hear it as an airplane hum. Measure the sound with `npx hyperframes audio <render> --json` (onsets, loudness): nobody can listen to it.
 - **Music** (only when the user said yes): get it with the `media-use` skill (`media-use resolve --type bgm`: the HeyGen catalog when signed in, or a generated track), or use the file the user downloaded from Pixabay. Run `npx hyperframes beats` on it and land the hero moment, the payoff and the end mark on its strongest beats or the drop. Cuts follow the motion, not the drums. Keep music under the UI sounds: the bed around −23 LUFS, UI sound peaks 6–8 dB over it, key ticks quieter than clicks. Start the track on a bar line so the title hit lands on a downbeat, fade in over 0.5–1 s, and fade out over 2–3 s ending on the end card. Duck the music 3–4 dB under hero impacts (`sidechaincompress` keyed on the sfx track).
 

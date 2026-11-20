@@ -11,15 +11,15 @@
 /* .window wraps .aura, .ring and .viewport so the whole inset can enter as one (scale and fade from its centre). */
 .window { position: absolute; inset: 0; transform-origin: 1232px 540px; }
 /* Optional glow behind the inset window: only when the app has a glow of its own to borrow. */
-.aura { position: absolute; left: 640px; top: 96px; width: 1184px; height: 888px; border-radius: 40px;
+.aura { opacity: 0; position: absolute; left: 592px; top: 180px; width: 1280px; height: 720px; border-radius: 40px;
   background: conic-gradient(from 210deg, var(--accent-a), var(--accent-b), var(--accent-c), var(--accent-a));
-  filter: blur(70px); opacity: 0.35; }
-.ring { position: absolute; inset: 0;
+  filter: blur(70px); }  /* kit.shot fades it in for inset beats */
+.ring { opacity: 0; position: absolute; inset: 0;
   background: conic-gradient(from 210deg at 70% 50%, var(--accent-a), var(--accent-b), var(--accent-c), var(--accent-a));
-  clip-path: inset(93px 93px 93px 637px round 27px); }
-/* The inset matches DemoKit's default INSET (x 640, y 96, 1184 x 888, radius 24). Change both together. */
-.viewport { position: absolute; inset: 0; overflow: hidden; background: #111;
-  clip-path: inset(96px 96px 96px 640px round 24px); }
+  clip-path: inset(177px 45px 177px 589px round 23px); }
+/* Full frame by default. For box: 'inset' beats, kit.shot animates the clip to DemoKit's INSET (x 592, y 180,
+   1280 x 720, radius 20): 16:9 like the page, so nothing is cropped. Change both together. */
+.viewport { position: absolute; inset: 0; overflow: hidden; background: #111; clip-path: inset(0px 0px 0px 0px round 0px); }
 .cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
 .screen-video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; object-fit: fill; }
 .cursor { position: absolute; left: 0; top: 0; width: 50px; height: 50px; transform-origin: 0 0; pointer-events: none;
@@ -27,6 +27,11 @@
 .caption { position: absolute; left: 112px; top: 50%; width: 470px; transform: translateY(-50%);
   font-family: var(--face); font-weight: 700; font-size: 68px; line-height: 1.08; letter-spacing: -0.02em;
   color: var(--ink); opacity: 0; }
+/* Over a full-frame shot: one short line low in the frame, on a pill so it reads over any UI. Use with style 'pill'. */
+.caption.lower { left: 50%; top: auto; bottom: 64px; width: auto; max-width: 1400px; transform: translateX(-50%);
+  font-size: 44px; line-height: 1.15; padding: 18px 34px; border-radius: 999px; white-space: nowrap;
+  background: color-mix(in srgb, var(--ground-2) 82%, transparent); backdrop-filter: blur(14px);
+  box-shadow: 0 10px 40px rgba(0,0,0,.35); }
 .caption .kicker { display: block; font-weight: 500; font-size: 40px; letter-spacing: 0.01em; color: var(--quiet);
   margin-bottom: 22px; }
 .accent { background: linear-gradient(100deg, var(--accent-a), var(--accent-b) 55%, var(--accent-c));

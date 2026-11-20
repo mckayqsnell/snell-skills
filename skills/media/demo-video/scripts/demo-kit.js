@@ -1,22 +1,26 @@
 // Demo kit: helpers for screen-recording scenes in HyperFrames. Everything is a pure function of timeline time.
 //
 // Layout: the recording plays on a "screen" (1920x1080 at zoom 1, so 1 recording CSS px = 1920 / viewport width
-// frame px) inside a camera (.cam, transform-origin 0 0). A viewport clip-path shows it either full-frame or in an
-// inset window, so a caption can sit beside it while the camera keeps working inside the window.
+// frame px) inside a camera (.cam, transform-origin 0 0). A viewport clip-path shows it full-frame (the default: the app
+// at its biggest, nothing cropped) or in an inset window (box: 'inset'), for a beat with a caption beside the app.
 // Needs gsap and this markup in the scene: .window > .viewport > .cam > video.screen-video + svg.cursor (and optional
 // .ring, .aura inside .window for a glowing inset frame). Set the inset with DemoKit.setInset({ x, y, w, h, r }) before binding scenes.
 //
 //   const kit = DemoKit.scene(rootEl, clipData)      bind a scene (clipData = window.__demo[name] from cut.mjs)
-//   kit.shot(tl, at, dur, { rect, z, box, ease })    move the camera (rect in recording CSS px). The default inset is
-//                                                    4:3, so the whole 16:9 page fills it from z 0.82 (sides cropped);
-//                                                    below that it is centered with bars
+//   kit.shot(tl, at, dur, { rect, z, box, ease })    move the camera (rect in recording CSS px). z is relative to the
+//                                                    box: 1 shows the whole page, filling the box (the default), 1.2
+//                                                    is a 20% punch-in. Capped at DemoKit.setMaxZoom() (1.3), so at
+//                                                    least ~3/4 of the app always stays on screen
+//   DemoKit.setMaxZoom(z)                            raise the cap for one tight shot (a single line being typed)
 //   kit.cursor(tl, duration)                         replay the recorded pointer, drawn smooth
 //   kit.caption(tl, el, at, hold, style)             reveal a caption, hold it still, blur it out
 //   kit.src(t)                                       cut time of SOURCE time t in the raw take (through the speed
 //                                                    ramps), so re-timing a ramp never knocks a shot off its target
 (function () {
   var W = 1920; var H = 1080;
-  var INSET = { x: 640, y: 96, w: 1184, h: 888, r: 24 };
+  // 16:9 like the page, so the base shot shows the whole app with nothing cropped (at 1 CSS px per frame px).
+  var INSET = { x: 592, y: 180, w: 1280, h: 720, r: 20 };
+  var MAXZ = 1.3; // the gentlest zoom that still reads: more crops the app's nav and loses the viewer
   var S = 1.5; // frame px per recording CSS px; scene() sets it from the clip's viewport
   var FULL = { x: 0, y: 0, w: W, h: H, r: 0 };
   var easeInOut = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
@@ -67,8 +71,11 @@
     var cursorEl = q('.cursor');
 
     function shot(tl, at, dur, o) {
-      var box = o.box === 'full' ? FULL : INSET;
-      var to = frame(o.rect || { x: 0, y: 0, w: VW, h: VH }, o.z || 1, box);
+      var box = o.box === 'inset' ? INSET : FULL;
+      var fit = Math.min(box.w / W, box.h / (VH * S)); // the zoom that shows the whole page in this box
+      var rel = Math.min(o.z || 1, MAXZ);
+      if ((o.z || 1) > MAXZ) console.warn('kit.shot: z ' + o.z + ' capped at ' + MAXZ + ' (DemoKit.setMaxZoom to allow)');
+      var to = frame(o.rect || { x: 0, y: 0, w: VW, h: VH }, fit * rel, box);
       var ease = o.ease || 'power3.inOut';
       if (dur === 0) {
         tl.set(cam, to, at); tl.set(view, { clipPath: clipPath(box) }, at);
@@ -155,7 +162,8 @@
 
   // Vertical video: DemoKit.setFrame(1080, 1920) before binding scenes.
   function setFrame(w, h) { W = w; H = h; FULL.w = w; FULL.h = h; }
+  function setMaxZoom(z) { MAXZ = z; }
   function setInset(b) { INSET.x = b.x; INSET.y = b.y; INSET.w = b.w; INSET.h = b.h; INSET.r = b.r == null ? INSET.r : b.r; }
 
-  window.DemoKit = { setFrame: setFrame, setInset: setInset, scene: scene, pointerAt: pointerAt, frame: frame, clipPath: clipPath, INSET: INSET, FULL: FULL, splitWords: splitWords };
+  window.DemoKit = { setFrame: setFrame, setInset: setInset, setMaxZoom: setMaxZoom, scene: scene, pointerAt: pointerAt, frame: frame, clipPath: clipPath, INSET: INSET, FULL: FULL, splitWords: splitWords };
 })();

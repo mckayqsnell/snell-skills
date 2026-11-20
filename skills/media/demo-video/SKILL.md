@@ -5,7 +5,7 @@ description: Make a polished, hands-free demo video of an app the user built, wi
 
 # demo-video
 
-You make a demo video of the user's app with no hands on the mouse. A script drives a real browser like a person, records clean takes with no OS cursor, and logs every move. The edit draws its own smooth cursor and aims the zooms from that log. Two critics review the cut before the user sees it.
+You make a demo video of the user's app with no hands on the mouse. A script drives a real browser like a person, records clean takes with no OS cursor, and logs every move. The edit plays the app full-screen, draws its own smooth cursor and aims gentle zooms from that log. Two critics review the cut before the user sees it.
 
 **This skill's folder** holds `scripts/` (copied into each video's workspace), `platforms/` (the tools for each kind of app) and `references/` (the edit and the review). Use its full path when you run commands from elsewhere.
 
@@ -65,7 +65,7 @@ Open on the strongest moment, not on an empty form. End on a claim and an end ca
 
 ## 7. Cut, then compose
 
-- **Cut:** `node recorder/cut.mjs story story-cut "0-4.5@1,4.5-20@6,20-31@1,31.2~0.5"`. Waiting runs at 3–10×; the hero action and anything the viewer reads runs at 1×; `t~hold` freezes a frame (under a zoom-through, so the pressed button stays on screen). The cut writes the clip and the event log with its times moved to match.
+- **Cut:** `node recorder/cut.mjs story story-cut "0-4.5@1,4.5-20@6,20-31@1,31.2~0.5"`. Waiting runs at 3–6× (faster reads as a glitch); the hero action and anything the viewer reads runs at 1×, and a beat the viewer must read gets at least 2 s on screen; `t~hold` freezes a frame (under a zoom-through, so the pressed button stays on screen). The cut writes the clip and the event log with its times moved to match.
 - **Sound:** `node recorder/sfx.mjs story-cut` places key ticks and clicks on the right frames. Animation impacts: find the real frame with `node recorder/peaks.mjs`; DOM signals often fire early.
 - **Compose:** Full mode → [`references/hyperframes.md`](references/hyperframes.md). Quick mode → [`references/quick.md`](references/quick.md).
 

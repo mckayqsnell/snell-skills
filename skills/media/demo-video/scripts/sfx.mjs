@@ -9,6 +9,8 @@ import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 const name = process.argv[2];
+// UI sounds sit under the picture, not on top of it: about -5 dB from the samples' own level. --gain 0.8 for louder.
+const gi = process.argv.indexOf('--gain'); const GAIN = gi > 0 ? Number(process.argv[gi + 1]) : 0.55;
 const ROOT = process.cwd();
 if (!name) { console.error('usage: node recorder/sfx.mjs <cut-name>'); process.exit(1); }
 globalThis.window = {};
@@ -23,8 +25,8 @@ for (const f of ['key-press.mp3', 'click-soft.mp3']) {
 }
 for (const e of clip.events) {
   // light arrives before sound: each hit lands ~1 frame after its picture
-  if (e.type === 'key') hits.push({ file: 'key-press.mp3', t: e.t + 0.016, vol: 0.55 + rand() * 0.25, rate: 0.94 + rand() * 0.12 });
-  if (e.type === 'down') hits.push({ file: 'click-soft.mp3', t: e.t + 0.016, vol: 0.55, rate: 1 });
+  if (e.type === 'key') hits.push({ file: 'key-press.mp3', t: e.t + 0.016, vol: GAIN * (0.55 + rand() * 0.25), rate: 0.94 + rand() * 0.12 });
+  if (e.type === 'down') hits.push({ file: 'click-soft.mp3', t: e.t + 0.016, vol: GAIN * 0.5, rate: 1 });
 }
 fs.mkdirSync(path.join(ROOT, 'assets/audio'), { recursive: true });
 const out = path.join(ROOT, 'assets/audio', `${name}-ui.wav`);
