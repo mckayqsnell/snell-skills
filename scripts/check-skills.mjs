@@ -78,7 +78,7 @@ if (mode === 'links') {
   // references|platforms|scripts/..., not part of a longer path (so a workspace
   // path like recorder/scripts/x is left alone). Placeholders (<name>) and
   // globs (*) stop the match, so they are never checked.
-  const TOKEN = /(?<![\w./<>{}$-])(?:<skill>\/|\$\{?CLAUDE_SKILL_DIR\}?\/)?((?:references|platforms|scripts)\/[\w./-]*[\w-])(?![\w<*{])/g;
+  const TOKEN = /(?<![\w./<>{}$-])(?:<skill>\/|"?\$\{?CLAUDE_SKILL_DIR\}?"?\/|\.\/)?((?:references|platforms|scripts)\/[\w./-]*[\w-])(?![\w<*{]|\.[*{])/g;
   const LINK = /(?<!!)\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
   let checked = 0;
   for (const file of skillFiles) {
@@ -92,9 +92,11 @@ if (mode === 'links') {
         if (!fs.existsSync(path.join(dir, rel))) fail(file, i + 1, `names ${rel}, but ${path.relative(ROOT, path.join(dir, rel))} does not exist`, rel);
       }
       if (inFence) return;
-      for (const [, target] of line.matchAll(LINK)) {
+      // A link written inside `inline code` is an example, not a link.
+      for (const [, target] of line.replace(/`[^`]*`/g, '').matchAll(LINK)) {
         if (/^([a-z][a-z0-9+.-]*:|#|\/)/i.test(target)) continue; // URLs, anchors, absolute paths
-        const rel = decodeURI(target.split('#')[0]);
+        let rel = target.split('#')[0];
+        try { rel = decodeURI(rel); } catch { /* a stray % stays as written */ }
         if (!rel) continue;
         checked++;
         if (!fs.existsSync(path.join(dir, rel))) fail(file, i + 1, `links to ${target}, but ${path.relative(ROOT, path.join(dir, rel))} does not exist`, rel);

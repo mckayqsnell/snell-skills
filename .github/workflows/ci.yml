@@ -72,11 +72,11 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: shellcheck, node --check, SKILL.md paths, scrub
+      - name: shellcheck, node --check, SKILL.md paths, scrub, CI covers every step
         run: |
           set -euo pipefail
           shellcheck --version
-          bash scripts/check.sh --only shellcheck,node-syntax,links,scrub
+          bash scripts/check.sh --only shellcheck,node-syntax,links,scrub,ci-steps
 
   kit:
     name: Kit tests, sync and plain language
@@ -150,32 +150,13 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check out the code (full history, to see what changed)
+      - name: Check out the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
-      # Installing ffmpeg takes about half a minute, so the test runs only
-      # when the demo-video scripts or this test itself changed.
-      - name: Did the demo-video scripts or this test change?
-        id: changed
-        env:
-          BASE: origin/${{ github.base_ref }}
-        run: |
-          set -euo pipefail
-          if [ ! -d skills/media/demo-video/scripts ]; then
-            echo "skills/media/demo-video/ is not in this branch, nothing to test"
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet "$BASE...HEAD" -- skills/media/demo-video/ scripts/check.sh .github/workflows/ci.yml; then
-            echo "No changes to the demo-video scripts or this test since $BASE, skipping"
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Set up Node.js
-        if: steps.changed.outputs.run == 'true'
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
@@ -184,7 +165,7 @@ jobs:
       # Skips man-db's slow index rebuild, and only refreshes the package
       # lists if the runner's copy is too old to install from.
       - name: Install ffmpeg (Ubuntu package)
-        if: steps.changed.outputs.run == 'true'
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
           if ! command -v ffmpeg >/dev/null; then
@@ -194,8 +175,8 @@ jobs:
           fi
           ffmpeg -hide_banner -version | head -1
 
+      # Skips with a note when the demo-video skill is not in the branch.
       - name: Cut a test clip and map its times
-        if: steps.changed.outputs.run == 'true'
         run: |
           set -euo pipefail
           bash scripts/check.sh --only demo-video
@@ -239,7 +220,7 @@ jobs:
   # above passed (or was skipped on purpose).
   all-checks:
     name: All checks
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [plugin, lint, kit, changeset, demo-video, workflows]
     runs-on: ubuntu-24.04
     timeout-minutes: 5

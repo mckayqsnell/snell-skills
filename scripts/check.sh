@@ -26,6 +26,7 @@
 #   - changeset       a branch that changes skills/ adds a changeset (compared with origin/main)
 #   - demo-video      the demo-video scripts cut a tiny ffmpeg clip and map its times
 #                     (skipped when skills/media/demo-video/ is not in the repo)
+#   - ci-steps        every step above runs in some job in .github/workflows/ci.yml
 #
 # A tool that is missing locally (shellcheck, ffmpeg) skips its step with a
 # warning. In CI (CI=true) a missing tool fails the step instead.
@@ -35,7 +36,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
 BIN="$ROOT/node_modules/.bin"
-STEPS=(version validate skills-list frontmatter links shellcheck node-syntax markdownlint scrub tests kit-sync plain-language changeset demo-video)
+STEPS=(version validate skills-list frontmatter links shellcheck node-syntax markdownlint scrub tests kit-sync plain-language changeset demo-video ci-steps)
+SKIPPED=()
 
 SCRATCH="$(mktemp -d)"
 trap 'rm -rf -- "$SCRATCH"' EXIT
@@ -56,6 +58,7 @@ need_cmd() {
     exit 1
   fi
   echo "⚠️  $1 is not installed, so this step is skipped here ($2). CI still runs it."
+  SKIPPED+=("$CURRENT_STEP")
   return 1
 }
 
@@ -135,7 +138,7 @@ step_shellcheck() {
 }
 
 step_node-syntax() {
-  local files=() f bad=0
+  local files=() f out bad=0
   while IFS= read -r f; do files+=("$f"); done < <(git ls-files \
     ':(glob)skills/**/scripts/*.mjs' ':(glob)skills/**/scripts/*.js' 'scripts/*.mjs')
   for f in "${files[@]}"; do
@@ -159,6 +162,8 @@ step_scrub() {
   # Personal home-folder paths, the old hard-coded vault, email addresses,
   # and common token shapes (GitHub, OpenAI/Anthropic, AWS, private keys).
   local pattern allow hits
+  # Keep the next line unindented: the scrub skips its own pattern= line by
+  # matching "check.sh:<n>:pattern=" (see below).
 pattern='/Users/[A-Za-z]|/home/[a-z][a-z0-9_-]*/|obsidian-vault|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
   # Allowed: git's noreply addresses and the git@github.com SSH host. These
   # are cut out of each matching line before it is checked again, so another
@@ -210,6 +215,7 @@ step_changeset() {
   if ! git rev-parse --verify --quiet "$base^{commit}" >/dev/null; then
     if [ "${CI:-}" = "true" ]; then echo "❌ $base is not fetched" >&2; exit 1; fi
     echo "⚠️  $base is not fetched, so this step is skipped here (run: git fetch origin main). CI still runs it."
+    SKIPPED+=("$CURRENT_STEP")
     return 0
   fi
   local changed
@@ -286,31 +292,58 @@ JSON
   echo "✅ cut.mjs and srctime.mjs work on a test clip"
 }
 
+step_ci-steps() {
+  # Every step must be in some job's `check.sh --only ...` list, or it would
+  # pass locally and never run on a pull request.
+  local wf=.github/workflows/ci.yml listed missing=() s
+  listed="$(grep -oE 'check\.sh --only [a-z,-]+' "$wf" | sed 's/.* //' | tr ',' '\n' | sort -u)"
+  for s in "${STEPS[@]}"; do
+    printf '%s\n' "$listed" | grep -Fxq -- "$s" || missing+=("$s")
+  done
+  if [ "${#missing[@]}" -gt 0 ]; then
+    echo "❌ $wf runs no job for: ${missing[*]}. Add them to a job's check.sh --only list." >&2
+    exit 1
+  fi
+  echo "✅ all ${#STEPS[@]} steps run in a CI job"
+}
+
 run_step() {
+  CURRENT_STEP="$1"
   printf '\n▶ %s\n' "$1"
   "step_$1"
+}
+
+summary() {
+  if [ "${#SKIPPED[@]}" -gt 0 ]; then
+    printf '\n✅ %s, but skipped here: %s (CI runs them)\n' "$1" "${SKIPPED[*]}"
+  else
+    printf '\n✅ %s\n' "$1"
+  fi
 }
 
 only=""
 case "${1:-}" in
   "") ;;
   --list) printf '%s\n' "${STEPS[@]}"; exit 0 ;;
-  --only) only="${2:?--only needs a step name (see --list)}" ;;
-  --only=*) only="${1#--only=}" ;;
+  --only) only="${2:-}"; [ "$#" -le 2 ] || { echo "❌ too many arguments (use --only a,b,c)" >&2; exit 2; } ;;
+  --only=*) only="${1#--only=}"; [ "$#" -le 1 ] || { echo "❌ too many arguments (use --only=a,b,c)" >&2; exit 2; } ;;
   -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
   *) echo "❌ unknown argument: $1 (try --help)" >&2; exit 2 ;;
 esac
 
-command -v git >/dev/null || { echo "❌ git is not installed" >&2; exit 1; }
+case "${1:-}" in --only|--only=*) [ -n "$only" ] || { echo "❌ --only needs step names (see --list)" >&2; exit 2; } ;; esac
+for tool in git node; do
+  command -v "$tool" >/dev/null || { echo "❌ $tool is not installed" >&2; exit 1; }
+done
 
 if [ -z "$only" ]; then
   for s in "${STEPS[@]}"; do run_step "$s"; done
-  printf '\n✅ All %s checks passed\n' "${#STEPS[@]}"
+  summary "All ${#STEPS[@]} checks passed"
 else
   IFS=',' read -r -a picked <<<"$only"
   for s in "${picked[@]}"; do
     printf '%s\n' "${STEPS[@]}" | grep -Fxq -- "$s" || { echo "❌ unknown step: $s (known: ${STEPS[*]})" >&2; exit 2; }
   done
   for s in "${picked[@]}"; do run_step "$s"; done
-  printf '\n✅ Passed: %s\n' "$only"
+  summary "Passed: $only"
 fi
