@@ -316,6 +316,14 @@ concurrency:
   strictest.
 - **shellcheck** checks every `.sh` file for common shell bugs.
 
+The rest of CI is `scripts/check.sh`, split into parallel jobs: plugin and
+skills (validate, listing, frontmatter, markdownlint), scripts and scrub,
+the kit, the changeset rule, and a demo-video smoke test with ffmpeg. An
+**All checks** job at the end is green only when every other job passed or
+was skipped, so it's the one status to require in branch protection. A
+separate **Links** workflow runs lychee every Monday; it never runs on pull
+requests, so a site that's down can't block a merge.
+
 ## 4. One kit, a copy in each skill
 
 The three html skills look the same because they read the same kit: the page

@@ -1,0 +1,17 @@
+// markdownlint: only the rules that catch broken tables and code fences.
+// Style rules (line length, inline HTML, heading style...) stay off on purpose:
+// the skills are prose for agents, not a style guide.
+{
+  "config": {
+    "default": false,
+    "MD031": { "list_items": true }, // a code fence needs a blank line before and after
+    "MD040": true, // a code fence names its language (```bash, ```text)
+    "MD046": { "style": "fenced" }, // code blocks are fenced, not indented
+    "MD048": { "style": "consistent" }, // fences use one style per file
+    "MD055": true, // table rows start and end with a pipe the same way
+    "MD056": true, // every table row has the same number of cells
+    "MD058": true // a table has a blank line before and after
+  },
+  // Built copies (kit/) and generated files are checked at their source.
+  "ignores": ["**/node_modules/**", "skills/*/*/kit/**", "CHANGELOG.md"]
+}

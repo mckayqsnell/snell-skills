@@ -1,4 +1,6 @@
 # CI: validates every pull request before it can be merged.
+# Each job runs a few steps of scripts/check.sh (`--only <steps>`), so CI and
+# `pnpm run check` share one list of checks. The jobs run side by side.
 # See docs/how-it-works.md for what each safety setting below guards against.
 name: CI
 
@@ -16,8 +18,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Plugin, skills, scripts and scrub
+  # The only checks that need node_modules (the claude, skills, yaml and
+  # markdownlint packages).
+  plugin:
+    name: Plugin, skills and Markdown
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -44,11 +48,132 @@ jobs:
           set -euo pipefail
           pnpm install --frozen-lockfile
 
-      - name: Run the check suite
+      - name: Version, plugin validate, skills listing, frontmatter, markdownlint
+        run: |
+          set -euo pipefail
+          bash scripts/check.sh --only version,validate,skills-list,frontmatter,markdownlint
+
+  # Plain Node and shell tools: no install step.
+  lint:
+    name: Scripts, links and scrub
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: shellcheck, node --check, SKILL.md paths, scrub
         run: |
           set -euo pipefail
           shellcheck --version
-          pnpm run check
+          bash scripts/check.sh --only shellcheck,node-syntax,links,scrub
+
+  kit:
+    name: Kit tests, sync and plain language
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Tests, kit sync, plain-language floor
+        run: |
+          set -euo pipefail
+          bash scripts/check.sh --only tests,kit-sync,plain-language
+
+  changeset:
+    name: Changeset for skill changes
+    # The release workflow's Version Packages PR uses up the changesets.
+    if: github.head_ref != 'changeset-release/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the code (full history, to compare with main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      # Only @changesets/cli is needed, and it has no install scripts.
+      - name: Install dependencies (exact versions, no install scripts)
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Require a changeset when skills/ changes
+        env:
+          CHANGESET_BASE: origin/${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          bash scripts/check.sh --only changeset
+
+  demo-video:
+    name: demo-video scripts smoke test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install ffmpeg (Ubuntu package)
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null
+          fi
+          ffmpeg -hide_banner -version | head -1
+
+      # Skips with a note when the demo-video skill is not in the repo.
+      - name: Cut, map and scan a test clip
+        run: |
+          set -euo pipefail
+          bash scripts/check.sh --only demo-video
 
   workflows:
     name: Lint workflows (actionlint, zizmor)
@@ -84,3 +209,26 @@ jobs:
         run: |
           set -euo pipefail
           pipx run "zizmor==${ZIZMOR_VERSION}" --offline --persona=auditor .github/
+
+  # One status to require in branch protection: green only when every job
+  # above passed (or was skipped on purpose).
+  all-checks:
+    name: All checks
+    if: always()
+    needs: [plugin, lint, kit, changeset, demo-video, workflows]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every job passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -euo pipefail
+          echo "Job results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in
+              success|skipped) ;;
+              *) echo "::error::A CI job ended as '$r'."; exit 1 ;;
+            esac
+          done
