@@ -17,25 +17,26 @@ Read the project first (`package.json`, any design docs). Don't ask what the rep
 
 Ask **one question at a time**. Put a short guess after each one ("My guess: quiet, about a 2"), so the user can just say yes. Build the guess from their earlier answers, not from what most people would say. A specific guess that might be wrong beats a safe one.
 
-Ask these 9, in this order. Skip any the user has already answered.
+Ask these 7, in this order. Skip any the user has already answered. It usually takes 5 to 8 turns. When the Stop rule below is met, stop, even if questions are left.
 
 1. **What is it, and who is it for?**
 2. **Where do they see it, and what's on it?** The screen matters: a laptop, a phone, a museum iPad, a projector. What's on it sets the density. Is it a few big things, or lots of small ones?
-3. **Hard limits.** Ask about these six, because they rule picks out:
+3. **Hard limits.** Ask about these six in one message, as a list the user can answer in one go, because they rule picks out:
    - the stack, and who builds it
-   - who edits it after launch, and where it lives (a repo, Shopify, a CMS)
+   - who edits it after launch, and where it lives (a repo, Shopify, a CMS: a tool for editing site content)
    - devices
    - deadline
-   - accessibility needs
+   - accessibility needs (the default is WCAG AA, the usual web standard)
    - money for paid tools
 
    Ask about sound, offline, print, shared data, light or dark, and brand only if earlier answers point there.
 4. **Three sites, apps or things you love the feel of.** Any kind. Then ask what exactly they love about each: the type, the color, the motion, the quiet, the texture.
-5. **Volume: 1 quiet to 5 loud.**
-6. **Play: 1 serious to 5 playful.**
-7. **The alive thing: what's the one moment people will remember?** It doesn't have to move. It can be a card you flip, a sound, a material, or a detail in the words.
-8. **Motion: how much, and what kind?** None, a little, a lot, or the whole page. Gentle, snappy, bouncy or cinematic. "A lot, but gentle" is a fine answer.
-9. **What would make you hate it?**
+5. **The dials.** Ask all three at once, with a guess for each:
+   - volume, 1 quiet to 5 loud
+   - play, 1 serious to 5 playful
+   - motion: none, a little, a lot, or the whole page; and gentle, snappy, bouncy or cinematic. "A lot, but gentle" is a fine answer.
+6. **The alive thing: what's the one moment people will remember?** It doesn't have to move. It can be a card you flip, a sound, a material, or a detail in the words.
+7. **What would make you hate it?**
 
 **Push back on vague answers.** "Clean", "modern", "fun", "nice", "simple" and "immersive" aren't answers yet. Give two or three concrete options: "Clean like Vercel's docs, or clean like a Muji catalog?" Push back at most twice per question, then write down your best reading.
 
@@ -43,7 +44,7 @@ Ask these 9, in this order. Skip any the user has already answered.
 
 **Stop** when you can sum up the feel in 3 or 4 sentences that rule things out. Every pick in step 3 should be clear by then.
 
-**Nobody to answer?** Maybe you run as a sub-agent or in a script, or the user said "don't ask". Use the brief you were given. Guess the rest and mark each guess "(guess)". Skip every "wait for the user" step below, and keep the marks in the note.
+**Nobody to answer?** Maybe you run as a sub-agent or in a script, or the user said "don't ask". Use the brief you were given. Guess the rest and mark each guess "(guess)". Skip the wait at the end of step 2 and the swap at the end of step 3. Keep the marks in the note.
 
 ## 2. Vibe brief
 
@@ -59,11 +60,11 @@ Limits: <the ones that apply>
 Not this: <looks to stay away from>
 ```
 
-List every "(guess)" under it in one message: "I guessed these. Fix any that are wrong." A guess the user can't answer stays marked "(default)", not "confirmed". Wait for a yes. When they correct it, show the brief again.
+List every "(guess)" under it in one message: "I guessed these. Fix any that are wrong." A guess the user can't answer keeps its "(guess)" mark. Wait for a yes. When they correct it, show the brief again.
 
 ## 3. Pick
 
-1. Read **Route by vibe** in `references/catalog.md`. Choose 1 or 2 families from what the user loves: the loved things and the alive thing. Then check them against the dials. Then read only the catalog rows that name those families.
+1. Read **Route by vibe** in `references/catalog.md`. Choose 1 or 2 families from what the user loves: the loved things and the alive thing. Then check them against the dials. Then read the catalog rows that name those families, plus rows tagged All, the **No library needed** section, and any section a limit points to (editing, shared data, licenses).
 2. If the user has the AI Builder Day team list (`AIBuilderDay/hackathon-resources`, a local clone or `gh api repos/AIBuilderDay/hackathon-resources/readme --jq .content | base64 --decode`), read it too. Treat its items like catalog items. If you can't reach it, skip it quietly.
 3. Apply the limits first. Cross out what the stack, builder, devices, budget or license rule out.
 4. Pick **2 or 3 sources**: usually one base and one for the alive thing. The alive thing may need no library at all (a CSS trick, a type detail, the words, speed). When that fits, prefer it. For each pick, say why it fits and where it shows up.
@@ -76,12 +77,12 @@ Show the picks and let the user swap any of them. Then write the note.
 
 ## 4. Build note
 
-Copy `references/build-note.md` to `design/vibe.md` in the project, or wherever the user wants it. Fill it in, and replace every `{{…}}`: `grep -n '{{' design/vibe.md` must print nothing. Keep it to about 800 words plus the brief, in bullets. Cut adjectives, not decisions. A coding agent should be able to build from it with nothing else.
+Copy `references/build-note.md` to `design/vibe.md` in the project, or wherever the user wants it. Fill it in, and replace every `{{…}}`: `grep -n '{{' design/vibe.md` must print nothing. Keep the decisions to about 800 words plus the brief, in bullets. Long stand-in copy goes in a section at the end, so it doesn't count. Cut adjectives, not decisions. A coding agent should be able to build from it with nothing else.
 
-- Put the brief in word for word, with any "(default)" marks.
+- Put the brief in word for word, with any "(guess)" marks.
 - Check install lines with `npm view <pkg> version`.
-- Check every text color against its background for WCAG AA.
+- Check every text color against its background for WCAG AA (4.5:1 for body text) with a tool, not by eye: Leonardo, oklch.com, or a short script.
 - Fill the Avoid list with the user's "not this" answers. Add the 3 or 4 tells from the catalog's **Generic-AI tells** this page could fall into.
-- Make the Check list fit their screens and limits.
+- Make the Check list fit their screens and limits. If the page changes with time, data or state, add a URL switch to the Check list (like `?hour=2`) so each state can be seen.
 
 End by printing the path to the note and one line: "Hand this to the agent that builds it."
