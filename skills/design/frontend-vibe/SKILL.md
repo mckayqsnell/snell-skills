@@ -17,7 +17,7 @@ Ask **one question at a time**. Put a short guess after each one, one or two sen
 
 Ask these 8, in this order. Skip or fold in any the user has already answered:
 
-1. **What is it, who is it for, and where do they see it?** One sentence each. The screen matters: laptop, phone from Instagram, museum iPad, a projector. Also: what's on it? A few big things or lots of small ones (text, images, video, live data)?
+1. **What is it, who is it for, and where do they see it?** One sentence each. The screen matters: laptop, phone from Instagram, museum iPad, a projector. Also: what's on it? A few big things or lots of small ones (text, images, video, live data)? That answer sets the density dial.
 2. **Hard limits.** Give a checklist and let them tick it: stack and who builds it (a React dev? someone who knows basic HTML?), where it will live (a repo, Shopify, a CMS), deadline, devices and browsers (old iPads?), touch or keyboard, speed, accessibility and the users' age or reading level, light or dark, saved or shared data (and whether people log in), sound, offline, print, money for paid tools, brand colors or fonts they're stuck with. These come early because they rule picks out.
 3. **Three sites, apps or things you love the feel of.** Any kind, not just this kind of product. Then ask what exactly they love about each: the type, the color, the motion, the quiet, the texture.
 4. **Volume: 1 quiet to 5 loud.**
@@ -58,14 +58,14 @@ Ask about every "(guess)" by name: "I guessed X for your deadline. Right?" Don't
 4. Pick **2 or 3 sources**: usually one base and one or two that make the alive thing. For each, say why it fits the brief and where it shows up on the page.
 5. **Make it theirs.** Ask yourself: would anyone with these dials get this exact set? If yes, swap one piece for something tied to this user's own answers: a loved site, the alive thing, a material. The owner's own stuff (their handwriting, their photos, their real data) beats any library. Borrowing from a neighbouring family is often the way. Stay inside the dials: a quiet, serious brief gets a more exact detail, not an effect.
 6. **Vary on purpose.** When two or more options fit the brief equally (two serifs, two shader effects), pick one at random and say it was a toss-up, naming the other. Two runs on the same brief should land in the same family with different details. Never randomize anything the brief decided.
-7. **Check each pick still works**: the link loads, the repo isn't archived, and it's either active (a release in the last year) or clearly finished and stable. Fonts and plain CSS can be finished. Say in one line if one fails, and pick another.
+7. **Check each pick still works**: the link loads, the repo isn't archived, and it's either active (a release in the last year) or clearly finished and stable. Fonts and plain CSS can be finished. If the note will name a specific component or effect (a side panel, a `Water` shader), check it exists in the current docs or package, not just in a blog post. Say in one line if one fails, and pick another.
 8. **Nothing fits?** Search the web for well-maintained options (active repo, real docs, a license you can use). Label anything not in the catalog **new**, so the user knows it wasn't vetted.
 
 Show the picks and let the user swap any of them before you write the note.
 
 ## 4. Build note
 
-Copy `references/build-note.md` into the project as `design/vibe.md`, or wherever the user wants it, and fill it in. **About 600 words, plus the brief**: bullets, not paragraphs. A coding agent should be able to build from it with no other context. It holds the brief word for word, the picks with checked install lines (`npm view <pkg> version`), the tokens, where each effect goes, the motion rules, the limits that change the build, an Avoid list and a Check list.
+Copy `references/build-note.md` into the project as `design/vibe.md`, or wherever the user wants it, and fill it in. **About 800 words, plus the brief**: bullets, not paragraphs. Cut adjectives, not decisions. A coding agent should be able to build from it with no other context. It holds the brief word for word, the picks with checked install lines (`npm view <pkg> version`), the tokens (with every text color checked for contrast), where each effect goes, the motion rules, the limits that change the build, an Avoid list and a Check list.
 
 Fill the Avoid list with this user's "not this" answers plus the 3 or 4 tells from the catalog's **Generic-AI tells** that this page is most likely to fall into. Make the Check list fit their screens and limits, not a stock list.
 

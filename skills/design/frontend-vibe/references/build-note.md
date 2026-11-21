@@ -1,6 +1,6 @@
 # Build note: {{project}}
 
-Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with your defaults, the note wins. Keep it to about 600 words plus the brief: bullets, not paragraphs.
+Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with your defaults, the note wins. Keep it to about 800 words plus the brief: bullets, not paragraphs. Cut adjectives, not decisions.
 
 ## Feel
 
@@ -14,18 +14,18 @@ Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with
 
 ## Tokens
 
-- **Fonts:** {{display face}} for {{where}}, {{text face}} for the rest. Load: {{how}}.
-- **Colors:** background, surface, text, muted text, accent (used only for {{what}}). Write them in `oklch()`, with hex fallbacks if Limits names old browsers. Light and dark: {{both / one}}.
+- **Fonts:** {{display face}} for {{where}}, {{text face}} for the rest. Two faces, three at most. Load: {{how}}.
+- **Colors:** background, surface, text, muted text, accent (used only for {{what}}). Every text and background pair below was checked for WCAG AA contrast. Write them in `oklch()`, with hex fallbacks if Limits names old browsers. Light and dark: {{both / one}}.
 - **Shape:** radius {{px}}, borders {{style}}, shadows {{none / one level}}.
-- **Space:** {{scale, e.g. 4 8 12 16 24 40 64}}. Content width {{px}}.
+- **Space:** {{scale, e.g. 4 8 12 16 24 40 64}}. Content width {{px}}. If the base pick has its own scale (Open Props, Tailwind, Kumo), name its tokens instead of inventing numbers.
 
 ## Page, section by section
 
 1. **{{section}}**: {{what's in it}}. Effect: {{pick + settings, or "none"}}.
 
-**The first 5 seconds:** {{what someone sees right after it loads. No empty boxes, no long preloader: live views start part-way full, and effects start after the content shows.}}
+**The first 5 seconds:** {{what someone sees right after it loads. No empty boxes, no long preloader: live views start part-way full, and effects start after the content shows. If the real data starts empty (count 0, no posts yet), design that empty state as its own moment and say so here.}}
 
-The alive thing is **{{one moment}}**. Spend the effort there, and keep what's around it quiet.
+The alive thing is **{{one moment}}**. Spend the most effort there. {{If motion is "none" or "a little": keep everything around it still, so it stands out. If "a lot": the rest can move too, but smaller and faster than the alive thing.}}
 
 **Content the owner supplies:** {{scans, photos, copy, data}}. Until it arrives, build a believable stand-in ({{e.g. an SVG handwritten card, a public sample model, simulated data}}), so the alive thing can be judged now. Never ship a grey "placeholder" box in its place.
 
