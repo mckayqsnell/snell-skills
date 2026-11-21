@@ -56,4 +56,5 @@ Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with
 - [ ] Text passes WCAG AA contrast; focus is visible; it works with {{keyboard / touch}}.
 - [ ] Reduced motion works as written above.
 - [ ] {{a limit check, e.g. "prints one recipe per page", "under 300 kB of JS, gzipped, before the effect loads"}}
+- [ ] Put it next to each loved site. Could someone mistake it for that site? If yes, change more than the logo.
 - [ ] Read the Feel again and look at the page. If it could be any other site, fix the alive thing first.
