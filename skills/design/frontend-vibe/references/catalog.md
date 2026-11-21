@@ -14,7 +14,7 @@ Find the 1 or 2 families closest to the brief's dials. Then read their rows in t
 | **Editorial**: led by type, reads like a magazine | volume 1-3, play 1-3 | Plain CSS + Open Props, or Astro | Pretext text wrapping around shapes, GSAP SplitText, Lenis scroll | A real serif (Fontshare, Collletttivo, Velvetyne) + a quiet sans |
 | **Archive and print**: keepsakes, recipes, collections | volume 1, play 1-3 | Plain HTML and CSS, no build step | A CSS 3D card flip, a zoomable scan, paper texture (Paper Shaders Paper Texture), a print stylesheet | A book serif + a typewriter or hand face |
 | **Warm and cozy**: friendly, soft, easy | volume 2-3, play 3-4 | Radix Themes, HeroUI, Mantine, or plain CSS | Motion springs, Auto Animate lists, soft sounds (Tone.js, Howler), a Rive character | A rounded or humanist sans (Fontshare), Phosphor icons |
-| **Toy box**: tactile, bouncy, makes you poke it | volume 3-5, play 4-5 | neobrutalism.dev, React Bits, or plain CSS | Pokemon Cards CSS foil, Atropos tilt, Matter.js physics, Rough.js sketch lines, sound | A chunky display face + mono |
+| **Toy box**: tactile, bouncy, makes you poke it | volume 3-5, play 4-5 | Plain HTML and CSS (most common), or neobrutalism.dev and React Bits for React | Pokemon Cards CSS foil, Atropos tilt, Matter.js physics, Rough.js sketch lines, sound | A chunky display face + mono |
 | **Zine and collage**: DIY, photocopied, stickers and tape | volume 4-5, play 3-5 | Plain HTML and CSS | Things you drag and stack (Matter.js), torn-paper SVG edges, photocopy grain (CSS filters + SVG noise), a Wrapped-style story of your own stats | A condensed grotesk + a typewriter face |
 | **Cinematic**: the page is the show | volume 4-5, any play | Almost none: a few plain controls | ShaderGradient, Spark splats, Canvas UI, Paper Shaders, Unicorn Studio, GSAP ScrollTrigger + Lenis | One big display face, used huge |
 | **Retro OS and games**: nostalgia, joke-friendly | play 4-5 | 98.css, 7.css, XP.css, NES.css, 8bitcn | Sounds, pixel art, CRT or VHS effect (Canvas UI VHS) | Geist Pixel, Departure Mono, system fonts |
@@ -118,6 +118,8 @@ The browser can do these on its own. Reach for them before adding a package.
 - **Card flips and tilts:** CSS 3D transforms (`perspective`, `rotateY`, `backface-visibility`).
 - **Page and state changes:** [View Transitions](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API).
 - **Respecting motion settings:** [`prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
+- **Blips and clicks:** the Web Audio API makes a short square-wave or sine beep in about 10 lines. No sound files.
+- **Offline:** a small service worker that caches the page, fonts and data.
 - **Print:** an `@media print` stylesheet. Hide the chrome, set page breaks, use black text.
 
 ## Motion
