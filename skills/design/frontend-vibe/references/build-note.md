@@ -4,7 +4,7 @@ Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with
 
 ## Feel
 
-{{The confirmed brief, word for word, with any "(default)" marks.}}
+{{The brief, word for word, with any "(guess)" marks.}}
 
 ## Picks
 
@@ -12,13 +12,13 @@ Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with
 | :- | :- | :- | :- |
 | {{name}} | {{base / the alive thing / motion}} | `{{npm i ...}}` or {{CDN / copy the CSS / no library}} | {{llms.txt or .md link, or "none"}} |
 
-{{Any "use only part of it" warning, e.g. "Geist: use the font and color tokens only; don't install @vercel/geistcn, it isn't public."}}
+{{Any "use only part of it" warning, e.g. "Geist: use the font and color tokens only; don't install @vercel/geistcn, it isn't public." Delete this line if there is none.}}
 
 ## Tokens
 
 - **Fonts:** {{display face}} for {{where}}, {{text face}} for the rest. Load: {{how}}.
-- **Colors:** background {{}}, surface {{}}, text {{}}, muted text {{}}, accent {{}} (used only for {{what}}). Each text color passes WCAG AA on its background. Light and dark: {{both / one}}.
-- **Color format:** `oklch()` in CSS{{, with hex fallbacks for the old browsers in Limits}}. Any color passed to a shader, canvas or chart library also gets a hex copy: many of them can't read `oklch()`.
+- **Colors:** background {{value}}, surface {{value}}, text {{value}}, muted text {{value}}, accent {{value}} (used only for {{what}}). Each text color passes WCAG AA on its background. Light and dark: {{both / one}}.
+- **Color format:** {{`oklch()` in CSS, or the base's own color tokens if it has them}}{{, with hex fallbacks for the old browsers in Limits}}. Any color passed to a shader, canvas or chart library also gets a hex copy: many of them can't read `oklch()`.
 - **Shape:** radius {{px}}, borders {{style}}, shadows {{none / one level}}.
 - **Space:** {{the base's own token names, or a scale like 4 8 12 16 24 40 64}}. Content width {{px}}.
 
@@ -30,7 +30,7 @@ Written by frontend-vibe on {{date}}. Build from this note. If it conflicts with
 
 **Empty state:** {{what it looks like when the real data is empty (count 0, no posts yet), or "none"}}.
 
-**The alive thing** is {{one moment}}. Spend the most effort there. {{"Keep everything around it still so it stands out" for motion none or a little; "the rest can move, but smaller and faster" for a lot.}}
+**The alive thing** is {{one moment}}. Spend the most effort there. {{"Keep everything around it still so it stands out" for motion none or a little; "the rest can move, but smaller and faster" for a lot; "everything moves, but this moment moves most and lasts longest" for the whole page.}}
 
 **Stand-ins:** {{what the owner will supply (photos, scans, copy, data)}}. Until then, build believable stand-ins ({{e.g. SVG film frames, a public sample model, simulated data}}), never a grey box. Mark each one `STAND-IN` in the code, and never state a stand-in as fact in the page's words.
 

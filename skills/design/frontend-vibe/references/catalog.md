@@ -1,6 +1,6 @@
 # Catalog
 
-Sources the frontend-vibe skill picks from. Each one was checked in November 2026: the link loads, the repo is active and not archived, and the npm name is real. Check again before you hand one off (SKILL.md, step 3).
+Sources the frontend-vibe skill picks from. Each one was checked in November 2026: the link loads, the repo is active (or clearly finished) and not archived, and the npm name is real. Check again before you hand one off (SKILL.md, step 3).
 
 "Agent docs" means the source publishes Markdown made for agents: an `llms.txt`, or pages that work with `.md` added to the URL. Point the builder at those docs; they read better than scraped HTML.
 
@@ -13,7 +13,7 @@ Choose 1 or 2 families from what the user loves (the loved things and the alive 
 | **Quiet tool**: black and white, precise, fast | volume 1-2, play 1-2 | Geist's tokens on a restyled shadcn/ui, Kumo, Base UI, coss ui; Astro or Starlight for static sites and docs | Real code or terminal output (Shiki, Expressive Code), a precise detail (live numbers, a real changelog), Paper Shaders Dithering or Dot Grid, View Transitions | Geist Sans + Mono, IBM Plex, Switzer |
 | **Quiet with a wink**: calm, with one joke in it | volume 1-2, play 4-5 | A Quiet tool or Editorial base, often plain CSS | One playful detail and nothing else: a mark that reacts to the cursor, a hidden easter egg, a hand-drawn squiggle, a joke in the words | A precise sans + one odd display face, used once |
 | **Editorial**: led by type, reads like a magazine | volume 1-3, play 1-3 | Plain CSS + Open Props, or Astro | Pretext text wrapping around shapes, GSAP SplitText, Lenis scroll | A real serif (Fontshare, Collletttivo, Velvetyne) + a quiet sans |
-| **Archive and print**: keepsakes, recipes, collections | volume 1, play 1-3 | Plain HTML and CSS, no build step | A CSS 3D card flip, a zoomable scan, paper texture (Paper Shaders Paper Texture), a print stylesheet | A book serif + a typewriter or hand face |
+| **Archive and print**: keepsakes, recipes, collections | volume 1, play 1-3 | Plain HTML and CSS, no build step | A CSS 3D card flip, a zoomable scan, paper texture (an SVG `feTurbulence` grain first; Paper Shaders Paper Texture if there's a build step), a print stylesheet | A book serif + a typewriter or hand face |
 | **Warm and cozy**: friendly, soft, easy | volume 2-3, play 3-4 | Radix Themes, HeroUI, Mantine, or plain CSS | Motion springs, Auto Animate lists, soft sounds (Tone.js, Howler), a Rive character | A rounded or humanist sans (Fontshare), Phosphor icons |
 | **Toy box**: tactile, bouncy, makes you poke it | volume 3-5, play 4-5 | Plain HTML and CSS (most common), or neobrutalism.dev and React Bits for React | Pokemon Cards CSS foil, Atropos tilt, Matter.js physics, Rough.js sketch lines, sound | A chunky display face + mono |
 | **Zine and collage**: DIY, photocopied, stickers and tape | volume 4-5, play 3-5 | Plain HTML and CSS | Things you drag and stack (Matter.js), torn-paper SVG edges, photocopy grain (CSS filters + SVG noise), a Wrapped-style story of your own stats | A condensed grotesk + a typewriter face |
@@ -28,9 +28,9 @@ Choose 1 or 2 families from what the user loves (the loved things and the alive 
 
 | Source | Gives you | Families | Stack, install, notes |
 | :- | :- | :- | :- |
-| [Vercel Geist](https://vercel.com/geist) | The black-and-white Vercel look: colors, type, grid, materials. | Quiet tool, AI chat | Agent docs (`.md` on any page). Its docs show `@vercel/geistcn`, but that package isn't public: take the tokens and font, build on shadcn/ui, and say so in the note. Borrow the look, never the logo or brand. |
+| [Vercel Geist](https://vercel.com/geist) | The black-and-white Vercel look: colors, type, grid, materials. | Quiet tool, AI chat | Agent docs (`.md` on subpages, e.g. `vercel.com/geist/colors.md`). Its docs show `@vercel/geistcn`, but that package isn't public: take the tokens and font, build on shadcn/ui, and say so in the note. Borrow the look, never the logo or brand. |
 | [Geist font](https://vercel.com/font) | Geist Sans, Mono, Serif and Pixel. | Quiet tool, AI chat, Retro OS and games | `npm i geist`. Google Fonts has Sans, Mono and Pixel; Serif is npm only. OFL. |
-| [Cloudflare Kumo](https://kumo-ui.com) | Cloudflare's product UI: accessible React components on Base UI, blocks, light and dark tokens, a command palette, and a way to render AI-made UI from JSON. | Quiet tool, Live ops, Dense data | Agent docs. `npm i @cloudflare/kumo @phosphor-icons/react` (optional peers: `zod` for the JSON-to-UI part, `echarts` for charts); `npx @cloudflare/kumo doc Button` prints docs. MIT. It doesn't stream text or logs for you. Its brand color is blue, not Cloudflare orange; check buttons in dark mode if you change it. |
+| [Cloudflare Kumo](https://kumo-ui.com) | Cloudflare's product UI: accessible React components on Base UI, blocks, light and dark tokens, a command palette, and a way to render AI-made UI from JSON. | Quiet tool, Live ops, Dense data | Agent docs. `npm i @cloudflare/kumo @phosphor-icons/react` (optional peers: `zod` for the JSON-to-UI part, `echarts` for charts); `npx @cloudflare/kumo doc Button` prints docs. With Tailwind v4, put `@import "@cloudflare/kumo/styles/tailwind";` before `@import "tailwindcss";` and add `@source "../node_modules/@cloudflare/kumo/dist/**/*.{js,jsx,ts,tsx}";`, or dialogs and other parts render unstyled. MIT. It doesn't stream text or logs for you. Its brand color is blue, not Cloudflare orange; check buttons in dark mode if you change it. |
 | [shadcn/ui](https://ui.shadcn.com) | Copy-in React components that you own. The base most libraries below build on. | All React families | Agent docs. Restyle it: the stock grays and radius are the biggest AI tell there is. MIT. |
 | [shadcn-vue](https://www.shadcn-vue.com), [shadcn-svelte](https://www.shadcn-svelte.com), [Nuxt UI](https://ui.nuxt.com) | The same copy-in idea for Vue, Svelte and Nuxt. | Any family, when the stack is Vue or Svelte | MIT. `npm i @nuxt/ui` for Nuxt. |
 | [Astro](https://astro.build) | Static sites that ship almost no JS. Use any of the React or plain-JS picks as islands. | Quiet tool, Editorial | `npm create astro@latest`. MIT. |
@@ -72,7 +72,7 @@ Choose 1 or 2 families from what the user loves (the loved things and the alive 
 
 | Source | Gives you | Families | Stack, install, notes |
 | :- | :- | :- | :- |
-| [Paper Shaders](https://shaders.paper.design) | Fast, light shader backgrounds: mesh gradient, grain, dithering, dot grid, liquid metal, halftone, water, paper texture. | Quiet tool, Cinematic, Editorial, Archive | Agent docs. `npm i @paper-design/shaders-react`, or `@paper-design/shaders` with no framework. Apache-2.0. The best first pick for "make the background alive". They play on their own; wire up pointer input yourself if it should react. Image Dithering needs an image. Colors must be hex, comma-style `rgb()` or `hsl()`; anything else silently turns into a default color. |
+| [Paper Shaders](https://shaders.paper.design) | Fast, light shader backgrounds: mesh gradient, grain, dithering, dot grid, liquid metal, halftone, water, paper texture. | Quiet tool, Cinematic, Editorial, Archive and print | Agent docs. `npm i @paper-design/shaders-react`, or `@paper-design/shaders` with no framework. Apache-2.0. The best first pick for "make the background alive". They play on their own; wire up pointer input yourself if it should react. Image Dithering needs an image. Pass colors as hex. `rgb()` and `hsl()` work only in the old comma form with whole numbers; `oklch()` logs an error and falls back to a default color. |
 | [ShaderGradient](https://www.shadergradient.co) | Grainy, slow, 3D moving gradients. | Cinematic, Warm and cozy | `npm i @shadergradient/react`. Tune one at shadergradient.co/customize and paste the URL in. MIT per npm; the repo has no LICENSE file. |
 | [Canvas UI](https://canvasui.dev) | Shaders over live, clickable HTML: liquid, glass, frost, shatter, VHS, particle reveal. | Cinematic, Toy box | Agent docs. shadcn registry for React, Vue, Svelte, vanilla. Most effects need Chrome 157+; Firefox, Safari and Android get a plain fallback, so never hide content behind it. MIT + Commons Clause. |
 | [Spark](https://sparkjs.dev) | Gaussian splats in three.js: real 3D scans you can dissolve and morph. | Cinematic | `npm i @sparkjsdev/spark three`. MIT. Heavy: one scene per page. |
@@ -82,11 +82,11 @@ Choose 1 or 2 families from what the user loves (the loved things and the alive 
 | [Spline](https://spline.design) | Design 3D scenes in the browser, then embed them. | Cinematic, Warm and cozy | Hosted tool. Embeds can be heavy on phones. |
 | [Pokemon Cards CSS](https://poke-holo.simey.me) | Holographic foil cards that tilt and shine. | Toy box | Copy the CSS from [the repo](https://github.com/simeydotme/pokemon-cards-css); a little JS tracks the pointer. GPL-3.0: check that this fits the project. |
 | [Atropos](https://atroposjs.com) | 3D parallax tilt on hover or touch. | Toy box, Warm and cozy | `npm i atropos`. MIT. Done and stable, last release 2023. |
-| [Matter.js](https://brm.io/matter-js) | 2D physics: things you can throw, stack and knock over. | Toy box, Zine | `npm i matter-js`. MIT. Finished and stable (last release 2024). |
+| [Matter.js](https://brm.io/matter-js) | 2D physics: things you can throw, stack and knock over. | Toy box, Zine and collage | `npm i matter-js`. MIT. Finished and stable (last release 2024). |
 | [cobe](https://cobe.vercel.app) | A tiny WebGL dotted globe. | Quiet tool | `npm i cobe`. MIT. About 6 kB. A common landing-page look, so use it only when the globe means something. |
-| [Rough.js](https://roughjs.com) | Hand-drawn, sketchy lines and shapes. | Toy box, Editorial, Zine | `npm i roughjs`. MIT. Done and stable. Often picked: check it is the right hand-made look, not just the first one. |
-| [perfect-freehand](https://perfectfreehand.com) | Smooth, pressure-shaped pen strokes: signatures, doodles, things people draw. | Toy box, Archive, Zine | `npm i perfect-freehand`. MIT. |
-| SVG wobble filter | `feTurbulence` + `feDisplacementMap` make any line or frame boil like hand-drawn animation. | Toy box, Zine, Retro | No library. Change the filter seed a few times a second for a boiling-line look. |
+| [Rough.js](https://roughjs.com) | Hand-drawn, sketchy lines and shapes. | Toy box, Editorial, Zine and collage | `npm i roughjs`. MIT. Done and stable. Often picked: check it is the right hand-made look, not just the first one. |
+| [perfect-freehand](https://perfectfreehand.com) | Smooth, pressure-shaped pen strokes: signatures, doodles, things people draw. | Toy box, Archive and print, Zine and collage | `npm i perfect-freehand`. MIT. |
+| SVG wobble filter | `feTurbulence` + `feDisplacementMap` make any line or frame boil like hand-drawn animation. | Toy box, Zine and collage, Retro OS and games | No library. Change the filter seed a few times a second for a boiling-line look. |
 | [tsParticles](https://particles.js.org) | Particles, confetti, fireworks. | Toy box | `npm i @tsparticles/slim`. MIT. Use for one moment (a win), not a background. |
 | [p5.js](https://p5js.org) | Creative coding for generative art. | Editorial, Toy box | `npm i p5`. LGPL-2.1. |
 | [Pretext](https://chenglou.me/pretext/) | Text layout without the DOM, so text can wrap around any shape and reflow live. | Editorial, Cinematic | `npm i @chenglou/pretext`. MIT. Read the demos before using it. |
@@ -104,7 +104,7 @@ Choose 1 or 2 families from what the user loves (the loved things and the alive 
 | [TanStack Table](https://tanstack.com/table) | Headless table logic: you draw every cell, so the look is yours. | Dense data | `npm i @tanstack/react-table` (also Vue, Svelte, plain JS). MIT. |
 | [TanStack Virtual](https://tanstack.com/virtual) | Smooth scrolling through thousands of rows or log lines. | Live ops, Dense data | `npm i @tanstack/react-virtual` (cores for Vue, Svelte, plain JS too). MIT. |
 | [Tone.js](https://tonejs.github.io) | Make sounds and music in the browser: notes, synths, effects. | Toy box, Warm and cozy | `npm i tone`. MIT. Start muted; browsers need a tap before sound. |
-| [Howler.js](https://howlerjs.com) | Play sound files simply, across browsers. | Toy box, Warm and cozy, Retro | `npm i howler`. MIT. Done and stable. |
+| [Howler.js](https://howlerjs.com) | Play sound files simply, across browsers. | Toy box, Warm and cozy, Retro OS and games | `npm i howler`. MIT. Done and stable. |
 
 ## Editing after launch
 
@@ -177,7 +177,7 @@ Several checked faces per family, so two projects don't land on the same pair. P
 | Cinematic | Panchang (F), Unbounded (G), Syne (G), Anybody (G) | Satoshi (F), Space Grotesk (G) | Geist Mono, Departure Mono |
 | Quiet with a wink | Instrument Serif (G) italic, Gloock (G), Clash Display (F): one of these, used once | Geist, Switzer (F) | Departure Mono |
 | Retro OS and games | Silkscreen (G), VT323 (G), Geist Pixel | System UI fonts | Departure Mono |
-| Live ops, Dense data | IBM Plex Sans Condensed (G), Khand (F) | IBM Plex Sans (G), Inter (G) | IBM Plex Mono (G), JetBrains Mono (G) |
+| Live ops, Dense data | IBM Plex Sans Condensed (G), Khand (F) | IBM Plex Sans (G); Inter (G) for Dense data only | IBM Plex Mono (G), JetBrains Mono (G) |
 | Public service | Public Sans (G) | Public Sans (G), Atkinson Hyperlegible (G) | IBM Plex Mono (G) |
 
 Readability: Atkinson Hyperlegible and Lexend (G) are built for low-vision and dyslexic readers. Use one when the brief names that need.
