@@ -103,8 +103,11 @@ jobs:
 
   changeset:
     name: Changeset for skill changes
-    # The release workflow's Version Packages PR uses up the changesets.
-    if: github.head_ref != 'changeset-release/main'
+    # The release workflow's Version Packages PR uses up the changesets. Only
+    # that branch in this repo is skipped; a fork can't dodge the rule by name.
+    if: >-
+      github.head_ref != 'changeset-release/main' ||
+      github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:

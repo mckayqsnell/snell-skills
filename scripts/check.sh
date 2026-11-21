@@ -206,11 +206,7 @@ step_plain-language() {
 
 step_changeset() {
   local base="${CHANGESET_BASE:-origin/main}"
-  # The release workflow's Version Packages PR uses up the changesets; it never needs one.
-  if [ "${GITHUB_HEAD_REF:-}" = "changeset-release/main" ]; then
-    echo "  Version Packages PR, no changeset needed"
-    return 0
-  fi
+  # CI skips this job for the release workflow's Version Packages PR (ci.yml).
   if ! git rev-parse --verify --quiet "$base^{commit}" >/dev/null; then
     if [ "${CI:-}" = "true" ]; then echo "❌ $base is not fetched" >&2; exit 1; fi
     echo "⚠️  $base is not fetched, so this step is skipped here (run: git fetch origin main). CI still runs it."

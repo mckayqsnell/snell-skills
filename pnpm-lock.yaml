@@ -173,13 +173,13 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       markdownlint-cli2:
-        specifier: ^0.24.1
+        specifier: 0.24.1
         version: 0.24.1
       skills:
         specifier: 1.8.1
         version: 1.8.1
       yaml:
-        specifier: ^2.9.1
+        specifier: 2.9.1
         version: 2.9.1
 
 packages:
