@@ -296,7 +296,9 @@ step_ci-steps() {
   # Every step must be in some job's `check.sh --only ...` list, or it would
   # pass locally and never run on a pull request.
   local wf=.github/workflows/ci.yml listed missing=() s
-  listed="$(grep -oE 'check\.sh --only [a-z,-]+' "$wf" | sed 's/.* //' | tr ',' '\n' | sort -u)"
+  # Only real run lines count, not comments: "  bash scripts/check.sh --only a,b".
+  listed="$(grep -E '^[[:space:]]+bash scripts/check\.sh --only[ =][a-z,-]+[[:space:]]*$' "$wf" \
+    | sed -E 's/.*--only[ =]//' | tr ',' '\n' | sed 's/[[:space:]]//g' | sort -u)"
   for s in "${STEPS[@]}"; do
     printf '%s\n' "$listed" | grep -Fxq -- "$s" || missing+=("$s")
   done
@@ -324,7 +326,7 @@ summary() {
 only=""
 case "${1:-}" in
   "") ;;
-  --list) printf '%s\n' "${STEPS[@]}"; exit 0 ;;
+  --list) [ "$#" -eq 1 ] || { echo "❌ --list takes no arguments" >&2; exit 2; }; printf '%s\n' "${STEPS[@]}"; exit 0 ;;
   --only) only="${2:-}"; [ "$#" -le 2 ] || { echo "❌ too many arguments (use --only a,b,c)" >&2; exit 2; } ;;
   --only=*) only="${1#--only=}"; [ "$#" -le 1 ] || { echo "❌ too many arguments (use --only=a,b,c)" >&2; exit 2; } ;;
   -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
