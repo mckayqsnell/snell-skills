@@ -98,6 +98,10 @@ gemini skills install https://github.com/mckayqsnell/snell-skills.git --path ski
 gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/media
 ```
 
+```bash
+gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/design
+```
+
 Re-run these commands to update.
 
 </details>
@@ -108,6 +112,7 @@ In your agent:
 
 - `/html-plan add dark mode to the settings page`: it sizes the job, asks a few questions, then writes the plan page.
 - `/e2e-test` after you build something: it tests the change in the running app and tells you what broke.
+- `/frontend-vibe` before a frontend build: a short interview, then picks and a build note.
 - `/html-explain how Redis caching works`: a page that teaches it. Add `for:"my dad"` to write it for someone else, or `keep` to save it with a PDF.
 
 To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder where kept pages should go.
@@ -122,6 +127,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 | [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it, in the way that suits that topic best. Draws the mechanism (3D, moving data, a scene with Play) and ends with a recap and the questions a sharp reader would ask. |
 | [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer and a reply box. |
 | [e2e-test](skills/dev/e2e-test/SKILL.md) | Tests what you just built in the real app, headless. Works out what changed from the git diff, the plan and the chat, pushes on it (edges, errors, light and dark, phone), follows each click to the network and the server, then smoke-tests the core flows. Reports pass/fail in chat, plus a page with screenshots for a big run. |
+| [frontend-vibe](skills/design/frontend-vibe/SKILL.md) | Run it before building a frontend. It grills you one question at a time about the feel, plays it back as a short brief, picks 2 or 3 design systems, libraries or effects from a checked catalog, and writes a build note a coding agent can follow. |
 | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
 | [demo-video](skills/media/demo-video/SKILL.md) | Makes a polished demo video of your app, hands-free: it finds the features, records clean takes in a headless browser, and edits them with a smooth cursor, zooms, captions and cards (HyperFrames), then has two critics review the cut. `/demo-video 2 minutes`. Needs ffmpeg and Playwright. |
 
