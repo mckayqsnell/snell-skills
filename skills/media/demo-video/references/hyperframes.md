@@ -35,7 +35,7 @@ The story scene plays the cut clip inside a camera. Its markup:
     var root = document.querySelector('[data-composition-id="story"]');
     var kit = DemoKit.scene(root, window.__demo['story-cut']);
     var tl = gsap.timeline({ paused: true });
-    tl.fromTo(root.querySelector('.window'), { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 0);   // the window enters, never pops on
+    tl.fromTo(root.querySelector('.window'), { opacity: 0, filter: 'blur(12px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.5, ease: 'expo.out' }, 0);   // the app enters with a blur swap, never pops on
     kit.shot(tl, 0, 0, {});                                                   // the whole app, full frame
     kit.caption(tl, root.querySelector('#cap-1'), 0.6, 2.4, 'pill');
     kit.shot(tl, 3.4, 0.9, { rect: INPUT_BOX, z: 1.2 });                      // a gentle 20% punch-in on a logged box
@@ -49,7 +49,7 @@ The story scene plays the cut clip inside a camera. Its markup:
 
 - `kit.shot(tl, at, dur, { rect, z, box, ease })` frames a rect (recording CSS px) at zoom `z`, full frame (the default) or in the inset window (`box: 'inset'`). Take every rect from a `box` event in `raw/<clip>.events.json` or measure it from a frame; never guess.
 - **Write times as source times** in the raw take and map them with `kit.src(t)`: `kit.shot(tl, kit.src(41.4), 0.6, …)`. Changing a speed ramp then never knocks the camera off its target. A freeze (`t~hold`) maps from its exact `t`.
-- **Pace for a first-time viewer.** At most one camera move every 3 s; hold at least 2 s after each arrival before the next move or cut. Moves: 0.8–1.0 s `power3.inOut`. Arrivals: `expo.out`. A zoom-through to the next scene: 0.38–0.4 s `power3.in` with a 6–8 px blur, landing on the button the cursor pressed (freeze that frame in the cut).
+- **Pace for a first-time viewer.** At most one camera move every 3 s; hold at least 2 s after each arrival before the next move or cut. Moves: 1.0 s `power2.inOut` (a sharper ease shows only half the move and reads as a snap). Arrivals: `expo.out`. A zoom-through to the next scene: 0.38–0.4 s `power3.in` with a 6–8 px blur, landing on the button the cursor pressed (freeze that frame in the cut).
 - **Zoom gently.** `z` is relative to the box: 1 shows the whole app, and `kit.shot` caps it at 1.3, so at least about three quarters of the app stays on screen and the viewer always knows where they are. Most punch-ins want 1.15–1.25; raise the cap (`DemoKit.setMaxZoom`) only for one line being typed. Make the first zoom the softest: the viewer hasn't seen the layout yet.
 - Push in to read (typing, an answer, a result), pull out to show a change across the page. Hold still while the viewer reads. The window should fill the frame whenever the UI is the subject: small UI floating in empty space reads as a mistake.
 - **A canvas that re-fits in one frame** (React Flow after a node lands): don't counter-zoom the camera to hold the nodes still, since that jumps all the other UI on that frame. Lay a still of the frame before the jump over the video and dissolve it out over 0.2 s. Extract that frame with `ffmpeg -i <clip> -vf "select=eq(n\,N-1)" -frames:v 1 …` (`-ss` lands a frame late). Check the fix on whole frames, in a render: `snapshot` picks video frames slightly differently.
@@ -57,8 +57,9 @@ The story scene plays the cut clip inside a camera. Its markup:
 
 ## Captions and cards
 
+- **A light app:** set the stage's ground variables in `scene.css` to the app's own background, so a full-frame scene never flashes dark between light scenes and cards. Fade in a dark ground only for inset beats.
 - **Full frame is the default** for every beat where the app is the subject: it is biggest, sharpest and uncropped. Use the inset window (`box: 'inset'`) only for a beat that needs room beside the app: the title over the first look, a big caption, the claim. Move in or out of it at a calm moment, not mid-action.
-- One short line per beat with one accent word. Over a full-frame shot: `class="caption lower"` with style `'pill'`, low in the frame, clear of what the viewer is reading (move it to the top if the action is at the bottom). Beside an inset: the plain `.caption` on the left, entering with `'words'`, `'line'` or `'ink'`; vary them, since every caption entering the same way reads as a template.
+- One short line per beat with one accent word. Over a full-frame shot: `class="caption lower"` with style `'pill'`, low in the frame. It must not cover what it talks about: at the shot's zoom, keep the app's bottom edge above y ≈ 920, or move the caption to the top. Snapshot every caption beat to check. Beside an inset: the plain `.caption` on the left, entering with `'words'`, `'line'` or `'ink'`; vary them, since every caption entering the same way reads as a template.
 - Start a beside-the-inset caption only after the move into the inset has finished, so the window has cleared that side.
 - Readable at 360 px wide: check one frame scaled down.
 - Title and end cards use the app's own logo and face. Search the registry (`/hyperframes-registry`) before you hand-build a card or a transition.
@@ -74,6 +75,6 @@ The story scene plays the cut clip inside a camera. Its markup:
 
 1. `npx hyperframes check --json > review/check.json`, then read the file (piping into `head` can cut the JSON off): fix every error. `check` leaves a warm Chrome running for about 5 minutes; that one is expected. `npx hyperframes snapshot --at <t,…>` at each beat's midpoint and look at the PNGs.
 2. Draft renders while you work: `npx hyperframes render --quality draft -o renders/draft-1.mp4`.
-3. The final: `npx hyperframes render --fps 60 --video-bitrate 14M -o renders/<app>-demo.mp4` (leave out `--quality delivery`: it overrides the bitrate). The default bitrate shows blocking in fast motion at 1080p60. `ffprobe` it: the length must match the root's `data-duration`, and the video bitrate should be near 14 Mb/s.
-4. Master the sound to about −15 LUFS with a true peak under −1 dB: measure with `ffmpeg -i <render> -af ebur128=peak=true -f null -`. Gain alone clips a spiky UI-sound track, so raise it through a limiter, audio only: `ffmpeg -i <render> -c:v copy -af "volume=<dB>dB,alimiter=limit=0.7:level=disabled" -c:a aac -b:a 192k <delivery>.mp4`, then measure again.
+3. The final: `npx hyperframes render --fps 60 --video-bitrate 14M -o renders/<app>-demo.mp4` (leave out `--quality delivery`: it overrides the bitrate). The default bitrate shows blocking in fast motion at 1080p60. `ffprobe` it: the length must match the root's `data-duration`, and the video bitrate should be up to about 14 Mb/s (lower is normal for a mostly still UI).
+4. Master the sound: with music, to about −15 LUFS with a true peak under −1 dB; with UI sounds only, to about −21 LUFS with a true peak under −2 dB (more gain only crushes the clicks). Measure with `ffmpeg -i <render> -af ebur128=peak=true -f null -`. Gain alone clips a spiky UI-sound track, so raise it through a limiter, audio only: `ffmpeg -i <render> -c:v copy -af "volume=<dB>dB,alimiter=limit=0.7:level=disabled" -c:a aac -b:a 192k <delivery>.mp4`, then measure again.
 5. Before the final render, start the Studio preview and tell the user they can keep editing there. When nobody is watching (the user is away, or you run as a sub-agent), start it with `preview --background --no-open`, render anyway, and stop it at clean-up unless the user wants to edit.
