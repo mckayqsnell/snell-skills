@@ -2,7 +2,7 @@
   "name": "snell-skills",
   "displayName": "Snell Skills",
   "version": "1.1.1",
-  "description": "McKay Snell's agent skills: html-plan (plans as one page you answer in one paste), html-explain (pages that teach a topic), html-house-style (the shared look), and to-markdown.",
+  "description": "McKay Snell's agent skills: html-plan (plans as one page you answer in one paste), html-explain (pages that teach a topic), html-house-style (the shared look), to-markdown, and demo-video (hands-free demo videos of your app).",
   "author": {
     "name": "McKay Snell",
     "url": "https://github.com/mckayqsnell"
@@ -19,6 +19,7 @@
   ],
   "skills": [
     "./skills/html/",
-    "./skills/tools/"
+    "./skills/tools/",
+    "./skills/media/"
   ]
 }

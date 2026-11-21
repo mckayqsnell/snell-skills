@@ -90,7 +90,11 @@ gemini skills install https://github.com/mckayqsnell/snell-skills.git --path ski
 gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/tools
 ```
 
-Re-run both commands to update.
+```bash
+gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/media
+```
+
+Re-run the commands to update.
 
 </details>
 
@@ -113,6 +117,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 | [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it, in the way that suits that topic best. Draws the mechanism (3D, moving data, a scene with Play) and ends with a recap and the questions a sharp reader would ask. |
 | [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer and a reply box. |
 | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
+| [demo-video](skills/media/demo-video/SKILL.md) | Makes a polished demo video of your app, hands-free: it finds the features, records clean takes in a headless browser, and edits them with a smooth cursor, zooms, captions and cards (HyperFrames), then has two critics review the cut. `/demo-video 2 minutes`. Needs ffmpeg and Playwright. |
 
 ## What a page has
 
