@@ -1,30 +1,31 @@
 #!/usr/bin/env bash
-# check.sh: the repo's validation suite. CI runs each step as its own job on
-# every pull request; run them all locally with `pnpm run check`.
+# check.sh: the repo's validation suite. On every pull request CI splits the
+# steps across parallel jobs (.github/workflows/ci.yml); run them all locally
+# with `pnpm run check`.
 #
 #   bash scripts/check.sh                    run every step, in order
 #   bash scripts/check.sh --only scrub,links run only the named steps
 #   bash scripts/check.sh --list             print the step names
 #
 # Steps:
-#   version         plugin.json carries the same version as package.json
-#   validate        `claude plugin validate --strict` passes (plugin + marketplace)
-#   skills-list     `npx skills add . --list` finds every skills/<group>/<name>/SKILL.md,
-#                   and plugin.json's "skills" list names every group folder
-#   frontmatter     each SKILL.md's frontmatter is valid YAML, its name matches
-#                   its folder, and its description fits Claude Code's 1,536-char cap
-#   links           every references/, platforms/ and scripts/ path a SKILL.md
-#                   names, and every relative Markdown link, exists
-#   shellcheck      shellcheck passes on every tracked .sh file
-#   node-syntax     `node --check` passes on every skill script (.mjs, .js) and repo script
-#   markdownlint    no broken tables or code fences (.markdownlint-cli2.jsonc)
-#   scrub           no personal paths, emails or secrets are tracked
-#   tests           the kit sync, word check and page script tests pass
-#   kit-sync        every skill's kit/ matches what kit-src/ builds
-#   plain-language  the html skills and the kit docs read at plain-language level 80 or better
-#   changeset       a branch that changes skills/ adds a changeset (compared with origin/main)
-#   demo-video      the demo-video scripts cut, map and scan a tiny ffmpeg clip
-#                   (skipped when skills/media/demo-video/ is not in the repo)
+#   - version         plugin.json carries the same version as package.json
+#   - validate        `claude plugin validate --strict` passes (plugin + marketplace)
+#   - skills-list     `npx skills add . --list` finds every skills/<group>/<name>/SKILL.md,
+#                     and plugin.json's "skills" list names every group folder
+#   - frontmatter     each SKILL.md's frontmatter is valid YAML, its name matches
+#                     its folder, and its description fits Claude Code's 1,536-char cap
+#   - links           every references/, platforms/ and scripts/ path a SKILL.md
+#                     names, and every relative Markdown link, exists
+#   - shellcheck      shellcheck passes on every tracked .sh file
+#   - node-syntax     `node --check` passes on every skill script (.mjs, .js) and repo script
+#   - markdownlint    no broken tables or code fences (.markdownlint-cli2.jsonc)
+#   - scrub           no personal paths, emails or secrets are tracked
+#   - tests           the kit sync, word check and page script tests pass
+#   - kit-sync        every skill's kit/ matches what kit-src/ builds
+#   - plain-language  the html skills and the kit docs read at plain-language level 80 or better
+#   - changeset       a branch that changes skills/ adds a changeset (compared with origin/main)
+#   - demo-video      the demo-video scripts cut, map and scan a tiny ffmpeg clip
+#                     (skipped when skills/media/demo-video/ is not in the repo)
 #
 # A tool that is missing locally (shellcheck, ffmpeg) skips its step with a
 # warning. In CI (CI=true) a missing tool fails the step instead.
@@ -301,7 +302,7 @@ case "${1:-}" in
   --list) printf '%s\n' "${STEPS[@]}"; exit 0 ;;
   --only) only="${2:?--only needs a step name (see --list)}" ;;
   --only=*) only="${1#--only=}" ;;
-  -h|--help) sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
   *) echo "❌ unknown argument: $1 (try --help)" >&2; exit 2 ;;
 esac
 
