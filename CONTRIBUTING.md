@@ -2,7 +2,9 @@
 
 ## Setup
 
-You need Node.js 24 or newer, pnpm, and shellcheck.
+You need Node.js 24 or newer and pnpm. shellcheck and ffmpeg are optional
+locally: without them `pnpm run check` skips those steps with a warning, and
+CI still runs them.
 
 ```bash
 pnpm install
@@ -12,8 +14,19 @@ pnpm install
 pnpm run check
 ```
 
-`pnpm run check` runs the same checks CI runs on a pull request. See
-[scripts/check.sh](scripts/check.sh) for the list.
+`pnpm run check` runs the same checks CI runs on a pull request. CI runs them
+as parallel jobs, each calling `scripts/check.sh --only <steps>`. To run one
+step, or see the list:
+
+```bash
+bash scripts/check.sh --only frontmatter,links
+```
+
+```bash
+bash scripts/check.sh --list
+```
+
+See [scripts/check.sh](scripts/check.sh) for what each step checks.
 
 ## Adding a skill
 
