@@ -11,6 +11,8 @@ if (!cut || !list) { console.error('usage: srctime.mjs <cut> <t1,t2,...> [offset
 const { segments } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'assets/data', `${cut}.json`), 'utf8'));
 const offset = Number(offsetArg || 0);
 function map(t) {
+  const hold = segments.find((g) => g.hold && Math.abs(t - g.from) < 1e-6);
+  if (hold) return hold.at;
   for (const g of segments) {
     if (g.hold) { if (Math.abs(t - g.from) < 1e-6) return g.at; continue; }
     if (t >= g.from && t <= g.to) return g.at + (t - g.from) / g.speed;

@@ -56,8 +56,9 @@ In this order:
 - **Saved state leaks between takes** (a mode left on, a draft, a dismissed tip). Reset it at the start of every scene.
 - **Auto-scroll** can carry an answer past the part worth showing. Scroll back like a reader would, with `rec.scroll()`.
 - **Layouts move after they load** (a canvas re-fits after every node, a list grows). Log a fresh `rec.box()` at each mark, and frame the payoff from the last frame's layout, not where things started.
-- **Dev overlays** (framework error badges, prototype switchers, version tags) come back on every page load. Hide them with `page.addStyleTag` after each `goto`, not once.
+- **Dev overlays** (framework error badges, prototype switchers, version tags) come back on every page load. Hide them with `page.addStyleTag` after each `goto`, not once (`launch()` bypasses a strict CSP so this works).
 - **A reload or navigation is invisible in the take:** headless Chrome holds the old paint, so "survives a reload" shows nothing changing. Mark it (`rec.mark('reload')`) and draw a short blank in the edit, or show the change another way.
+- **A mark lands late** when it comes after a `waitFor` plus a settle wait: about 0.4–0.6 s after the pixels change. Time shots on frames, not on that mark.
 - **A DOM signal is not the frame.** An attribute can change long before the pixels do. Check the moment on a 60 fps contact sheet before you sync sound to it.
 
 ## Clean up

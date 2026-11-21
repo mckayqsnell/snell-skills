@@ -6,7 +6,7 @@ Two critic sub-agents review every render with fresh eyes: they see what is in t
 
 | Critic | Lens | Reads first |
 |---|---|---|
-| Motion and timing | camera moves, eases, cuts, speed ramps, holds, the cursor, sound on the frame; flag any shot that crops the app's nav or edges, any zoom over 1.3, and any move sooner than 2 s after the last arrival | HyperFrames `references/motion.md` and `references/review.md` |
+| Motion and timing | camera moves, eases, cuts, speed ramps, holds, the cursor, sound on the frame; flag any shot that crops the logo, the breadcrumb or the thing being read, any zoom over 1.3, and any move sooner than 2 s after the last arrival | HyperFrames `references/motion.md` and `references/review.md` |
 | Story and clarity | does each beat land, is every feature clear to a first-time viewer, are captions readable, any dead frames | `SPEC.md` and the shot list |
 
 ## The brief (send each critic this, with its lens filled in)

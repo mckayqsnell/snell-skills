@@ -27,13 +27,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Headless Chrome sends screencast frames at CSS-pixel size unless the whole browser runs at a forced scale factor
 // (a context deviceScaleFactor alone gives 1280-wide frames). Headless also keeps ~87 px of the window for an
 // invisible toolbar, so the window is taller than the page. Checked, not assumed: the page size is asserted.
-export async function launch({ width = 1280, height = 720, dpr = 2.5, headless = true, theme, storageState, channel = 'chrome', toolbar = 87 } = {}) {
+export async function launch({ width = 1280, height = 720, dpr = 2.5, headless = true, theme, storageState, channel = 'chrome', toolbar = 87, bypassCSP = true } = {}) {
   const args = ['--hide-scrollbars', `--force-device-scale-factor=${dpr}`, `--window-size=${width},${height + (headless ? toolbar : 0)}`];
   let browser;
   try { browser = await chromium.launch({ channel, headless, args }); } catch {
     browser = await chromium.launch({ headless, args }); // no Chrome installed: Playwright's own Chromium
   }
-  const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: null, colorScheme: theme, storageState });
+  const context = await browser.newContext({ ignoreHTTPSErrors: true, bypassCSP, viewport: null, colorScheme: theme, storageState }); // bypassCSP: addStyleTag works on a strict-CSP app
   const page = await context.newPage();
   const inner = await page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
   if (inner[0] !== width || inner[1] !== height || inner[2] !== dpr) {

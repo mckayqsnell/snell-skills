@@ -7,7 +7,7 @@
 // .ring, .aura inside .window for a glowing inset frame). Set the inset with DemoKit.setInset({ x, y, w, h, r }) before binding scenes.
 //
 //   const kit = DemoKit.scene(rootEl, clipData)      bind a scene (clipData = window.__demo[name] from cut.mjs)
-//   kit.shot(tl, at, dur, { rect, z, box, ease })    move the camera (rect in recording CSS px). z is relative to the
+//   kit.shot(tl, at, dur, { rect, z, box, ease, anchor })    move the camera (rect in recording CSS px). z is relative to the
 //                                                    box: 1 shows the whole page, filling the box (the default), 1.2
 //                                                    is a 20% punch-in. Capped at DemoKit.setMaxZoom() (1.3), so at
 //                                                    least ~3/4 of the app always stays on screen
@@ -52,11 +52,13 @@
 
   // Camera transform that puts a recording rect (CSS px) in the middle of box at zoom z (frame px per screen px),
   // never showing past the recording's edge inside the box.
-  function frame(rect, z, box) {
+  // anchor 'tl' pins the page's top-left corner (logo, breadcrumb); the rect must sit inside what stays on screen.
+  function frame(rect, z, box, anchor) {
     box = box || FULL;
     var sx = rect.x * S; var sy = rect.y * S; var sw = rect.w * S; var sh = rect.h * S;
     var x = box.x + box.w / 2 - (sx + sw / 2) * z;
     var y = box.y + box.h / 2 - (sy + sh / 2) * z;
+    if (anchor === 'tl') { x = box.x; y = box.y; }
     // never show past the recording's edge; when the recording is smaller than the box, center it instead
     x = W * z >= box.w ? clamp(x, box.x + box.w - W * z, box.x) : box.x + (box.w - W * z) / 2;
     y = H * z >= box.h ? clamp(y, box.y + box.h - H * z, box.y) : box.y + (box.h - H * z) / 2;
@@ -75,8 +77,8 @@
       var fit = Math.min(box.w / W, box.h / (VH * S)); // the zoom that shows the whole page in this box
       var rel = Math.min(o.z || 1, MAXZ);
       if ((o.z || 1) > MAXZ) console.warn('kit.shot: z ' + o.z + ' capped at ' + MAXZ + ' (DemoKit.setMaxZoom to allow)');
-      var to = frame(o.rect || { x: 0, y: 0, w: VW, h: VH }, fit * rel, box);
-      var ease = o.ease || 'power3.inOut';
+      var to = frame(o.rect || { x: 0, y: 0, w: VW, h: VH }, fit * rel, box, o.anchor);
+      var ease = o.ease || 'power2.inOut';
       if (dur === 0) {
         tl.set(cam, to, at); tl.set(view, { clipPath: clipPath(box) }, at);
         if (ring) tl.set([ring, aura], { opacity: box === FULL ? 0 : 1 }, at);
@@ -126,6 +128,8 @@
 
     function src(t) {
       var seg = (clip && clip.segments) || [];
+      // a freeze wins: its t may also sit inside an earlier kept span
+      for (var j = 0; j < seg.length; j++) if (seg[j].hold && Math.abs(t - seg[j].from) < 1e-6) return seg[j].at;
       for (var i = 0; i < seg.length; i++) {
         var g = seg[i];
         if (g.hold) { if (Math.abs(t - g.from) < 1e-6) return g.at; continue; }
