@@ -39,7 +39,7 @@ Ask these 9, in this order. Skip any the user has already answered.
 
 **Push back on vague answers.** "Clean", "modern", "fun", "nice", "simple" and "immersive" aren't answers yet. Give two or three concrete options: "Clean like Vercel's docs, or clean like a Muji catalog?" Push back at most twice per question, then write down your best reading.
 
-**Borrow, don't clone.** When they love a famous site, find the one or two traits they mean ("the sharp grid"). The page should look like theirs, not like Vercel's.
+**Borrow, don't clone.** When they love a famous site, find the one or two traits they mean ("the sharp grid"). The page should look like theirs, not like Vercel's. If a loved site's own system is in the catalog (Geist for Vercel), take its traits but build on a different base, or on its tokens only.
 
 **Stop** when you can sum up the feel in 3 or 4 sentences that rule things out. Every pick in step 3 should be clear by then.
 
