@@ -203,6 +203,11 @@ uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   happened (tj-actions/changed-files, March 2025).
 - **Why the comment.** `# v7.0.1` tells humans, and Dependabot, which
   release the SHA is.
+- **Enforced by GitHub.** The repo's Actions settings require every action
+  to be pinned to a full SHA, and allow only GitHub's own actions plus
+  `pnpm/action-setup`, `changesets/action` and `lycheeverse/lychee-action`.
+  A new outside action needs a line added there first (Settings → Actions →
+  General).
 
 ### `permissions:` at the minimum, per job
 
@@ -322,7 +327,10 @@ The rest of CI is `scripts/check.sh`, split into parallel jobs: plugin and
 skills (validate, listing, frontmatter, markdownlint), scripts and scrub,
 the kit, the changeset rule, and a demo-video smoke test with ffmpeg. An
 **All checks** job at the end is green only when every other job passed or
-was skipped, so it's the one status to require in branch protection. A
+was skipped. The "Protect main" ruleset requires it: `main` takes changes
+only through a pull request whose All checks passed, and it can't be
+force-pushed or deleted. No review approval is required, so you can merge
+your own pull requests. A
 separate **Links** workflow runs lychee every Monday; it never runs on pull
 requests, so a site that's down can't block a merge.
 
