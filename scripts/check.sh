@@ -22,7 +22,7 @@
 #   - scrub           no personal paths, emails or secrets are tracked
 #   - tests           the kit sync, word check and page script tests pass
 #   - kit-sync        every skill's kit/ matches what kit-src/ builds
-#   - plain-language  the html skills and the kit docs read at plain-language level 80 or better
+#   - plain-language  the html and design skills and the kit docs read at plain-language level 80 or better
 #   - changeset       a branch that changes skills/ adds a changeset (compared with origin/main)
 #   - demo-video      the demo-video scripts cut a tiny ffmpeg clip and map its times
 #                     (skipped when skills/media/demo-video/ is not in the repo)
@@ -194,7 +194,7 @@ step_kit-sync() {
 step_plain-language() {
   # The kit's own checker. to-markdown predates the house style, so it is not held to it.
   local vocab_files=() f out vocab_fail=0
-  while IFS= read -r f; do vocab_files+=("$f"); done < <(git ls-files 'skills/html/*/SKILL.md' 'kit-src/HOUSE-STYLE.md' 'kit-src/PARTS.md')
+  while IFS= read -r f; do vocab_files+=("$f"); done < <(git ls-files 'skills/html/*/SKILL.md' 'skills/design/*/SKILL.md' 'kit-src/HOUSE-STYLE.md' 'kit-src/PARTS.md')
   [ "${#vocab_files[@]}" -gt 0 ] || { echo "❌ no html skills or kit docs found to check" >&2; exit 1; }
   for f in "${vocab_files[@]}"; do
     if out="$(node kit-src/vocab-check.mjs "$f" --level 80 2>&1)"; then

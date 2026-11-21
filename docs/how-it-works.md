@@ -45,7 +45,7 @@ differ in who does the work and what you get.
   plugin's name; the part after is the marketplace's name.
 - **How it finds nested groups.** By default a plugin only scans
   `skills/<name>/SKILL.md`, one level. `plugin.json` adds
-  `"skills": ["./skills/html/", "./skills/tools/"]`, which tells it to scan
+  `"skills": ["./skills/html/", "./skills/tools/", "./skills/design/"]`, which tells it to scan
   those group folders too. A new group needs a new line there.
 - **What you get.** Every skill, plus any commands or hooks the plugin
   ships (none today). Names get a prefix: `/snell-skills:html-plan`.
