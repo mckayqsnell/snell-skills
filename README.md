@@ -90,7 +90,11 @@ gemini skills install https://github.com/mckayqsnell/snell-skills.git --path ski
 gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/tools
 ```
 
-Re-run both commands to update.
+```bash
+gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/design
+```
+
+Re-run the commands to update.
 
 </details>
 
@@ -99,6 +103,7 @@ Re-run both commands to update.
 In your agent:
 
 - `/html-plan add dark mode to the settings page`: it sizes the job, asks a few questions, then writes the plan page.
+- `/frontend-vibe` before a frontend build: a short interview, then picks and a build note.
 - `/html-explain how Redis caching works`: a page that teaches it. Add `for:"my dad"` to write it for someone else, or `keep` to save it with a PDF.
 
 To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder where kept pages should go.
@@ -112,6 +117,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 | [html-plan](skills/html/html-plan/SKILL.md) | Plans a coding job as one page. Sizes the job first (below S, S, M, L), so a tiny job gets a ready-to-paste prompt and a big one gets phases, a build split and risks. You pick the decisions and paste one answer back. |
 | [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it, in the way that suits that topic best. Draws the mechanism (3D, moving data, a scene with Play) and ends with a recap and the questions a sharp reader would ask. |
 | [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer and a reply box. |
+| [frontend-vibe](skills/design/frontend-vibe/SKILL.md) | Run it before building a frontend. It grills you one question at a time about the feel, plays it back as a short brief, picks 2 or 3 design systems, libraries or effects from a checked catalog, and writes a build note a coding agent can follow. |
 | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
 
 ## What a page has
