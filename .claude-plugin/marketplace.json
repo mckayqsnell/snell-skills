@@ -9,7 +9,7 @@
     {
       "name": "snell-skills",
       "source": "./",
-      "description": "McKay Snell's agent skills: html-plan (plans as one page you answer in one paste), html-explain (pages that teach a topic), html-house-style (the shared look), to-markdown, and demo-video (hands-free demo videos of your app)."
+      "description": "McKay Snell's agent skills: html-plan (plans as one page you answer in one paste), html-explain (pages that teach a topic), html-house-style (the shared look), e2e-test (tests what you just built in the real app), demo-video (hands-free demo videos of your app), and to-markdown."
     }
   ]
 }

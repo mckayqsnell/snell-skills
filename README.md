@@ -91,10 +91,14 @@ gemini skills install https://github.com/mckayqsnell/snell-skills.git --path ski
 ```
 
 ```bash
+gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/dev
+```
+
+```bash
 gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/media
 ```
 
-Re-run the commands to update.
+Re-run these commands to update.
 
 </details>
 
@@ -103,6 +107,7 @@ Re-run the commands to update.
 In your agent:
 
 - `/html-plan add dark mode to the settings page`: it sizes the job, asks a few questions, then writes the plan page.
+- `/e2e-test` after you build something: it tests the change in the running app and tells you what broke.
 - `/html-explain how Redis caching works`: a page that teaches it. Add `for:"my dad"` to write it for someone else, or `keep` to save it with a PDF.
 
 To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder where kept pages should go.
@@ -116,6 +121,7 @@ To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder
 | [html-plan](skills/html/html-plan/SKILL.md) | Plans a coding job as one page. Sizes the job first (below S, S, M, L), so a tiny job gets a ready-to-paste prompt and a big one gets phases, a build split and risks. You pick the decisions and paste one answer back. |
 | [html-explain](skills/html/html-explain/SKILL.md) | Explains a topic as one page that teaches it, in the way that suits that topic best. Draws the mechanism (3D, moving data, a scene with Play) and ends with a recap and the questions a sharp reader would ask. |
 | [html-house-style](skills/html/html-house-style/SKILL.md) | The shared look, for any other page you want to read: colors, fonts, page parts, SVG drawings (flat, isometric 3D and moving), a drawing viewer and a reply box. |
+| [e2e-test](skills/dev/e2e-test/SKILL.md) | Tests what you just built in the real app, headless. Works out what changed from the git diff, the plan and the chat, pushes on it (edges, errors, light and dark, phone), follows each click to the network and the server, then smoke-tests the core flows. Reports pass/fail in chat, plus a page with screenshots for a big run. |
 | [to-markdown](skills/tools/to-markdown/SKILL.md) | Converts PDFs, Office files, images, audio and more into Markdown. |
 | [demo-video](skills/media/demo-video/SKILL.md) | Makes a polished demo video of your app, hands-free: it finds the features, records clean takes in a headless browser, and edits them with a smooth cursor, zooms, captions and cards (HyperFrames), then has two critics review the cut. `/demo-video 2 minutes`. Needs ffmpeg and Playwright. |
 
