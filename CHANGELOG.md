@@ -1,5 +1,21 @@
 # snell-skills
 
+## 1.2.0
+
+### Minor Changes
+
+- 0d3d516: New skill: **demo-video** (`/demo-video`, optionally with a length like `2 minutes` or `vertical`). It makes a polished demo video of an app you built, with no hands on the mouse:
+  
+  - asks a few questions first (length, audience, music), then finds the app's main features and plans a story and a shot list;
+  - records clean 60 fps takes in a headless browser with Playwright's screencast feed (3200 px frames, no OS cursor) and logs every move, click and key;
+  - edits in HyperFrames with a smooth drawn cursor, punch-in zooms aimed from the log, captions, title and end cards and UI sounds, with music on beat when you want it; Quick mode uses Playwright's own cursor and cards when HyperFrames isn't installed;
+  - has two critic sub-agents review the frames, fixes what they find (2 rounds at most), and cleans up its browsers and scratch files.
+  
+  Web apps first: other platforms get their own file later. Needs ffmpeg and Playwright (the global `playwright-cli` is enough); HyperFrames is suggested when missing.
+- a6516f8: New skill: **e2e-test**, in a new `dev` group. Run `/e2e-test` after you build something. It works out what changed from the git diff, the plan and the chat, then tests it in the real app with a headless browser: happy path, edges, error states (with request mocks), light and dark, phone and wide, console errors, failed requests and keyboard reach. It follows each click to the network request, the server log and a read-only look at the data, then smoke-tests the app's core flows (and offers to save them as `e2e-flows.md`). It fixes bugs in code the session wrote, asks before touching older code, reports pass/fail in chat (plus an html-house-style page with screenshots for a big run) and closes every browser, tab and scratch file it opened. Web apps and APIs have their own guides; iOS points to the iOS Simulator tool for now.
+  
+  Gemini CLI users: install the new group with `gemini skills install https://github.com/mckayqsnell/snell-skills.git --path skills/dev`.
+
 ## 1.1.1
 
 ### Patch Changes
