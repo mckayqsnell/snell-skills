@@ -1,7 +1,7 @@
 {
   "name": "snell-skills",
   "displayName": "Snell Skills",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "McKay Snell's agent skills: html-plan (plans as one page you answer in one paste), html-explain (pages that teach a topic), html-house-style (the shared look), e2e-test (tests what you just built in the real app), demo-video (hands-free demo videos of your app), and to-markdown.",
   "author": {
     "name": "McKay Snell",
