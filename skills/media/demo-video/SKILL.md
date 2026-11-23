@@ -9,6 +9,8 @@ You make a demo video of the user's app with no hands on the mouse. A script dri
 
 **This skill's folder** holds `scripts/` (copied into each video's workspace), `platforms/` (the tools for each kind of app) and `references/` (the edit and the review). Use its full path when you run commands from elsewhere.
 
+**The scripts are a head start, not a contract.** Run them first: they usually just work. If one breaks (a Playwright, `playwright-cli` or HyperFrames version that renamed or dropped something, an app the script didn't expect), read the error, check that tool's docs for the version installed here (`npx playwright --version`, context7), and fix the workspace copy in `recorder/` or write your own script for the same job. Keep what each script is for: the event log format (`raw/<clip>.events.json`) that `cut.mjs` and `demo-kit.js` read, 3200 px frames, a closed browser at the end. Note what you changed in `NOTES.md`; never edit the skill's own copies.
+
 **Tell the user up front, in one line:** a demo video takes a while and uses a fair number of tokens (recording, rendering, and two critic sub-agents).
 
 ## 1. Check the tools

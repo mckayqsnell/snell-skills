@@ -4,7 +4,7 @@ How to explore, sign in to and record a web app. The core steps are in `../SKILL
 
 ## Get the newest Playwright features first
 
-Playwright and `playwright-cli` ship recording features often. Before you write the scene script, pull the current docs in one or two lookups: context7 `query-docs` on "page.screencast and playwright-cli video commands", or the release notes at `https://playwright.dev/docs/release-notes`. Use any newer feature that makes the video better, and note it in `NOTES.md`. As of Playwright 1.64:
+Playwright and `playwright-cli` ship recording features often. Before you write the scene script, pull the current docs in one or two lookups: context7 `query-docs` on "page.screencast and playwright-cli video commands", or the release notes at `https://playwright.dev/docs/release-notes`. Use any newer feature that makes the video better, and note it in `NOTES.md`. If the installed version is older or newer than the one below and a call doesn't exist, adapt the workspace scripts to what that version has (`recorder.mjs` already falls back to raw CDP frames when `page.screencast` is missing). As of Playwright 1.64:
 
 - `page.screencast.start({ onFrame, path, size, fps, quality })`: `onFrame` gets each JPEG frame with its timestamp (what `recorder.mjs` uses); `path` writes a WebM itself.
 - `page.screencast.showActions({ cursor: 'none' | 'pointer', duration, position, style: { point, highlight, title } })`: draws an animated cursor, a click point, a box on the target and an action title. `hideActions()` stops it.
