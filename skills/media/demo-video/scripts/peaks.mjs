@@ -6,7 +6,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const [v, start, length, crop] = process.argv.slice(2);
+const [vArg, start, length, crop] = process.argv.slice(2);
+const v = vArg && path.resolve(vArg); // ffmpeg runs in the temp folder below
 if (!crop) { console.error('usage: node recorder/peaks.mjs <video> <from> <len> <crop w:h:x:y>'); process.exit(1); }
 // ffmpeg writes the stats to a temp file: /dev/stdout can't be opened on Linux when Node captures the output.
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'peaks-'));
@@ -14,7 +15,8 @@ const file = path.join(dir, 'yavg.txt');
 let out;
 try {
   execFileSync('ffmpeg', ['-loglevel', 'error', '-ss', start, '-t', length, '-i', v, '-vf',
-    `crop=${crop},scale=180:60,signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=${file.replace(/[\\:']/g, '\\$&')}`, '-f', 'null', '-']);
+    `crop=${crop},scale=180:60,signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=yavg.txt`, '-f', 'null', '-'],
+  { cwd: dir }); // a bare file name: no path goes into the filter graph, so no escaping is needed
   out = fs.readFileSync(file, 'utf8');
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });

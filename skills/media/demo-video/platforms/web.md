@@ -22,14 +22,14 @@ Playwright and `playwright-cli` ship recording features often. Before you write 
 
 Run every browser headless. Keep one browser open at a time.
 
-A dev server on self-signed HTTPS: headless `playwright-cli open` needs `ignoreHTTPSErrors: true` in `.playwright/cli.config.json` (add it to the scratch list). Or explore with a short Node script that calls recorder's `launch()`: it already ignores certificate errors and is as headless as the real take. Some composers ignore `fill` then `press Enter`; type with key presses as a person would.
+A dev server on self-signed HTTPS: headless `playwright-cli open` needs `--config=<workspace>/cli.json` with `{"browser":{"contextOptions":{"ignoreHTTPSErrors":true}}}` (keep it in the workspace, never in the app's repo). Or explore with a short Node script that calls recorder's `launch()`: it ignores certificate errors only for a local `APP_URL` (localhost, 127.0.0.1, `*.test`); pass `ignoreHTTPSErrors: true` for another self-signed host you trust. Some composers ignore `fill` then `press Enter`; type with key presses as a person would.
 
 ## Sign in and data
 
 In this order:
 
 1. **The app's own test login:** a test-login route, a seed or reset command, fixture users (search the repo for `test-login`, `seed`, `fixtures`, `reset`, `.env.example`). Put the reset at the top of each scene, so every take starts the same.
-2. **A saved sign-in:** sign in once with `playwright-cli`, then `state-save auth.json`, and pass it to `launch({ storageState: 'auth.json' })`. Add `auth.json` to the run's scratch list (`node recorder/cleanup.mjs --add-scratch auth.json`): it holds live cookies.
+2. **A saved sign-in:** sign in once with `playwright-cli`, then `state-save <workspace>/auth.json` with the full path (never into the app's repo), and pass it to `launch({ storageState: … })`. Add it to the run's scratch list (`node recorder/cleanup.mjs --add-scratch auth.json`): it holds live cookies.
 3. **The user's own Chrome** (the Playwright Extension) only when the app needs their real sign-in and nothing above works. `playwright-cli attach --extension` reads the token from `PLAYWRIGHT_MCP_EXTENSION_TOKEN`; never print it or write it to a file. Use it to explore and to save a sign-in state, then record headless from that state.
 
 ## Launch settings
@@ -56,7 +56,7 @@ In this order:
 - **Saved state leaks between takes** (a mode left on, a draft, a dismissed tip). Reset it at the start of every scene.
 - **Auto-scroll** can carry an answer past the part worth showing. Scroll back like a reader would, with `rec.scroll()`.
 - **Layouts move after they load** (a canvas re-fits after every node, a list grows). Log a fresh `rec.box()` at each mark, and frame the payoff from the last frame's layout, not where things started.
-- **Dev overlays** (framework error badges, prototype switchers, version tags) come back on every page load. Hide them with `page.addStyleTag` after each `goto`, not once (`launch()` bypasses a strict CSP so this works).
+- **Dev overlays** (framework error badges, prototype switchers, version tags) come back on every page load. Hide them with `page.addStyleTag` after each `goto`, not once (on an app with a strict CSP, pass `launch({ bypassCSP: true })` so this works).
 - **A reload or navigation is invisible in the take:** headless Chrome holds the old paint, so "survives a reload" shows nothing changing. Mark it (`rec.mark('reload')`) and draw a short blank in the edit, or show the change another way.
 - **A mark lands late** when it comes after a `waitFor` plus a settle wait: about 0.4–0.6 s after the pixels change. Time shots on frames, not on that mark.
 - **A DOM signal is not the frame.** An attribute can change long before the pixels do. Check the moment on a 60 fps contact sheet before you sync sound to it.

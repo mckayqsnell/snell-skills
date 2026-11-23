@@ -1,4 +1,5 @@
-// Cleans up after a demo run. Run from the video workspace: node recorder/cleanup.mjs [--dry-run]
+// Cleans up after a demo run: node <workspace>/recorder/cleanup.mjs [--dry-run]. It works on the workspace it lives in,
+// wherever you run it from, and refuses to run unless that folder has the demo-video.json setup.mjs wrote.
 // - Closes the browsers this run's playwright-cli sessions opened (only sessions named in .demo-run.json).
 // - Deletes scratch: raw/*.frames/, review/scratch/, sheets/, HyperFrames snapshots, and every path listed under
 //   "scratch" in .demo-run.json.
@@ -10,8 +11,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd();
+const ROOT = fs.realpathSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..'));
+if (!fs.existsSync(path.join(ROOT, 'demo-video.json'))) {
+  console.error(`refusing to clean ${ROOT}: no demo-video.json, so it isn't a demo workspace`); process.exit(1);
+}
 const LIST = path.join(ROOT, '.demo-run.json');
 const read = () => (fs.existsSync(LIST) ? JSON.parse(fs.readFileSync(LIST, 'utf8')) : { sessions: [], scratch: [] });
 const [flag, value] = process.argv.slice(2);
@@ -35,12 +40,16 @@ const scratch = [...run.scratch, 'review/scratch', 'sheets', '.hyperframes/artif
 if (fs.existsSync(path.join(ROOT, 'raw'))) {
   for (const f of fs.readdirSync(path.join(ROOT, 'raw'))) if (f.endsWith('.frames')) scratch.push(path.join('raw', f));
 }
+const left = [];
 for (const rel of scratch) {
   const p = path.resolve(ROOT, rel);
-  if (!p.startsWith(ROOT + path.sep)) { done.push(`skipped ${rel}: outside the workspace`); continue; }
   if (!fs.existsSync(p)) continue;
+  // compare real paths, so a symlinked folder can't lead outside the workspace
+  const real = path.join(fs.realpathSync(path.dirname(p)), path.basename(p));
+  if (!real.startsWith(ROOT + path.sep)) { left.push(rel); continue; }
   if (!dry) fs.rmSync(p, { recursive: true, force: true });
   done.push(`deleted ${rel}`);
 }
 if (!dry) fs.rmSync(LIST, { force: true });
 console.log(done.length ? done.join('\n') : 'nothing to clean');
+if (left.length) console.warn(`NOT deleted, outside the workspace: delete these yourself if this run made them:\n  ${left.join('\n  ')}`);

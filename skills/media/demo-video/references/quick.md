@@ -2,6 +2,8 @@
 
 For when HyperFrames isn't installed, or the user wants a fast cut. Playwright draws the cursor, the chapter cards and the captions into the page while it records. There is no camera move: the frame is the page.
 
+Quick mode needs Playwright 1.64 or newer (`page.screencast.showActions`, `showChapter`, `showOverlay`): check with `node recorder/find-playwright.mjs`. On an older version, record with `recorder.mjs` (it falls back to raw CDP frames), add a title card and an end card with ffmpeg (`drawtext`, or a PNG you make with a headless page), and say in the hand-over that the cursor and captions are plain.
+
 ## The take
 
 One Node script (or `playwright-cli run-code --filename take.js` with the body as `async page => { … }`):

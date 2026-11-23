@@ -27,13 +27,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Headless Chrome sends screencast frames at CSS-pixel size unless the whole browser runs at a forced scale factor
 // (a context deviceScaleFactor alone gives 1280-wide frames). Headless also keeps ~87 px of the window for an
 // invisible toolbar, so the window is taller than the page. Checked, not assumed: the page size is asserted.
-export async function launch({ width = 1280, height = 720, dpr = 2.5, headless = true, theme, storageState, channel = 'chrome', toolbar = 87, bypassCSP = true } = {}) {
+// ffmpeg concat lists quote paths in single quotes; a quote inside the path must be escaped as '\''.
+const q = (p) => p.replace(/'/g, "'\\''");
+const LOCAL = /^(https?:\/\/)?(localhost|127\.0\.0\.1|\[::1\]|[^/]+\.(test|localhost))([:/]|$)/.test(process.env.APP_URL || 'http://localhost');
+export async function launch({ width = 1280, height = 720, dpr = 2.5, headless = true, theme, storageState, channel = 'chrome', toolbar = 87, bypassCSP = false, ignoreHTTPSErrors } = {}) {
   const args = ['--hide-scrollbars', `--force-device-scale-factor=${dpr}`, `--window-size=${width},${height + (headless ? toolbar : 0)}`];
   let browser;
   try { browser = await chromium.launch({ channel, headless, args }); } catch {
     browser = await chromium.launch({ headless, args }); // no Chrome installed: Playwright's own Chromium
   }
-  const context = await browser.newContext({ ignoreHTTPSErrors: true, bypassCSP, viewport: null, colorScheme: theme, storageState }); // bypassCSP: addStyleTag works on a strict-CSP app
+  // Certificate errors are ignored only for a local dev server (pass ignoreHTTPSErrors: true for another self-signed host).
+  // bypassCSP: pass true only when addStyleTag is blocked by a strict CSP.
+  const context = await browser.newContext({ ignoreHTTPSErrors: ignoreHTTPSErrors ?? LOCAL, bypassCSP, viewport: null, colorScheme: theme, storageState });
   const page = await context.newPage();
   const inner = await page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
   if (inner[0] !== width || inner[1] !== height || inner[2] !== dpr) {
@@ -123,8 +128,8 @@ export function createRecorder(page, { outDir, engine = 'auto', maxWidth = 3200,
     const endTs = Math.max(c.frames.at(-1)[1] + 1000 / fps, end);
     const list = c.frames.map(([file, ts], i) => {
       const next = c.frames[i + 1]?.[1] ?? endTs;
-      return `file '${file}'\nduration ${((next - ts) / 1000).toFixed(5)}`;
-    }).join('\n') + `\nfile '${c.frames.at(-1)[0]}'\n`;
+      return `file '${q(file)}'\nduration ${((next - ts) / 1000).toFixed(5)}`;
+    }).join('\n') + `\nfile '${q(c.frames.at(-1)[0])}'\n`;
     const listFile = path.join(c.dir, 'list.txt');
     fs.writeFileSync(listFile, list);
     const mp4 = path.join(outDir, `${c.name}.mp4`);

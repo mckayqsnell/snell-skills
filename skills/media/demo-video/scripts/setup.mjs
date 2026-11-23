@@ -8,6 +8,7 @@
 // Never overwrites a file that is already there, so a second run keeps your edits.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const args = process.argv.slice(2);
 const printOnly = args.includes('--print-path');
@@ -18,7 +19,7 @@ const isRepo = fs.existsSync(path.join(app, 'package.json')) || fs.existsSync(pa
 // next to a repo; inside a plain folder for a hosted app
 const ws = isRepo || !name ? path.join(path.dirname(app), name || `${path.basename(app)}-demo-video`) : path.join(app, name);
 if (printOnly) { console.log(ws); process.exit(0); }
-const here = path.dirname(new URL(import.meta.url).pathname);
+const here = path.dirname(fileURLToPath(import.meta.url));
 const copy = (from, to) => {
   if (fs.existsSync(to)) return;
   fs.mkdirSync(path.dirname(to), { recursive: true });

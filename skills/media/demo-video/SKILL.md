@@ -9,7 +9,7 @@ You make a demo video of the user's app with no hands on the mouse. A script dri
 
 **This skill's folder** holds `scripts/` (copied into each video's workspace), `platforms/` (the tools for each kind of app) and `references/` (the edit and the review). Use its full path when you run commands from elsewhere.
 
-**The scripts are a head start, not a contract.** Run them first: they usually just work. If one breaks (a Playwright, `playwright-cli` or HyperFrames version that renamed or dropped something, an app the script didn't expect), read the error, check that tool's docs for the version installed here (`npx playwright --version`, context7), and fix the workspace copy in `recorder/` or write your own script for the same job. Keep what each script is for: the event log format (`raw/<clip>.events.json`) that `cut.mjs` and `demo-kit.js` read, 3200 px frames, a closed browser at the end. Note what you changed in `NOTES.md`; never edit the skill's own copies.
+**The scripts are a head start, not a contract.** Run them first: they usually just work. If one breaks (a Playwright, `playwright-cli` or HyperFrames version that renamed or dropped something, an app the script didn't expect), read the error, check that tool's docs for the version installed here (`node recorder/find-playwright.mjs` prints the path and version, then context7), and fix the workspace copy in `recorder/` or write your own script for the same job. Keep what each script is for: the event log format (`raw/<clip>.events.json`) that `cut.mjs` and `demo-kit.js` read, 3200 px frames, a closed browser at the end. Note what you changed in `NOTES.md`; never edit the skill's own copies.
 
 **Tell the user up front, in one line:** a demo video takes a while and uses a fair number of tokens (recording, rendering, and two critic sub-agents).
 
@@ -47,7 +47,7 @@ Explore the running app live (the platform file names the tools). Read the READM
 
 Rank by what makes a viewer lean in: the one moment that looks like magic first, then the core job the app exists for, then what sets it apart. Cut what the length can't hold. A feature that needs a long wait gets shown at speed, not dropped. Check that the demo data tells the story the goal line claims: a "bulk export" demo where half the rows fail, or a dashboard with one row, undercuts it. Fix the seed or pick other records before you record.
 
-**Real or test data?** Judge it as you explore. Seed data, demo accounts and obvious fakes are fine. If it looks like real customers (real names, emails, amounts, a production host), stop and ask before you record.
+**Real or test data?** Judge it as you explore. Seed data, demo accounts and obvious fakes are fine. If it looks like real customers (real names, emails, amounts, a production host), stop and ask before you record. On real data or a production host, the run never writes while exploring or recording (save, submit, send, delete, pay) unless the user approves each one, or the writes go to the app's mock or sandbox.
 
 ## 5. Write the story and the shot list
 
@@ -77,6 +77,6 @@ Follow [`references/critics.md`](references/critics.md): two critic sub-agents (
 
 ## 9. Hand over and clean up
 
-1. Give the user the MP4 path, a contact sheet of the whole video, the length, and one line on the storyline you picked. Offer the HyperFrames desktop app for edits (Full mode).
-2. Clean up, even when a step failed: `node recorder/cleanup.mjs` closes this run's browser sessions and deletes scratch (frame folders, `sheets/`, `review/scratch/`, HyperFrames snapshots, anything you listed with `--add-scratch`). Stop any server you started, and the HyperFrames preview unless the user is editing in it (`npx hyperframes preview --stop`). Close every tab you opened in the user's Chrome. Close only what this run opened: another project's preview or server stays.
+1. Make the hand-over sheet from the final render, before cleanup: `node recorder/sheet.mjs renders/<app>-demo.mp4 renders/<app>-sheet.png 0 <end> 1 6 320`. Give the user the MP4 path, that sheet, the length, and one line on the storyline you picked. Offer the HyperFrames desktop app for edits (Full mode).
+2. Clean up, even when a step failed: `node recorder/cleanup.mjs` closes this run's browser sessions and deletes scratch (frame folders, `sheets/`, `review/scratch/`, HyperFrames snapshots, anything you listed with `--add-scratch`). Stop any server you started, and the HyperFrames preview unless the user is editing in it (`preview --stop`, run the way `references/hyperframes.md` says). Close every tab you opened in the user's Chrome. Close only what this run opened: another project's preview or server stays.
 3. Ask before deleting anything worth running again: the scene script, raw takes and the composition stay unless the user says so.

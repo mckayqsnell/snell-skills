@@ -2,12 +2,13 @@
 //   node recorder/scenes.mjs <scene> [theme]
 // Each scene: reset state, open the page, then record one take. Prefer one long take through the whole story
 // over many short ones: the edit then moves the camera between beats instead of hard-cutting.
+import { fileURLToPath } from 'node:url';
 import { launch, createRecorder } from './recorder.mjs';
 
 const scene = process.argv[2] || 'story';
 const theme = process.argv[3]; // 'dark' or 'light'; leave it out to keep the app's default
 const APP = process.env.APP_URL || 'http://localhost:3000'; // the app's dev server
-const OUT = new URL('../raw/', import.meta.url).pathname;
+const OUT = fileURLToPath(new URL('../raw/', import.meta.url));
 
 const { browser, page } = await launch({ width: 1280, height: 720, dpr: 2.5, theme });
 const rec = createRecorder(page, { outDir: OUT, seed: scene.length * 31 });
