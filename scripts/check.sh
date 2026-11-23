@@ -241,9 +241,7 @@ step_demo-video() {
   fi
   need_cmd ffmpeg "macOS: brew install ffmpeg; Ubuntu: apt-get install ffmpeg" || return 0
   need_cmd ffprobe "comes with ffmpeg" || return 0
-  # Not run: sheet.mjs draws its labels in a headless browser (Playwright), and
-  # peaks.mjs has ffmpeg write to /dev/stdout, which Linux can't open when
-  # Node captures the output (ENXIO), so it fails on CI's Ubuntu runner.
+  # Not run: sheet.mjs draws its labels in a headless browser (Playwright).
   local ws="$SCRATCH/demo-video"
   mkdir -p "$ws/raw"
   # A 3 s black clip with a white flash at 1.5-1.7 s, and a matching event log.
@@ -289,7 +287,11 @@ JSON
   [ "$out" = '[{"src":0.5,"at":10.5},{"src":2,"at":11.333},{"src":2.6,"at":11.5}]' ] \
     || { echo "❌ srctime.mjs mapped the times wrong (expected 10.5, 11.333, 11.5)" >&2; exit 1; }
 
-  echo "✅ cut.mjs and srctime.mjs work on a test clip"
+  out="$(node "$dir/peaks.mjs" "$ws/raw/story.mp4" 0 3 320:180:0:0)"; echo "  peaks.mjs: $out"
+  printf '%s\n' "$out" | grep -Eq '^peak 1\.[5-7][0-9]* onset 1\.(4|5)' \
+    || { echo "❌ peaks.mjs did not find the flash at 1.5 s" >&2; exit 1; }
+
+  echo "✅ cut.mjs, srctime.mjs and peaks.mjs work on a test clip"
 }
 
 step_ci-steps() {
