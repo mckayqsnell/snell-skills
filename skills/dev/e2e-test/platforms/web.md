@@ -18,6 +18,7 @@ If `playwright-cli` is not on the PATH, try `npx --no-install playwright cli`. I
 ```bash
 SCRATCH="$(mktemp -d)"; cd "$SCRATCH"        # ledger: $SCRATCH
 playwright-cli -s=e2e open http://localhost:3000   # ledger: session e2e
+# loop mode: add --idle-timeout=0 (a headless session closes after an hour idle by default; step 8 closes it)
 ```
 
 - **Run every `playwright-cli` command from `$SCRATCH`.** A session belongs to the folder it was opened from: from any other folder, `list` shows nothing and `close` says "not open" while the browser keeps running. Use absolute paths (`--filename="$SCRATCH/shots/x.png"`) so files land where you expect.
@@ -29,7 +30,7 @@ playwright-cli -s=e2e open http://localhost:3000   # ledger: session e2e
 
 **Signing in**, best first:
 
-1. A test login URL or seed user from the project (README, seed files, `.env.example`). Visit it, then `playwright-cli -s=e2e state-save "$SCRATCH/auth.json"` so later sessions start signed in with `state-load`.
+1. A test login URL or seed user from the project (README, seed files, `.env.example`). Visit it, then `playwright-cli -s=e2e state-save "$SCRATCH/auth.json"` so later sessions start signed in with `state-load`. Never `state-save` in a session attached to the user's own Chrome: it writes their real cookies to disk.
 2. **The user's real Chrome**, only when the app needs their real sign-in and there is no test login: `playwright-cli attach --extension=chrome --session=e2e-real`. It needs the Playwright Extension and reads its token from `PLAYWRIGHT_MCP_EXTENSION_TOKEN`; never print, echo or save that token. You are now in the user's own browser: open your own tab with `tab-new`, write down its index, and touch no other tab. Each attach leaves a "Playwright · playwright-cli" tab group in their Chrome; step 8 closes it.
 
 Never type a real password. If neither way works, ask the user.
@@ -92,11 +93,13 @@ Any console error, or any 4xx or 5xx you did not cause on purpose, is a finding,
 
 When the data is real, or another person or agent is using the same app, make writes impossible instead of just avoiding them:
 
+Open the session with service workers blocked (they bypass routes): add `"serviceWorkers":"block"` to `contextOptions` in `$SCRATCH/cli.json`. Then block every write on the whole context, not just `/api/` (GraphQL, tRPC, server actions and form posts are writes too, and a page route misses popups):
+
 ```bash
-playwright-cli -s=e2e run-code "async page => { await page.route('**/api/**', r => r.request().method() === 'GET' ? r.continue() : r.abort()); }"
+playwright-cli -s=e2e run-code "async page => { await page.context().route('**/*', r => ['GET','HEAD','OPTIONS'].includes(r.request().method()) ? r.continue() : r.abort()); }"
 ```
 
-Log what you blocked (record `r.request().method()` and the path in the handler). Plain page views often send writes too (usage counters, "most used", lock checks), so this list is itself worth a line in the report. Error toasts and failed states that follow a blocked request are caused by you, not findings.
+Prove it before you test: send one harmless write (`run-code "async page => page.evaluate(() => fetch(location.origin + '/__e2e-probe', { method: 'POST' }).then(() => 'sent', () => 'blocked'))"`) and see `blocked`. Context routes don't show in `route-list`. Log what you blocked (record `r.request().method()` and the path in the handler). Plain page views often send writes too (usage counters, "most used", lock checks), so this list is itself worth a line in the report. Error toasts and failed states that follow a blocked request are caused by you, not findings.
 
 **The app's own mock mode** is better still when it has one (a `?mock=1` flag, a fake backend, a `MOCK_` env var: search the transport or API client code). It lets you send messages, submit forms and see error states with nothing reaching the server. Then check in real mode, read-only, what you can: that the real responses have the same shape the mock returns. A mock that drifted from the real backend (a renamed field, an old option list) is a finding.
 

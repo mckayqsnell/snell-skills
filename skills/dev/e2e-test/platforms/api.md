@@ -20,6 +20,7 @@ jq . "$SCRATCH/r1.json"
 ```
 
 - `-w '%{http_code}'` prints the status; `-i` shows headers; `-c "$SCRATCH/jar" -b "$SCRATCH/jar"` keeps cookies across calls.
+- **Read-only runs** (real data, a shared or deployed API, or you're unsure): GET and HEAD only. The write tests below run only against a local or test backend the user named; ask when unsure.
 - For each `new` endpoint test: a good request, a missing field, a wrong type, a too-long value, no auth, someone else's id (must be 403 or 404, never their data), and the same request twice (idempotent or a clear 409).
 - Check the body, not just the status: the shape the client expects, no stack traces or secrets in error bodies, the right content type.
 - A CLI: run each command with good input, bad input and `--help`; check the exit code (`echo $?`), stdout and stderr separately.
@@ -33,17 +34,17 @@ For each call, follow it down while the backend runs locally:
 3. **Data, read-only:** the row or message the call should have made.
 
 ```bash
-psql "$DATABASE_URL" -c "select id, name, updated_at from pipelines order by updated_at desc limit 5"
+PGOPTIONS='-c default_transaction_read_only=on' psql "$DATABASE_URL" -c "select id, name, updated_at from pipelines order by updated_at desc limit 5"
 sqlite3 -readonly app.db "select * from pipelines order by rowid desc limit 5"
 redis-cli LLEN queue:exports            # read commands only: LLEN, LRANGE, GET, XRANGE
 docker compose logs --tail 50 worker
 ```
 
-Only `select` and read commands. A write to check something (an insert, a `DEL`, a queue purge) is a data change: the hard rules in SKILL.md apply.
+First confirm which database `$DATABASE_URL` points at (local or test, never production without the user's yes), and select only the columns the check needs: what you print lands in the transcript. Only `select` and read commands. A write to check something (an insert, a `DEL`, a queue purge) is a data change: the hard rules in SKILL.md apply.
 
 ## Error states
 
-Make the API's own dependencies fail where the project lets you do it safely: a bad config value in a scratch `.env`, a stopped local dependency the project starts with `docker compose`, a fake upstream the project ships. When the API sits behind a web app, a Playwright mock is easier and touches nothing: see "Error states with mocks" in `web.md`. In a Playwright spec, `request.get` / `request.post` (the `request` fixture, an `APIRequestContext`) call the API with the browser's cookies.
+Make the API's own dependencies fail where the project lets you do it safely: a bad config value in a scratch `.env`, a stopped local dependency the project starts with `docker compose` (put it on the ledger; step 8 starts it again if it was running before), a fake upstream the project ships. When the API sits behind a web app, a Playwright mock is easier and touches nothing: see "Error states with mocks" in `web.md`. In a Playwright spec, `request.get` / `request.post` (the `request` fixture, an `APIRequestContext`) call the API with the browser's cookies.
 
 ## Workers and queues
 
@@ -51,4 +52,4 @@ Start the job the way a user would trigger it (the API call or the CLI command),
 
 ## Clean up and prove it
 
-Stop each server and worker you started (`kill <pid>`, `docker compose stop <svc>` for ones you started; leave the rest). Delete `$SCRATCH` after moving the report out. Then check: `lsof -iTCP -sTCP:LISTEN -P | grep <port>` shows only what was running before you came, and `git status --short` shows only the files the session meant to change.
+Stop each server and worker you started (`kill <pid>`, `docker compose stop <svc>` for ones you started; leave the rest), and start again any service you stopped that was running before you came. Delete `$SCRATCH` after moving the report out. Then check: `lsof -iTCP -sTCP:LISTEN -P | grep <port>` shows only what was running before you came, and `git status --short` shows only the files the session meant to change.
