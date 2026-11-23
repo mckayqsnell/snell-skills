@@ -1,6 +1,6 @@
 ---
 name: e2e-test
-description: 'End-to-end test what this session built, then smoke-test the app''s core flows so nothing old broke. Works out what to test from the git diff, the plan and the chat, drives the real app headless, follows each click to the network and the server, and reports pass/fail with screenshots. Use when the user says /e2e-test, "e2e test this", "test it end to end", or asks to check a feature they just built in the running app.'
+description: 'End-to-end test what this session built, then smoke-test the app''s core flows so nothing old broke. Works out what to test from the git diff, the plan and the chat, drives the real app headless, follows each click to the network and the server, and reports pass/fail with screenshots. Use when the user says /e2e-test, "e2e test this", "test it end to end", asks to check a feature they just built in the running app, or wants it as a verification loop while building ("test as you go", "run e2e in a loop").'
 ---
 
 # e2e-test
@@ -13,6 +13,17 @@ The run has two parts:
 - **Smoke pass:** the app's core flows, once each, to catch what the change broke elsewhere.
 
 Say this once at the start: "Heads-up: a full e2e run can use a fair number of tokens." Then go.
+
+## One run or a loop
+
+- **One run** (the default): the build is done; run steps 1–8 once.
+- **Loop**: the user or the plan says to use this skill as a verification loop while building ("use e2e-test in a loop while you build this", "test each step as you go"). Then:
+  1. **Once, at the start:** steps 2–4. Start the app, find the core flows, turn every promise in the plan into a behavior row, and ask the one question about testers. Keep the app and one named browser session open for the whole build; the ledger stays open too.
+  2. **After each slice of the build** (a plan step, a feature, a fix): a **check**. Run the deep pass on the rows that slice added or touched, plus the core flows that slice could break. Fix what fails before the next slice: it is all `new` code. Report one line in chat (`slice 3: 6 pass, 1 fixed`); no HTML report, no questions.
+  3. **Keep a loop log** in your scratch folder: every row with its latest result and the slice that last checked it. A later slice that breaks an earlier row shows up there.
+  4. **At the end:** every row again, plus the full smoke pass, then steps 7 and 8 as for one run.
+
+  The plan is the source of behaviors in a loop; the diff only adds what the plan forgot. Pull the Playwright docs once, at the start, not on every check.
 
 ## Hard rules
 
