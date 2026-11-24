@@ -192,13 +192,17 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      PLAYWRIGHT_CLI_VERSION: 0.1.22
     steps:
       - name: Check out the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Set up pnpm (version from package.json "packageManager")
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          cache: true
 
       - name: Set up Node.js
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
@@ -206,6 +210,13 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+
+      # Only @playwright/cli (pinned in pnpm-lock.yaml) is used here: no install scripts needed.
+      - name: Install dependencies (exact versions, no install scripts)
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Install ffmpeg (Chocolatey)
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
@@ -221,24 +232,26 @@ jobs:
           set -euo pipefail
           bash scripts/check.sh --only demo-video
 
-      # Run from an empty folder, so the only Playwright to find is the global one.
-      - name: Find a global playwright-cli
+      # Run from an empty folder with pnpm's playwright-cli.cmd shim on PATH, so the only
+      # Playwright to find is the one behind that shim (the way a global install is found).
+      - name: Find playwright-cli through its .cmd shim
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
-          npm install -g --ignore-scripts "@playwright/cli@$PLAYWRIGHT_CLI_VERSION" >/dev/null
+          export PATH="$PWD/node_modules/.bin:$PATH"
           finder="$PWD/skills/media/demo-video/scripts/find-playwright.mjs"
           cd "$RUNNER_TEMP"
           found="$(node "$finder")"
           echo "$found"
           case "$found" in *playwright-core*) ;; *) echo "find-playwright.mjs did not find playwright-core" >&2; exit 1 ;; esac
 
-      # A real 1 s take in headless Chrome (on the runner image), through the global playwright-cli's
+      # A real 1 s take in headless Chrome (on the runner image), through playwright-cli's
       # Playwright: frames, the ffmpeg concat list, the MP4 and the event log. Then cleanup on Windows.
       - name: Record a short take, then clean up
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
+          export PATH="$PWD/node_modules/.bin:$PATH"
           take="$PWD/scripts/ci/demo-video-take.mjs"
           node skills/media/demo-video/scripts/setup.mjs "$RUNNER_TEMP" take-ws >/dev/null
           ws="$RUNNER_TEMP/take-ws"

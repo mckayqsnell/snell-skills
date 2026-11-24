@@ -40,7 +40,20 @@ export async function launch({ width = 1280, height = 720, dpr = 2.5, headless =
   // bypassCSP: pass true only when addStyleTag is blocked by a strict CSP.
   const context = await browser.newContext({ ignoreHTTPSErrors: ignoreHTTPSErrors ?? LOCAL, bypassCSP, viewport: null, colorScheme: theme, storageState });
   const page = await context.newPage();
-  const inner = await page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
+  const measure = () => page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
+  let inner = await measure();
+  if ((inner[0] !== width || inner[1] !== height) && inner[2] === dpr) {
+    // The window's own frame differs by OS (Windows adds borders the toolbar guess doesn't cover):
+    // grow the window by the measured gap once, then check again.
+    try {
+      const cdp = await context.newCDPSession(page);
+      const { windowId, bounds } = await cdp.send('Browser.getWindowForTarget');
+      await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width: bounds.width + width - inner[0], height: bounds.height + height - inner[1] } });
+      await cdp.detach();
+      await page.waitForFunction(([w, h]) => innerWidth === w && innerHeight === h, [width, height], { timeout: 3000 }).catch(() => {});
+      inner = await measure();
+    } catch { /* keep the first measure; the check below reports it */ }
+  }
   if (inner[0] !== width || inner[1] !== height || inner[2] !== dpr) {
     await browser.close();
     throw new Error(`page is ${inner.join('x')}, wanted ${width}x${height}@${dpr}. Adjust launch({ toolbar }) by the height difference.`);
