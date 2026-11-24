@@ -1,7 +1,7 @@
 // Contact sheet with time labels, so a reviewer can name exact moments.
 //   node recorder/sheet.mjs <video> <out.png> <from> <to> <step> [cols] [tileWidth]
 //   node recorder/sheet.mjs <video> <out.png> --at 1.2,3.4,5 [cols] [tileWidth]
-// Labels are drawn by a headless page because Homebrew's ffmpeg often has no drawtext filter.
+// Labels are drawn by a headless page because many ffmpeg builds (Homebrew's among them) have no drawtext filter.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

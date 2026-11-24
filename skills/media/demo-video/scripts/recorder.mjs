@@ -128,8 +128,9 @@ export function createRecorder(page, { outDir, engine = 'auto', maxWidth = 3200,
     const endTs = Math.max(c.frames.at(-1)[1] + 1000 / fps, end);
     const list = c.frames.map(([file, ts], i) => {
       const next = c.frames[i + 1]?.[1] ?? endTs;
-      return `file '${q(file)}'\nduration ${((next - ts) / 1000).toFixed(5)}`;
-    }).join('\n') + `\nfile '${q(c.frames.at(-1)[0])}'\n`;
+      // Bare names: ffmpeg reads them next to list.txt, so Windows drive letters and backslashes never reach the list.
+      return `file '${q(path.basename(file))}'\nduration ${((next - ts) / 1000).toFixed(5)}`;
+    }).join('\n') + `\nfile '${q(path.basename(c.frames.at(-1)[0]))}'\n`;
     const listFile = path.join(c.dir, 'list.txt');
     fs.writeFileSync(listFile, list);
     const mp4 = path.join(outDir, `${c.name}.mp4`);

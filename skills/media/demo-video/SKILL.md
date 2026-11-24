@@ -17,9 +17,11 @@ You make a demo video of the user's app with no hands on the mouse. A script dri
 
 | Tool | Check | If missing |
 |---|---|---|
-| ffmpeg | `ffmpeg -version` | Ask, then `brew install ffmpeg` (macOS) or the system package. |
-| Playwright | `node <skill>/scripts/find-playwright.mjs` from the app's folder prints a path | Ask before installing anything. `@playwright/cli` globally is the lightest. |
+| ffmpeg (with ffprobe) | `ffmpeg -version` | Ask, then install: `winget install Gyan.FFmpeg` (Windows; open a new terminal after, so the PATH change shows up), `brew install ffmpeg` (macOS), or the system package (Linux). |
+| Playwright | `node <skill>/scripts/find-playwright.mjs` from the app's folder prints a path | Ask before installing anything. `npm install -g @playwright/cli` is the lightest. |
 | HyperFrames | the `hyperframes:hyperframes` skill is listed | Suggest `claude plugin marketplace add heygen-com/hyperframes`, then `claude plugin install hyperframes@hyperframes`. Until then, offer **Quick** mode. |
+
+**On Windows**, Claude Code runs commands in Git Bash, so the commands in this skill work as written. Quote every path: Windows user folders often have spaces (`C:\Users\First Last`). The scripts use Node's path tools and need no `sh`.
 
 **Full** mode (HyperFrames) is the default: zooms, captions, cards and sound in a real edit. **Quick** mode uses only Playwright's own cursor, chapter cards and overlays plus ffmpeg: plainer, faster, no plugin.
 

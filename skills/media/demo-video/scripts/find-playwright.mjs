@@ -5,7 +5,7 @@
 // Prints the folder when run directly: node find-playwright.mjs
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
@@ -20,20 +20,47 @@ function tryResolve(fromFile, name) {
   return null;
 }
 
+const WIN = process.platform === 'win32';
+
+// Where the playwright-cli command lives: `where` on Windows (no `sh` there), `command -v` elsewhere.
+function cliBin() {
+  let out;
+  try {
+    out = WIN
+      ? execFileSync('where', ['playwright-cli'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+      : execFileSync('sh', ['-c', 'command -v playwright-cli'], { encoding: 'utf8' });
+  } catch { return null; }
+  const lines = out.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // Windows lists the extensionless sh shim and the .cmd shim; the .cmd one is the one Windows runs.
+  return (WIN && lines.find((l) => /\.cmd$/i.test(l))) || lines[0] || null;
+}
+
+// The .js file a shim starts. npm on macOS/Linux links straight to it; pnpm writes a sh shim ("$basedir/…");
+// npm and pnpm on Windows write a .cmd shim ("%dp0%\…" or "%~dp0\…").
+export function shimTarget(shimPath, text) {
+  const m = text.match(/"\$basedir\/([^"]*@playwright\/cli\/[^"]*\.js)"/)
+    || text.match(/"%~?dp0%?\\?([^"]*@playwright[\\/]cli[\\/][^"]*\.js)"/i);
+  return m ? path.resolve(path.dirname(shimPath), m[1].split(/[\\/]/).join(path.sep)) : null;
+}
+
+// Last resort: the global npm folder. execSync goes through the shell, which Windows needs for npm.cmd.
+function fromNpmRoot() {
+  let root;
+  try { root = execSync('npm root -g', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return null; }
+  const pj = path.join(root, '@playwright', 'cli', 'package.json');
+  return fs.existsSync(pj) ? tryResolve(pj, 'playwright-core') : null;
+}
+
 function fromCli() {
-  let bin;
-  try { bin = execFileSync('sh', ['-c', 'command -v playwright-cli'], { encoding: 'utf8' }).trim(); } catch { return null; }
-  if (!bin) return null;
-  let target = fs.realpathSync(bin);
-  // npm links straight to the .js file; pnpm and others write a shell shim that names it.
-  if (!target.endsWith('.js')) {
-    const shim = fs.readFileSync(target, 'utf8');
-    const m = shim.match(/"\$basedir\/([^"]*@playwright\/cli\/[^"]*\.js)"/);
-    if (!m) return null;
-    target = path.resolve(path.dirname(target), m[1]);
-  }
-  // pnpm links the package in from its store; resolve from the real file so its own node_modules is found.
-  return tryResolve(fs.realpathSync(target), 'playwright-core');
+  try {
+    const bin = cliBin();
+    let target = bin && fs.realpathSync(bin);
+    if (target && !target.endsWith('.js')) target = shimTarget(target, fs.readFileSync(target, 'utf8'));
+    // pnpm links the package in from its store; resolve from the real file so its own node_modules is found.
+    const hit = target && fs.existsSync(target) && tryResolve(fs.realpathSync(target), 'playwright-core');
+    if (hit) return hit;
+  } catch { /* fall through to npm's global folder */ }
+  return fromNpmRoot();
 }
 
 export function findPlaywright() {
@@ -61,7 +88,7 @@ export async function loadPlaywright() {
   return mod.default?.chromium ? mod.default : mod;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) {
   const dir = findPlaywright();
   if (!dir) { console.error('not found'); process.exit(1); }
   const { version } = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
