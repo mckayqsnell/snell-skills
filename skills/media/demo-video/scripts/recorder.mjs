@@ -43,20 +43,14 @@ export async function launch({ width = 1280, height = 720, dpr = 2.5, headless =
   const measure = () => page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
   let inner = await measure();
   if ((inner[0] !== width || inner[1] !== height) && inner[2] === dpr) {
-    // The window's own frame differs by OS (Windows adds borders the toolbar guess doesn't cover, and at a
-    // fractional scale they round to a fraction of a CSS pixel): nudge the window by the measured gap until
-    // the page is exact, a few tries at most.
+    // The window's own frame differs by OS: on Windows it is bigger than the toolbar guess, and at a fractional
+    // scale no whole window size gives the exact page. Pin the page size instead, keeping the forced scale.
+    // The override lasts while this CDP session is attached, so it stays attached for the browser's life.
     try {
       const cdp = await context.newCDPSession(page);
-      for (let tries = 0; tries < 4 && (inner[0] !== width || inner[1] !== height); tries++) {
-        const { windowId, bounds } = await cdp.send('Browser.getWindowForTarget');
-        await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width: bounds.width + width - inner[0], height: bounds.height + height - inner[1] } });
-        const before = inner.join('x');
-        await page.waitForFunction((b) => [innerWidth, innerHeight, devicePixelRatio].join('x') !== b, before, { timeout: 2000 }).catch(() => {});
-        inner = await measure();
-      }
-      await cdp.detach();
-    } catch { /* keep the last measure; the check below reports it */ }
+      await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: dpr, mobile: false });
+      inner = await measure();
+    } catch { /* keep the first measure; the check below reports it */ }
   }
   if (inner[0] !== width || inner[1] !== height || inner[2] !== dpr) {
     await browser.close();

@@ -24,13 +24,14 @@ try {
   await rec.sleep(1000);
   const meta = await rec.stop();
   const mp4 = path.join(out, 'take.mp4');
-  const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration:stream=width', '-of', 'json', mp4], { encoding: 'utf8' }));
+  const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration:stream=width,height', '-of', 'json', mp4], { encoding: 'utf8' }));
   const log = JSON.parse(fs.readFileSync(path.join(out, 'take.events.json'), 'utf8'));
   const marks = log.events.filter((e) => e.type === 'mark').map((e) => e.label);
-  const res = { engine: meta.engine, frameWidth: log.frameWidth, frames: meta.frames, mp4Sec: Number(probe.format.duration), mp4Width: probe.streams[0].width, marks };
+  const res = { engine: meta.engine, frameWidth: log.frameWidth, frames: meta.frames, mp4Sec: Number(probe.format.duration), mp4Width: probe.streams[0].width, mp4Height: probe.streams[0].height, marks };
   console.log(JSON.stringify(res));
   const bad = [];
   if (res.frameWidth !== 1600) bad.push(`frameWidth ${res.frameWidth}, want 1600 (640 css px at 2.5x)`);
+  if (res.mp4Width !== 1600 || res.mp4Height !== 900) bad.push(`mp4 is ${res.mp4Width}x${res.mp4Height}, want 1600x900`);
   if (!(res.mp4Sec > 0.8)) bad.push(`mp4 is ${res.mp4Sec} s`);
   if (!marks.includes('clicked')) bad.push('no "clicked" mark');
   if (marks.includes('missing-box')) bad.push('the "go" box matched nothing');
