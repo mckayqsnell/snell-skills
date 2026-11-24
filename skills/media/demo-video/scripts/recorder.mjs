@@ -43,16 +43,20 @@ export async function launch({ width = 1280, height = 720, dpr = 2.5, headless =
   const measure = () => page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
   let inner = await measure();
   if ((inner[0] !== width || inner[1] !== height) && inner[2] === dpr) {
-    // The window's own frame differs by OS (Windows adds borders the toolbar guess doesn't cover):
-    // grow the window by the measured gap once, then check again.
+    // The window's own frame differs by OS (Windows adds borders the toolbar guess doesn't cover, and at a
+    // fractional scale they round to a fraction of a CSS pixel): nudge the window by the measured gap until
+    // the page is exact, a few tries at most.
     try {
       const cdp = await context.newCDPSession(page);
-      const { windowId, bounds } = await cdp.send('Browser.getWindowForTarget');
-      await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width: bounds.width + width - inner[0], height: bounds.height + height - inner[1] } });
+      for (let tries = 0; tries < 4 && (inner[0] !== width || inner[1] !== height); tries++) {
+        const { windowId, bounds } = await cdp.send('Browser.getWindowForTarget');
+        await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width: bounds.width + width - inner[0], height: bounds.height + height - inner[1] } });
+        const before = inner.join('x');
+        await page.waitForFunction((b) => [innerWidth, innerHeight, devicePixelRatio].join('x') !== b, before, { timeout: 2000 }).catch(() => {});
+        inner = await measure();
+      }
       await cdp.detach();
-      await page.waitForFunction(([w, h]) => innerWidth === w && innerHeight === h, [width, height], { timeout: 3000 }).catch(() => {});
-      inner = await measure();
-    } catch { /* keep the first measure; the check below reports it */ }
+    } catch { /* keep the last measure; the check below reports it */ }
   }
   if (inner[0] !== width || inner[1] !== height || inner[2] !== dpr) {
     await browser.close();
