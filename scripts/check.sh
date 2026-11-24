@@ -239,7 +239,7 @@ step_demo-video() {
     echo "  skills/media/demo-video/ is not in this checkout, nothing to test"
     return 0
   fi
-  need_cmd ffmpeg "macOS: brew install ffmpeg; Ubuntu: apt-get install ffmpeg" || return 0
+  need_cmd ffmpeg "macOS: brew install ffmpeg; Ubuntu: apt-get install ffmpeg; Windows: winget install Gyan.FFmpeg" || return 0
   need_cmd ffprobe "comes with ffmpeg" || return 0
   # Not run: sheet.mjs draws its labels in a headless browser (Playwright).
   local ws="$SCRATCH/demo-video"

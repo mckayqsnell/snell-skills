@@ -45,7 +45,8 @@ function closeSession(s) {
 }
 for (const s of run.sessions) {
   if (!SAFE_SESSION.test(s)) { done.push(`skipped session ${JSON.stringify(s)}: not a plain name`); continue; }
-  if (!dry) { try { closeSession(s); } catch { /* already closed */ } }
+  // playwright-cli exits 0 for a session that is already closed, so a failure here is real (not on PATH, say).
+  if (!dry) { try { closeSession(s); } catch (e) { done.push(`could not close session ${s}: ${e.code || e.message} (close it by hand)`); continue; } }
   done.push(`closed session ${s}`);
 }
 // HyperFrames keeps snapshot PNGs here; its check's warm-up Chrome exits on its own a few minutes later.

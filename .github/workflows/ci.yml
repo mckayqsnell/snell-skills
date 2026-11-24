@@ -211,10 +211,9 @@ jobs:
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
-          if ! command -v ffmpeg >/dev/null; then
-            choco install ffmpeg -y --no-progress >/dev/null
-            echo 'C:\ProgramData\chocolatey\bin' >> "$GITHUB_PATH"
-          fi
+          # Chocolatey's bin folder is already on PATH on hosted Windows runners.
+          command -v ffmpeg >/dev/null || choco install ffmpeg -y --no-progress >/dev/null
+          ffmpeg -hide_banner -version | head -1
 
       # Skips with a note when the demo-video skill is not in the branch.
       - name: Cut a test clip and map its times
@@ -233,6 +232,22 @@ jobs:
           found="$(node "$finder")"
           echo "$found"
           case "$found" in *playwright-core*) ;; *) echo "find-playwright.mjs did not find playwright-core" >&2; exit 1 ;; esac
+
+      # A real 1 s take in headless Chrome (on the runner image), through the global playwright-cli's
+      # Playwright: frames, the ffmpeg concat list, the MP4 and the event log. Then cleanup on Windows.
+      - name: Record a short take, then clean up
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        run: |
+          set -euo pipefail
+          take="$PWD/scripts/ci/demo-video-take.mjs"
+          node skills/media/demo-video/scripts/setup.mjs "$RUNNER_TEMP" take-ws >/dev/null
+          ws="$RUNNER_TEMP/take-ws"
+          cd "$RUNNER_TEMP"
+          node "$take" "$ws"
+          node "$ws/recorder/cleanup.mjs" --add-session ci-take
+          out="$(node "$ws/recorder/cleanup.mjs")"
+          echo "$out"
+          case "$out" in *"could not close"*) exit 1 ;; esac
 
   workflows:
     name: Lint workflows (actionlint, zizmor)
@@ -274,7 +289,7 @@ jobs:
   all-checks:
     name: All checks
     if: ${{ !cancelled() }}
-    needs: [plugin, lint, kit, changeset, demo-video, workflows]
+    needs: [plugin, lint, kit, changeset, demo-video, demo-video-windows, workflows]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}
