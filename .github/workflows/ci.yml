@@ -135,6 +135,8 @@ jobs:
         run: |
           set -euo pipefail
           pnpm install --frozen-lockfile --ignore-scripts
+          # pnpm's playwright-cli.cmd shim, on PATH for the steps below (one Windows path per line).
+          cygpath -w "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: Require a changeset when skills/ changes
         env:
@@ -182,7 +184,8 @@ jobs:
           bash scripts/check.sh --only demo-video
 
   # Most people who get demo-video run Windows: the same smoke test there, plus
-  # finding a global playwright-cli through its .cmd shim (no `sh` on Windows).
+  # finding playwright-cli through its .cmd shim (no `sh` on Windows), every shim
+  # format (npm -g, pnpm, sh) read with Windows paths, and a real recorded take.
   demo-video-windows:
     name: demo-video scripts on Windows
     runs-on: windows-2025
@@ -217,6 +220,8 @@ jobs:
         run: |
           set -euo pipefail
           pnpm install --frozen-lockfile --ignore-scripts
+          # pnpm's playwright-cli.cmd shim, on PATH for the steps below (one Windows path per line).
+          cygpath -w "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: Install ffmpeg (Chocolatey)
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
@@ -232,26 +237,27 @@ jobs:
           set -euo pipefail
           bash scripts/check.sh --only demo-video
 
-      # Run from an empty folder with pnpm's playwright-cli.cmd shim on PATH, so the only
-      # Playwright to find is the one behind that shim (the way a global install is found).
+      # npm -g's .cmd shim is only checked as text here: installing one would be an
+      # install outside the lockfile. Then, from an empty folder, find the Playwright
+      # behind pnpm's real .cmd shim (the way a global install is found).
       - name: Find playwright-cli through its .cmd shim
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
-          export PATH="$PWD/node_modules/.bin:$PATH"
+          node scripts/ci/demo-video-shims.mjs
           finder="$PWD/skills/media/demo-video/scripts/find-playwright.mjs"
           cd "$RUNNER_TEMP"
           found="$(node "$finder")"
           echo "$found"
           case "$found" in *playwright-core*) ;; *) echo "find-playwright.mjs did not find playwright-core" >&2; exit 1 ;; esac
 
-      # A real 1 s take in headless Chrome (on the runner image), through playwright-cli's
-      # Playwright: frames, the ffmpeg concat list, the MP4 and the event log. Then cleanup on Windows.
+      # A real 1 s take at the skill's default 1280x720 at 2.5x, in headless Chrome (on the runner
+      # image), through playwright-cli's Playwright: the page size, frames, the ffmpeg concat list,
+      # the MP4 and the event log. Then cleanup on Windows.
       - name: Record a short take, then clean up
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
-          export PATH="$PWD/node_modules/.bin:$PATH"
           take="$PWD/scripts/ci/demo-video-take.mjs"
           node skills/media/demo-video/scripts/setup.mjs "$RUNNER_TEMP" take-ws >/dev/null
           ws="$RUNNER_TEMP/take-ws"

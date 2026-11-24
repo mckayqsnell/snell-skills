@@ -25,8 +25,9 @@ const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Headless Chrome sends screencast frames at CSS-pixel size unless the whole browser runs at a forced scale factor
-// (a context deviceScaleFactor alone gives 1280-wide frames). Headless also keeps ~87 px of the window for an
-// invisible toolbar, so the window is taller than the page. Checked, not assumed: the page size is asserted.
+// (a context deviceScaleFactor alone gives 1280-wide frames). The window is sized from a first guess (headless keeps
+// ~87 px for an invisible toolbar on macOS and Linux); where the OS frame differs, as on Windows, launch() pins the
+// page size over CDP. Checked, not assumed: the page size is asserted.
 // ffmpeg concat lists quote paths in single quotes; a quote inside the path must be escaped as '\''.
 const q = (p) => p.replace(/'/g, "'\\''");
 const LOCAL = /^(https?:\/\/)?(localhost|127\.0\.0\.1|\[::1\]|[^/]+\.(test|localhost))([:/]|$)/.test(process.env.APP_URL || 'http://localhost');
@@ -42,19 +43,23 @@ export async function launch({ width = 1280, height = 720, dpr = 2.5, headless =
   const page = await context.newPage();
   const measure = () => page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]);
   let inner = await measure();
+  let pinError = null;
   if ((inner[0] !== width || inner[1] !== height) && inner[2] === dpr) {
     // The window's own frame differs by OS: on Windows it is bigger than the toolbar guess, and at a fractional
     // scale no whole window size gives the exact page. Pin the page size instead, keeping the forced scale.
-    // The override lasts while this CDP session is attached, so it stays attached for the browser's life.
+    // - It covers this page only (the one the recorder records); a popup or another newPage() is not pinned.
+    // - It lasts while this CDP session is attached, so it stays attached for the browser's life.
+    // - viewport: null above keeps Playwright from sending its own size; page.setViewportSize() would undo the pin.
     try {
       const cdp = await context.newCDPSession(page);
       await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: dpr, mobile: false });
       inner = await measure();
-    } catch { /* keep the first measure; the check below reports it */ }
+    } catch (e) { pinError = e; }
   }
   if (inner[0] !== width || inner[1] !== height || inner[2] !== dpr) {
     await browser.close();
-    throw new Error(`page is ${inner.join('x')}, wanted ${width}x${height}@${dpr}. Adjust launch({ toolbar }) by the height difference.`);
+    const why = pinError ? ` Pinning the size over CDP failed: ${pinError.message}` : '';
+    throw new Error(`page is ${inner.join('x')}, wanted ${width}x${height}@${dpr}.${why}`);
   }
   return { browser, context, page, viewport: { width, height, dpr } };
 }

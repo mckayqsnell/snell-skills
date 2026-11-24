@@ -140,7 +140,7 @@ step_shellcheck() {
 step_node-syntax() {
   local files=() f out bad=0
   while IFS= read -r f; do files+=("$f"); done < <(git ls-files \
-    ':(glob)skills/**/scripts/*.mjs' ':(glob)skills/**/scripts/*.js' 'scripts/*.mjs')
+    ':(glob)skills/**/scripts/*.mjs' ':(glob)skills/**/scripts/*.js' ':(glob)scripts/**/*.mjs')
   for f in "${files[@]}"; do
     if ! out="$(node --check "$f" 2>&1)"; then
       printf '%s\n' "$out" >&2

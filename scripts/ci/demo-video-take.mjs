@@ -9,8 +9,11 @@ import { pathToFileURL } from 'node:url';
 const ws = path.resolve(process.argv[2] || '');
 const { launch, createRecorder } = await import(pathToFileURL(path.join(ws, 'recorder', 'recorder.mjs')).href);
 const out = path.join(ws, 'raw');
+// The skill's default page (references/quick.md, scenes.example.mjs): 1280x720 at 2.5x gives 3200x1800 frames.
+const W = 1280, H = 720, DPR = 2.5;
+const FW = Math.round(W * DPR), FH = Math.round(H * DPR);
 
-const { browser, page } = await launch({ width: 640, height: 360, dpr: 2.5 });
+const { browser, page } = await launch({ width: W, height: H, dpr: DPR });
 try {
   // A spinning box keeps the page painting, so the screencast sends frames the whole time.
   await page.setContent(`<style>body{margin:0;display:grid;place-items:center;height:100vh}
@@ -30,8 +33,8 @@ try {
   const res = { engine: meta.engine, frameWidth: log.frameWidth, frames: meta.frames, mp4Sec: Number(probe.format.duration), mp4Width: probe.streams[0].width, mp4Height: probe.streams[0].height, marks };
   console.log(JSON.stringify(res));
   const bad = [];
-  if (res.frameWidth !== 1600) bad.push(`frameWidth ${res.frameWidth}, want 1600 (640 css px at 2.5x)`);
-  if (res.mp4Width !== 1600 || res.mp4Height !== 900) bad.push(`mp4 is ${res.mp4Width}x${res.mp4Height}, want 1600x900`);
+  if (res.frameWidth !== FW) bad.push(`frameWidth ${res.frameWidth}, want ${FW} (${W} css px at ${DPR}x)`);
+  if (res.mp4Width !== FW || res.mp4Height !== FH) bad.push(`mp4 is ${res.mp4Width}x${res.mp4Height}, want ${FW}x${FH}`);
   if (!(res.mp4Sec > 0.8)) bad.push(`mp4 is ${res.mp4Sec} s`);
   if (!marks.includes('clicked')) bad.push('no "clicked" mark');
   if (marks.includes('missing-box')) bad.push('the "go" box matched nothing');
