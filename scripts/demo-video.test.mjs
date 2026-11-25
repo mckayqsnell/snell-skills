@@ -100,7 +100,19 @@ test('snap: a join inside a phrase is flagged, and a sped-up wait is left alone'
   assert.equal(s.first, 'is');
   assert.ok(s.notes.some((n) => /starts inside a phrase/.test(n) && /run together/.test(n)));
   const w = snap({ take: 't1', from: 1.85, to: 2.6, speed: 4 }, words);
-  assert.equal(w.from, 1.85); assert.deepEqual(w.notes, []);
+  assert.equal(w.from, 1.85);
+  assert.ok(/sped up 4x and muted, but 3 words/.test(w.notes[0]), 'speech in a sped-up piece is muted: say so');
+  const m = snap({ take: 't1', from: 1.85, to: 2.6, mute: true }, words);
+  assert.equal(m.from, 1.85); assert.deepEqual(m.notes, [], 'a muted lead-in or tail keeps its edges');
+});
+
+test('snap: exact edges stay, and any edge that lands in sound is flagged', () => {
+  const loud = (lo, hi) => ({ t: lo, db: -20, quiet: false, run: 0, a: lo, b: hi });
+  const e = snap({ take: 't1', from: 1.9, to: 2.4, exact: true }, words, loud);
+  assert.equal(e.from, 1.9); assert.equal(e.to, 2.4);
+  assert.equal(e.notes.filter((n) => /lands in sound/.test(n)).length, 2);
+  const s = snap({ take: 't1', from: 1.85, to: 1.95 }, words, loud);
+  assert.ok(s.notes.some((n) => /lands in sound/.test(n)), 'a snapped edge in sound is flagged too');
 });
 
 test('snap: with the sound, edges go to the quietest spot and the pause is measured from it', () => {

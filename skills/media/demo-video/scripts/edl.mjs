@@ -5,7 +5,9 @@
 //   { "out": "talk", "keep": [
 //       { "take": "t1", "from": 12.4, "to": 31.9, "label": "Build a pipeline" },
 //       { "take": "t1", "from": 40.0, "to": 70.0, "speed": 4 },          // a wait, sped up and muted
-//       { "take": "t2", "from": 3.1, "to": 9.8, "camera": false } ] }   // optional fields: speed, label, fade
+//       { "take": "t2", "from": 3.1, "to": 9.8, "mute": true } ] }      // optional fields: speed, label, mute, exact
+//   mute: silent (a lead-in under the title card, a tail under the dissolve to the end card); not snapped.
+//   exact: keep the edges as written (after you measured them); still flagged if an edge lands in sound.
 //   Takes are raw/<take>.mp4|.mov|.mkv; their words are raw/<take>.words.json. A separate webcam file for a take is
 //   raw/<take>.cam.mp4 (OBS Source Record, Cap's camera.mp4): it is cut the same way into assets/clips/<out>-cam.mp4.
 // Spoken pieces snap to word edges: a cut never lands inside a word, gets 50 ms before and 80 ms after (never into
@@ -19,9 +21,9 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = process.cwd();
-const PRE = 0.05; const POST = 0.08; const FADE = 0.03; const PHRASE = 0.4; const TIGHT = 0.15;
+const PRE = 0.05; const POST = 0.08; const FADE = 0.03; const PHRASE = 0.4; const TIGHT = 0.15; const EDGE = 0.04;
 
-// --- Snapping (pure, tested in scripts/check.sh) ---
+// --- Snapping (pure, tested in scripts/demo-video.test.mjs) ---
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export const sentenceEnd = (word) => /[.?!]["')]?$/.test(word || '');
 // A safe join: a real pause, or a sentence end with at least a short breath.
@@ -32,7 +34,18 @@ export const safeJoin = (gap, wordBefore) => gap >= PHRASE || (gap >= TIGHT && s
 // With quiet(lo, hi) (the take's audio, see quietest()), each edge moves to the quietest spot near that word edge
 // instead, and the pause is measured from the sound: transcripts often give words no gap at all.
 export function snap(piece, words, quiet) {
-  if (!words?.length || (piece.speed || 1) !== 1) return { ...piece, notes: [] };
+  if ((piece.speed || 1) !== 1) {
+    // speech always plays at 1x: a sped-up piece is muted, so say so if it has words in it
+    const said = (words || []).filter((w) => w.end > piece.from && w.start < piece.to);
+    return { ...piece, notes: said.length ? [`sped up ${piece.speed}x and muted, but ${said.length} words are said here ("${said.slice(0, 4).map((w) => w.text).join(' ')}…"): keep them at 1x or drop them on purpose`] : [] };
+  }
+  // a muted piece (a lead-in under the title, a tail under the dissolve) keeps its edges and is not flagged
+  if (!words?.length || piece.mute) return { ...piece, notes: [] };
+  // "exact": the user (or you, after measuring) set these edges: keep them, only check they land in quiet
+  if (piece.exact) {
+    const inside = words.filter((w) => w.start >= piece.from - 0.3 && w.end <= piece.to + 0.3);
+    return { ...piece, first: inside[0]?.text, last: inside.at(-1)?.text, notes: loudEdges(piece.from, piece.to, quiet) };
+  }
   const notes = [];
   let i = words.findIndex((w) => w.end > piece.from);
   if (i < 0) i = words.length - 1;
@@ -49,18 +62,31 @@ export function snap(piece, words, quiet) {
   let to = Math.min(endAt + POST, nextStart === Infinity ? endAt + POST : last.end + (nextStart - last.end) / 2);
   let gapBefore = first.start - prevEnd; let gapAfter = nextStart - last.end;
   if (quiet) {
-    const a = quiet(Math.max(0, Math.min(prevEnd, first.start - 0.15)), first.start + 0.04);
-    // inside the quiet stretch, as close to the word as the padding allows
-    if (a) { from = a.quiet ? clamp(first.start - PRE, a.a, a.b) : a.t; if (a.quiet) gapBefore = Math.max(gapBefore, a.run); }
-    const b = quiet(last.end - 0.04, Math.max(Math.min(nextStart, last.end + 0.6), last.end + 0.15));
-    if (b) { to = b.quiet ? clamp(last.end + POST, b.a, b.b) : b.t; if (b.quiet) gapAfter = Math.max(gapAfter, b.run); }
+    // transcript times drift (0.3-0.8 s on real takes), so look a little past the neighbouring words too
+    const a = quiet(Math.max(0, Math.min(prevEnd - 0.1, first.start - 0.3)), first.start + 0.15);
+    // inside the quiet stretch, as close to the word as the padding allows, and 40 ms clear of the sound on
+    // either side (the fade needs it; a cut right on a word's onset clicks)
+    const inQuiet = (v, q) => (q.b - q.a > 2 * EDGE ? clamp(v, q.a + EDGE, q.b - EDGE) : (q.a + q.b) / 2);
+    if (a) { from = a.quiet ? inQuiet(first.start - PRE, a) : a.t; if (a.quiet) gapBefore = Math.max(gapBefore, a.run); }
+    const b = quiet(last.end - 0.15, Math.max(Math.min(nextStart + 0.1, last.end + 0.6), last.end + 0.3));
+    if (b) { to = b.quiet ? inQuiet(last.end + POST, b) : b.t; if (b.quiet) gapAfter = Math.max(gapAfter, b.run); }
   }
   if (i > 0 && !safeJoin(gapBefore, words[i - 1].text)) notes.push(`starts inside a phrase (${Math.round(gapBefore * 1000)} ms pause before "${first.text}")${gapBefore < TIGHT ? ': words run together, cut elsewhere' : ''}`);
   if (j < words.length - 1 && !safeJoin(gapAfter, last.text)) notes.push(`ends inside a phrase (${Math.round(gapAfter * 1000)} ms pause after "${last.text}")${gapAfter < TIGHT ? ': words run together, cut elsewhere' : ''}`);
+  notes.push(...loudEdges(from, to, quiet));
   return { ...piece, from: +from.toFixed(3), to: +to.toFixed(3), first: first.text, last: last.text, notes };
 }
+// An edge that lands in sound, whatever the transcript says: the check that catches drifting word times.
+function loudEdges(from, to, quiet) {
+  if (!quiet) return [];
+  const out = [];
+  const a = quiet(from, from + 0.03); const b = quiet(Math.max(0, to - 0.03), to);
+  if (a && a.db > -35) out.push(`start lands in sound (${a.db} dB at ${from.toFixed(2)}): move it, or set the edges by hand with "exact": true`);
+  if (b && b.db > -35) out.push(`end lands in sound (${b.db} dB at ${to.toFixed(2)}): move it, or set the edges by hand with "exact": true`);
+  return out;
+}
 // The quietest 10 ms in a stretch of mono samples that starts at lo seconds: its time, its level, and how long the
-// quiet around it lasts (windows within 6 dB of it and under -38 dBFS), from a to b. quiet is false when nothing
+// quiet around it lasts (windows within 6 dB of it or under -40 dBFS, and never over -38), from a to b. quiet is false when nothing
 // there is quiet.
 export function quietest(samples, rate, lo) {
   const n = Math.max(1, Math.round(rate * 0.01)); const db = [];
@@ -70,7 +96,8 @@ export function quietest(samples, rate, lo) {
   }
   if (!db.length) return null;
   let m = 0; db.forEach((v, k) => { if (v < db[m]) m = k; });
-  const floor = db[m]; const ok = (v) => v <= floor + 6 && v <= -38;
+  // quiet: within 6 dB of the floor, or anything under -40 dBFS (room tone varies), and never over -38
+  const floor = db[m]; const ok = (v) => v <= Math.min(-38, Math.max(floor + 6, -40));
   let a = m; let b = m;
   while (a > 0 && ok(db[a - 1])) a--;
   while (b < db.length - 1 && ok(db[b + 1])) b++;
@@ -125,7 +152,7 @@ function ffGraph(inputs, graph, tail, scratch) {
 }
 
 function main() {
-  const file = path.join(ROOT, process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : 'cut/edl.json');
+  const file = path.resolve(ROOT, process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : 'cut/edl.json');
   const plan = JSON.parse(fs.readFileSync(file, 'utf8'));
   const out = plan.out || 'talk';
   const takes = [...new Set(plan.keep.map((k) => k.take))];
@@ -165,7 +192,9 @@ function main() {
 
   // a separate webcam file, cut the same way (no audio: the voice is in the main clip)
   const cams = takes.map((t) => path.join(ROOT, 'raw', `${t}.cam.mp4`));
-  if (cams.every((c) => fs.existsSync(c))) {
+  const haveCam = cams.filter((c) => fs.existsSync(c)).length;
+  if (haveCam && haveCam < cams.length) console.warn(`no webcam cut: only ${haveCam} of ${cams.length} takes have a raw/<take>.cam.mp4`);
+  if (haveCam === cams.length) {
     const cg = segments.map((s, n) => `[${takes.indexOf(s.take)}:v]trim=start=${s.from}:end=${s.to},setpts=(PTS-STARTPTS)/${s.speed},fps=${fps}[c${n}]`).join(';')
       + `;${segments.map((_, n) => `[c${n}]`).join('')}concat=n=${segments.length}:v=1:a=0,format=yuv420p[cout]`;
     ffGraph(cams, cg, ['-map', '[cout]', '-c:v', 'libx264', '-crf', '18', '-g', String(fps), '-movflags', '+faststart', path.join(ROOT, 'assets/clips', `${out}-cam.mp4`)], path.join(ROOT, 'assets/clips'));

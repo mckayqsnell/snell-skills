@@ -298,8 +298,10 @@ async function make() {
     fs.copyFileSync(best.file, path.join(outDir, `${l.id}.wav`));
     fs.writeFileSync(path.join(outDir, `${l.id}.words.json`), JSON.stringify(best.words, null, 1) + '\n');
     const row = { id: l.id, seconds: best.seconds, take: best.take, sim: best.sim, heard: best.words.map((w) => w.text).join(' ') };
-    if (best.sim < 0.9) row.warn = 'the take drops or swaps words: listen, reword the line, or use "say" to spell it out';
-    if (l.max && best.seconds > l.max) row.warn = `${best.seconds}s is over this line's max ${l.max}s`;
+    const warn = [];
+    if (best.sim < 0.9) warn.push('the take drops or swaps words: listen, reword the line, or use "say" to spell it out');
+    if (l.max && best.seconds > l.max) warn.push(`${best.seconds}s is over this line's max ${l.max}s`);
+    if (warn.length) row.warn = warn.join('; ');
     report.push(row);
     console.log(JSON.stringify(row));
   }
@@ -321,7 +323,8 @@ export function lineStart(l, segments, marks) {
   }
   if (typeof src !== 'number') throw new Error(`${l.id}: give it t, at or mark`);
   src += l.offset || 0;
-  for (const s of segments) if (!s.hold && src >= s.from && src <= s.to) return s.at + (src - s.from) / s.speed;
+  // a cut from several takes (edl.mjs) has the same source time in each: "take" says which
+  for (const s of segments) if (!s.hold && (!l.take || !s.take || s.take === l.take) && src >= s.from && src <= s.to) return s.at + (src - s.from) / s.speed;
   throw new Error(`${l.id}: source time ${src} is not in the cut`);
 }
 // Fit: a line must end 0.25 s before the next starts and before the track ends. Says how much more room each needs.
@@ -342,7 +345,7 @@ function place(track) {
   const lines = cfg.lines.filter((l) => (l.track || 'story-cut') === track);
   if (!lines.length) throw new Error(`no lines with track "${track}" in voice/script.json`);
   const dataFile = path.join(ROOT, 'assets', 'data', `${track}.json`);
-  const seg = fs.existsSync(dataFile) ? readJson(dataFile) : { segments: [], duration: Number(opt('--duration', 0)) };
+  const seg = fs.existsSync(dataFile) ? readJson(dataFile) : { segments: [] };
   const duration = Number(opt('--duration', seg.duration));
   if (!duration) throw new Error(`no duration for ${track}: cut it first, or pass --duration`);
   // marks come from the raw take the cut was made from (cut.mjs writes its name into the .js data)
