@@ -206,7 +206,12 @@ jobs:
                 sudo rm -f /var/lib/man-db/auto-update
                 get_ffmpeg() { sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null; }
                 get_ffmpeg || { sudo apt-get update -qq && get_ffmpeg; } ;;
-              Windows) choco install ffmpeg -y --no-progress >/dev/null ;;
+              Windows)
+                # Choco's output stays visible: a failed package download still exits 0.
+                choco install ffmpeg -y --no-progress
+                shims=$(cygpath -u "${ChocolateyInstall:-C:\\ProgramData\\chocolatey}")/bin
+                export PATH="$shims:$PATH"
+                cygpath -w "$shims" >> "$GITHUB_PATH" ;;
               macOS) brew install --quiet ffmpeg ;;
             esac
           fi

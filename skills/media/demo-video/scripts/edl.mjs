@@ -146,7 +146,7 @@ function main() {
   const v = first.streams.find((s) => s.codec_type === 'video');
   const [fn, fd] = v.r_frame_rate.split('/').map(Number);
   const fps = plan.fps || Math.min(60, Math.round(fn / (fd || 1)));
-  const W = v.width; const H = v.height;
+  const W = v.width & ~1; const H = v.height & ~1; // libx264 needs even sizes
   const inputs = takes.map((t) => src[t]);
   const vid = (n, s) => `[${takes.indexOf(s.take)}:v]trim=start=${s.from}:end=${s.to},setpts=(PTS-STARTPTS)/${s.speed},fps=${fps},scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1[v${n}]`;
   const aud = (n, s) => {
