@@ -56,7 +56,7 @@ The edit fits the voice, not the other way round. Write `voice/script.json` from
 ## Make, check, place
 
 1. `node recorder/voice.mjs make` makes 2 takes of every line (Kokoro: 1), trims the silence, levels each to −18 LUFS, transcribes it, and keeps the take that says the words and fits. It writes `assets/voice/<id>.wav` and `<id>.words.json` (word times, for captions). A line with `warn` dropped or swapped words: listen, reword it, or spell it out with `say`, then `make --only <id>`. Whisper sometimes mishears a short line that was fine: if it sounds right in the transcript of the full mix, keep it.
-2. Rough times on Apple Silicon: Ming about 3× faster than real time after a 3 s load; Fish 1–2× real time after a 10 s load; Kokoro under 1 s a line. Each model loads once per `make`.
+2. Rough times on Apple Silicon: Ming about 3× faster than real time after a 3 s load; Fish 1–2× real time after a 10 s load; Kokoro under 1 s a line. Each model loads once per `make` and once per `samples`. Checking each take with whisper adds about 2–3 s, so 8 lines × 2 takes is about 75 s in all.
 3. After each cut: `node recorder/voice.mjs place <track>` (a card has no cut data: `place title --duration 3`). It puts each line at its time, checks that every line ends 0.25 s before the next starts, and writes `assets/audio/<track>-voice.wav` and `voice/<track>-fit.json`. A line that is `short_by` some seconds needs room: hold its beat longer (a freeze `t~hold`, or a slower span in the cut), or shorten the line. Then make and place again until `fits` is true.
 4. Play `assets/audio/<track>-voice.wav` as an `<audio>` from that scene's start, next to the UI sounds.
 

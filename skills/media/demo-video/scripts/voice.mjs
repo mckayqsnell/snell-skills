@@ -67,7 +67,12 @@ export function elevenKey(env = process.env, file = path.join(HOME, '.config', '
 }
 
 // --- Words ---
-const norm = (s) => s.toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, ' ').split(/\s+/).filter(Boolean);
+// Whisper writes "4" for "four" and "into" for "in to": both sides are spelled the same way before comparing.
+const NUM = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty'.split(' ');
+const SPLIT = { into: ['in', 'to'], onto: ['on', 'to'], cannot: ['can', 'not'] };
+const norm = (s) => s.toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, ' ').split(/\s+/).filter(Boolean)
+  .flatMap((w) => SPLIT[w] || [/^\d+$/.test(w) && Number(w) <= 20 ? NUM[Number(w)] : w]);
+const heardText = (words) => words.map((w) => w.text).join(' ');
 // How much of the script the take really says: 1 is every word in order.
 export function similarity(want, got) {
   const a = norm(want); const b = norm(got);
@@ -155,24 +160,29 @@ async function generate(cfg, jobs, dir) {
   if (p === 'kokoro') {
     // HyperFrames' own Kokoro; it needs kokoro-onnx, which the voice venv has (HYPERFRAMES_PYTHON points it there)
     const py = pythonPath(); const env = py && !process.env.HYPERFRAMES_PYTHON ? { env: { ...process.env, HYPERFRAMES_PYTHON: py } } : {};
-    for (const j of jobs) hf(['tts', j.text, '--voice', cfg.voice || 'af_heart', '--speed', String(cfg.speed || 1), '--output', path.join(dir, `${j.name}.wav`)], env);
+    for (const j of jobs) hf(['tts', j.text, '--voice', j.voice || cfg.voice || 'af_heart', '--speed', String(cfg.speed || 1), '--output', path.join(dir, `${j.name}.wav`)], env);
     return {};
   }
   if (p === 'ming' || p === 'fish') {
-    const ref = refFor(cfg.voice || '', dir);
     const style = p === 'fish' && cfg.style ? `[${cfg.style}] ` : '';
-    const base = ref || (p === 'ming' ? (cfg.instruct ? { instruct: cfg.instruct, use_zero_spk_emb: true } : { voice: cfg.voice || 'US_Emma' }) : {});
-    if (p === 'fish' && !ref && !style) throw new Error('fish needs a voice to copy ("ming:US_Emma", "me" or a .wav) or a style');
-    const rows = mlx(p, jobs.map((j) => ({ ...base, name: j.name, text: style + j.text, seed: j.seed, ...(cfg.speed && p === 'ming' ? { speed: cfg.speed } : {}) })), dir);
+    // one model load for every job; a job's own voice (samples) wins over the script's
+    const rows = mlx(p, jobs.map((j) => {
+      const v = j.voice || cfg.voice || '';
+      const ref = refFor(v, dir);
+      const base = ref || (p === 'ming' ? (cfg.instruct && !j.voice ? { instruct: cfg.instruct, use_zero_spk_emb: true } : { voice: v || 'US_Emma' }) : {});
+      if (p === 'fish' && !ref && !style) throw new Error('fish needs a voice to copy ("ming:US_Emma", "me" or a .wav) or a style');
+      return { ...base, name: j.name, text: style + j.text, seed: j.seed, ...(cfg.speed && p === 'ming' ? { speed: cfg.speed } : {}) };
+    }), dir);
     return { per_line: rows.map((r) => ({ name: r.name, seconds: r.seconds, took: r.took })), peak_gb: Math.max(0, ...rows.map((r) => r.peak_gb || 0)) };
   }
   if (p === 'elevenlabs') {
-    if (cfg.voice === 'me' || /\.wav$/.test(cfg.voice || '')) throw new Error('a recording of a voice never goes to ElevenLabs from this script: clone it in the ElevenLabs app yourself and use that voice id');
+    const vs = [...new Set(jobs.map((j) => j.voice || cfg.voice))];
+    if (vs.some((v) => v === 'me' || /\.wav$/.test(v || ''))) throw new Error('a recording of a voice never goes to ElevenLabs from this script: clone it in the ElevenLabs app yourself and use that voice id');
     const key = elevenKey();
     if (!key) throw new Error(KEY_HINT);
-    if (!cfg.voice) throw new Error('elevenlabs needs a voice id ("voice" in voice/script.json); `samples elevenlabs` lists your voices');
+    if (vs.some((v) => !v)) throw new Error('elevenlabs needs a voice id ("voice" in voice/script.json); `samples elevenlabs` lists your voices');
     for (const j of jobs) {
-      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(cfg.voice)}/with-timestamps?output_format=mp3_44100_128`, {
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(j.voice || cfg.voice)}/with-timestamps?output_format=mp3_44100_128`, {
         method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: j.text, model_id: cfg.model || 'eleven_v4', ...(j.seed ? { seed: j.seed } : {}), ...(j.previous_text ? { previous_text: j.previous_text } : {}), ...(j.next_text ? { next_text: j.next_text } : {}) }),
       });
@@ -211,7 +221,8 @@ async function check() {
   }
   if (!out.elevenlabs.ok) out.elevenlabs.why = 'no key: set ELEVENLABS_API_KEY, or put it in ~/.config/snell-skills/local.env';
   if (mac && ramGb < 32) out.fish.why = `needs 32 GB of memory; this Mac has ${ramGb}`;
-  out.offer = ['kokoro', out.ming.ok || mac ? 'ming' : null, mac && ramGb >= 32 ? 'fish' : null, out.elevenlabs.ok ? 'elevenlabs' : null].filter(Boolean);
+  // the pick first: Ming on a Mac (after setup), else Kokoro
+  out.offer = [mac ? 'ming' : null, 'kokoro', mac && ramGb >= 32 ? 'fish' : null, out.elevenlabs.ok ? 'elevenlabs' : null].filter(Boolean);
   console.log(JSON.stringify(out, null, 1));
 }
 
@@ -229,12 +240,12 @@ async function samples(provider, list, text) {
   const voices = (list ? list.split(',') : VOICES[provider]) || [];
   const dir = path.join(ROOT, 'voice', 'samples'); fs.mkdirSync(dir, { recursive: true });
   const made = [];
-  for (const v of voices) {
-    const name = `${provider}-${v.replace(/[^A-Za-z0-9_-]+/g, '_')}`;
-    const raw = path.join(dir, 'raw'); fs.mkdirSync(raw, { recursive: true });
-    await generate({ provider, voice: v }, [{ name, text, seed: 1 }], raw);
-    const sec = finish(path.join(raw, `${name}.wav`), path.join(dir, `${name}.wav`));
-    made.push({ provider, voice: v, file: `samples/${name}.wav`, seconds: +sec.toFixed(2) });
+  const raw = path.join(dir, 'raw'); fs.mkdirSync(raw, { recursive: true });
+  const jobs = voices.map((v) => ({ name: `${provider}-${v.replace(/[^A-Za-z0-9_-]+/g, '_')}`, voice: v, text, seed: 1 }));
+  await generate({ provider }, jobs, raw); // one model load for all of them
+  for (const j of jobs) {
+    const sec = finish(path.join(raw, `${j.name}.wav`), path.join(dir, `${j.name}.wav`));
+    made.push({ provider, voice: j.voice, file: `samples/${j.name}.wav`, seconds: +sec.toFixed(2) });
     console.log(JSON.stringify(made.at(-1)));
   }
   fs.rmSync(path.join(dir, 'raw'), { recursive: true, force: true });
@@ -280,7 +291,7 @@ async function make() {
       const fin = path.join(raw, `${name}.fin.wav`);
       const seconds = finish(src, fin);
       const words = transcribe(fin);
-      cands.push({ take: k, file: fin, seconds: +seconds.toFixed(2), words, sim: +similarity(l.text, words.map((w) => w.text).join(' ')).toFixed(3) });
+      cands.push({ take: k, file: fin, seconds: +seconds.toFixed(2), words, sim: +Math.max(similarity(l.text, heardText(words)), l.say ? similarity(l.say, heardText(words)) : 0).toFixed(3) });
     }
     if (!cands.length) throw new Error(`no take came out for ${l.id}`);
     const best = pickTake(cands, l);

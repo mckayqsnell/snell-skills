@@ -14,6 +14,9 @@ test('similarity: 1 for the same words, lower for dropped ones, ignores case and
   assert.equal(similarity('Done. Nothing to fix by hand.', 'done nothing to fix by hand'), 1);
   assert.ok(similarity('Export them all in one go', 'Export them in go') < 0.9);
   assert.equal(similarity('', ''), 1);
+  // how whisper writes what was said right: "into" for "in to", digits for small numbers
+  assert.equal(similarity('Signed in to the account.', 'signed into the account'), 1);
+  assert.equal(similarity('All four, done.', 'All 4 done.'), 1);
 });
 
 test('pickTake: the take that says the words wins over a shorter one that drops them', () => {

@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { CLICK, KEY } from './sfx-packs.mjs';
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -37,8 +38,8 @@ const cueFile = (cue) => {
   return fs.existsSync(own) ? own : null;
 };
 const firstOf = (cues) => cues.map(cueFile).find(Boolean);
-const clickFile = packDir ? firstOf(['press', 'select', 'check']) : cueFile('click-soft');
-const keyFile = packDir ? firstOf(['typing', 'focus', 'press']) : cueFile('key-press');
+const clickFile = packDir ? firstOf(CLICK) : cueFile('click-soft');
+const keyFile = packDir ? firstOf(KEY) : cueFile('key-press');
 const ui = !argv.includes('--no-ui');
 if (ui && (!clickFile || !keyFile)) { console.error(`missing the click or key sound in ${packDir ? `assets/sfx/uisfx/${PACK}` : 'assets/sfx (key-press.mp3, click-soft.mp3)'}`); process.exit(1); }
 
