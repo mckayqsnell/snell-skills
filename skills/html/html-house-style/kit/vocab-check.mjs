@@ -40,8 +40,21 @@ const ALLOW = new Set(`html pdf md css json api url cli npm repo repos redis mar
  halo arrowhead arrowheads hex js id ids vocab skill skills fold folds folded beta plain placeholder placeholders
  tab tabs toggle checkbox radio dropdown tooltip popover viewport layout rail`.split(/\s+/));
 
-// Acronyms every engineer knows. Any other acronym must be spelled out where it first shows up.
-export const ACRONYMS_KNOWN = new Set('api url html css json js http https sql ui id ids cli npm pdf svg md yaml ok'.split(' '));
+// Acronyms every engineer knows: never spell these out. Any other acronym (SDK, OAuth, JWT, PKCE...) gets a hover card
+// where it first shows up. Only add ones a competent engineer reads without a second look.
+export const ACRONYMS_KNOWN = new Set(('api apis url urls uri html css json js ts jsx tsx http https sql ui ux id ids uuid cli npm pdf svg png md yaml xml csv ok ' +
+  'pr prs ci cd mcp aws gcp ai llm llms db io os ide ssh dns ip cpu gpu ram vm qa faq todo readme env utc rest crud ' +
+  'mvp poc ga dev prod tl dr eta pm am sqlite kb mb gb tb ms ' +
+  'get post put patch delete head sha fifo lifo rfc ietf w3c iso').split(' '));
+
+// Spec words written in capitals (RFC 2119 style) are not acronyms.
+export const SPEC_WORDS = new Set('must should may shall not required optional recommended'.split(' '));
+
+// For a non-technical reader (reader: general) only these few count as known; everything else gets spelled out.
+export const ACRONYMS_EVERYONE = new Set('ok pdf faq eta am pm utc tv usb wifi'.split(' '));
+
+// Above this many hover terms an engineer page is defining things the reader already knows. A warning, not a fail.
+export const TERM_WARN = 8;
 
 export const FILLER = ['leverage','leverages','leveraging','utilize','utilizes','utilizing','utilise','robust','seamless','seamlessly',
  'in order to','facilitate','facilitates','comprehensive','holistic','synergy','streamline','streamlines','cutting-edge',
@@ -149,6 +162,12 @@ export function score(html, opts = {}) {
   const reader = opts.reader || (meta && READERS.includes(meta[1].toLowerCase()) ? meta[1].toLowerCase() : settingsReader());
   const extra = reader === 'engineer' ? ENGINEER : new Set();
   const { units, glossed } = prepare(html);
+  // hover terms: how many, which cards have no example, and any old .vocab boxes
+  const termTags = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').match(/<(?:dfn|abbr|span)\b[^>]*class="(?:[^"]*\s)?term(?:\s[^"]*)?"[^>]*>/gi) || [];
+  const cardList = []; pullCards(html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' '), cardList);
+  const plain = (c) => c.replace(/<span\b[^>]*class="(?:[^"]*\s)?term-eg(?:\s[^"]*)?"[\s\S]*$/i, '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const noExample = cardList.filter(c => !/class="(?:[^"]*\s)?term-eg(?:\s|")/i.test(c)).map(c => plain(c).slice(0, 40));
+  const vocabBoxes = (html.match(/class="(?:[^"]*\s)?vocab(?:\s[^"]*)?"/gi) || []).length;
   const acronyms = new Map();
   let totalWords = 0, shortCount = 0, passiveCount = 0, vocabWords = 0, commonWords = 0;
   const hard = new Map(), longSents = [], passiveSents = [], fillerHits = [];
@@ -170,9 +189,10 @@ export function score(html, opts = {}) {
         p = p.replace(/['’]s$/, '').replace(/^['’]|['’]$/g, '');
         if (!/^[A-Za-z]{2,}$/.test(p)) return;
         if (i > 0 && /^[A-Z][a-z]/.test(p) && j === 0) return;
-        if (/^[A-Z]{2,}$/.test(p)) {                       // acronyms: not scored, listed when nothing explains them
-          const l = p.toLowerCase();
-          if (!glossed.has(l) && !ACRONYMS_KNOWN.has(l) && l !== 'codetoken') acronyms.set(p, (acronyms.get(p) || 0) + 1);
+        if (/^[A-Z]{2,}[a-z]*$/.test(p)) {                 // acronyms (OAuth too): not scored, listed when nothing explains them
+          const l = p.toLowerCase(), base = /^[A-Z]{2,}s$/.test(p) ? l.slice(0, -1) : l;   // JWTs counts as JWT
+          const knownSet = reader === 'engineer' ? ACRONYMS_KNOWN : ACRONYMS_EVERYONE;
+          if (!glossed.has(l) && !glossed.has(base) && !knownSet.has(l) && !knownSet.has(base) && !SPEC_WORDS.has(l) && l !== 'codetoken') acronyms.set(p, (acronyms.get(p) || 0) + 1);
           return;
         }
         vocabWords++;
@@ -199,9 +219,10 @@ export function score(html, opts = {}) {
     score: Math.round(total * 10) / 10,
     reader,
     parts: { short: r(short), common: r(common), commonPct: r(commonPct), active: r(active), filler: r(filler) },
-    counts: { sentences: N, words: totalWords, shortSentences: shortCount, passive: passiveCount, vocabWords, commonWords, fillerHits: fillerCount, glossedTerms: glossed.size },
+    counts: { sentences: N, words: totalWords, shortSentences: shortCount, passive: passiveCount, vocabWords, commonWords, fillerHits: fillerCount, glossedWords: glossed.size },
     detail: { hard: [...hard.entries()].sort((a, b) => b[1] - a[1]).map(([w, n]) => w + (n > 1 ? 'x' + n : '')), longSents, passiveSents, fillerHits,
       acronyms: [...acronyms.keys()] },
+    terms: { count: termTags.length, warnAbove: TERM_WARN, noExample, vocabBoxes },
   };
 }
 const r = x => Math.round(x * 10) / 10;
@@ -237,10 +258,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`score ${res.score}  reader ${res.reader}  (short ${res.parts.short} · common ${res.parts.common} · active ${res.parts.active} · filler ${res.parts.filler})`);
     console.log(JSON.stringify(res.counts));
     if (res.detail.acronyms.length && !args.includes('--verbose')) console.log('spell these out where they first show up (an <abbr class="term"> card):', res.detail.acronyms.join(', '));
+    const T = res.terms;
+    console.log(`hover terms: ${T.count}${T.count >= 5 ? ' (5 or more: add a folded glossary)' : ''}`);
+    if (T.count > T.warnAbove) console.log(`WARN: ${T.count} hover terms (more than ${T.warnAbove}). For an engineer reader that usually means defining words they know. Keep only real jargon.`);
+    if (T.noExample.length) console.log(`WARN: ${T.noExample.length} hover card(s) have no <span class="term-eg"> example:`, T.noExample.map(x => `"${x}"`).join(', '));
+    if (T.vocabBoxes) console.log(`WARN: ${T.vocabBoxes} .vocab box(es). There is no such part any more: make each one a hover term in the sentence.`);
     if (args.includes('--verbose')) { console.log('hard:', res.detail.hard.join(', ')); console.log('long:', res.detail.longSents.join('\n      ')); console.log('passive:', res.detail.passiveSents.join('\n        ')); console.log('filler:', res.detail.fillerHits.join(', ')); console.log('acronyms not spelled out (not scored):', res.detail.acronyms.join(', ')); }
   }
   if (level != null) {
     if (args.includes('--exact')) { const ok = Math.abs(res.score - level) <= 5; console.log(ok ? `PASS: within 5 of ${level}` : `FAIL: ${res.score} is not within 5 of ${level}`); process.exit(ok ? 0 : 1); }
-    const ok = res.score >= level; console.log(ok ? `PASS: ${res.score} is at or above the floor of ${level}` : `FAIL: ${res.score} is under the floor of ${level}. Run with --verbose to see hard words, long sentences and passive voice. Hard words the page can't avoid? Define each in place with <dfn> where it first shows up.`); process.exit(ok ? 0 : 1);
+    const ok = res.score >= level; console.log(ok ? `PASS: ${res.score} is at or above the floor of ${level}` : `FAIL: ${res.score} is under the floor of ${level}. Run with --verbose to see hard words, long sentences and passive voice. Swap hard words for plainer ones first. Real jargon the page can't avoid? Make it a hover term where it first shows up (PARTS.md).`); process.exit(ok ? 0 : 1);
   }
 }

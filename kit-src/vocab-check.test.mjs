@@ -46,3 +46,28 @@ test('"is <code>…</code>" is not passive voice', () => {
   assert.equal(res.detail.passiveSents.length, 1);
   assert.match(res.detail.passiveSents[0], /written/);
 });
+
+test('acronyms every engineer knows are never listed; SDK and OAuth still are', () => {
+  const res = score(page('<p>Open a PR, let CI pass, then the MCP server on AWS reads the SDK config and the OAuth token.</p>'));
+  assert.deepEqual(res.detail.acronyms.sort(), ['OAuth', 'SDK']);
+});
+
+test('a non-technical reader gets PR and MCP listed too', () => {
+  const res = score(page('<p>Open a PR so the MCP server can read it.</p>'), { reader: 'general' });
+  assert.ok(res.detail.acronyms.includes('PR') && res.detail.acronyms.includes('MCP'));
+});
+
+test('hover terms: counted, cards without an example listed, old .vocab boxes found', () => {
+  const withEg = '<dfn class="term">quorum<span class="term-def">Most of the nodes agree. <span class="term-eg">3 of 5 nodes say yes.</span></span></dfn>';
+  const noEg = '<dfn class="term">backpressure<span class="term-def">A slow step tells the fast one to wait.</span></dfn>';
+  const res = score(page(`<p>Writes need a ${withEg} and the queue uses ${noEg}.</p><p class="vocab"><dfn>cron</dfn>A timer job.</p>`));
+  assert.equal(res.terms.count, 2);
+  assert.deepEqual(res.terms.noExample, ['A slow step tells the fast one to wait.']);
+  assert.equal(res.terms.vocabBoxes, 1);
+  assert.equal(res.terms.warnAbove, 8);
+});
+
+test('an acronym plural counts once its singular has a card; RFC and SHOULD are never listed', () => {
+  const res = score(page('<p>The server checks the <abbr class="term">JWT<span class="term-def"><b>JSON Web Token.</b> A signed pass. <span class="term-eg">eyJ…</span></span></abbr>. Clients SHOULD cache JWTs, per RFC 9068.</p>'));
+  assert.deepEqual(res.detail.acronyms, []);
+});
