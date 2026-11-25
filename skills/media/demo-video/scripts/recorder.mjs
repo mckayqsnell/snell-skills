@@ -158,7 +158,7 @@ export function createRecorder(page, { outDir, engine = 'auto', maxWidth = 3200,
     const mp4 = path.join(outDir, `${c.name}.mp4`);
     const total = (endTs - t0) / 1000;
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', listFile,
-      '-vf', `fps=${fps},format=yuv420p`, '-t', total.toFixed(3), '-c:v', 'libx264', '-preset', 'slow', '-crf', '14',
+      '-vf', `fps=${fps},crop=trunc(iw/2)*2:trunc(ih/2)*2:0:0,format=yuv420p`, '-t', total.toFixed(3), '-c:v', 'libx264', '-preset', 'slow', '-crf', '14',
       '-g', String(fps / 2), '-movflags', '+faststart', mp4]);
     const gaps = c.frames.slice(1).map((f, i) => f[1] - c.frames[i][1]);
     const frameWidth = jpegWidth(fs.readFileSync(c.frames[0][0]));

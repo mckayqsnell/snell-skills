@@ -180,11 +180,29 @@ pattern='/Users/[A-Za-z]|/home/[a-z][a-z0-9_-]*/|obsidian-vault|[A-Za-z0-9._%+-]
     echo "❌ Found personal paths, emails or secrets (above). Move personal values to a gitignored local.env." >&2
     exit 1
   fi
+  # Your own words to keep out (an employer, a customer, a product): SCRUB_WORDS in the gitignored local.env at the
+  # repo root, as one extended regex, e.g. SCRUB_WORDS='acme|(^|[^a-z])widget([^a-z]|$)' (the second is a whole
+  # word: git grep has no \b on macOS). Matched without case. The word lists
+  # the html kits ship (vocab-common-3000.txt) are skipped: they hold ordinary English words.
+  local words=""
+  if [ -f "$ROOT/local.env" ]; then
+    words="$(sed -nE "s/^SCRUB_WORDS=['\"]?([^'\"]*)['\"]?[[:space:]]*$/\1/p" "$ROOT/local.env" | tail -1)"
+  fi
+  if [ -n "$words" ]; then
+    hits="$(git grep -n -I -i -E "$words" -- . ':!pnpm-lock.yaml' ':!*vocab-common-3000.txt' || true)"
+    if [ -n "$hits" ]; then
+      echo "$hits" >&2
+      echo "❌ Found words from SCRUB_WORDS in local.env (above)." >&2
+      exit 1
+    fi
+    echo "✅ clean (and no SCRUB_WORDS from local.env)"
+    return 0
+  fi
   echo "✅ clean"
 }
 
 step_tests() {
-  node --test scripts/sync-kit.test.mjs kit-src/vocab-check.test.mjs kit-src/kit-js.test.mjs
+  node --test scripts/sync-kit.test.mjs kit-src/vocab-check.test.mjs kit-src/kit-js.test.mjs scripts/demo-video.test.mjs
 }
 
 step_kit-sync() {
@@ -291,7 +309,55 @@ JSON
   printf '%s\n' "$out" | grep -Eq '^peak 1\.[5-7][0-9]* onset 1\.(4|5)' \
     || { echo "❌ peaks.mjs did not find the flash at 1.5 s" >&2; exit 1; }
 
-  echo "✅ cut.mjs, srctime.mjs and peaks.mjs work on a test clip"
+  # sfx.mjs: HyperFrames' sounds by default, a uisfx pack with --pack, and named cues from marks and --at.
+  mkdir -p "$ws/assets/sfx/uisfx/soft"
+  local cue
+  for cue in key-press click-soft uisfx/soft/press uisfx/soft/typing uisfx/soft/success; do
+    ffmpeg -loglevel error -y -f lavfi -i 'sine=f=880:d=0.08' -ac 1 -ar 44100 -f mp3 "$ws/assets/sfx/$cue.mp3"
+  done
+  out="$(cd "$ws" && node "$dir/sfx.mjs" story-cut)"; echo "  sfx.mjs: $out"
+  printf '%s\n' "$out" | grep -q '"hits":1,"pack":"hyperframes"' || { echo "❌ sfx.mjs should place 1 click from the log" >&2; exit 1; }
+  out="$(cd "$ws" && node "$dir/sfx.mjs" story-cut --pack soft --at 'success@1.2')"; echo "  sfx.mjs --pack: $out"
+  printf '%s\n' "$out" | grep -q '"hits":2,"pack":"soft","cues":1' || { echo "❌ sfx.mjs --pack should place the click and the success cue" >&2; exit 1; }
+
+  # voice.mjs place: a line at a source time follows the cut, and a line too long for its room is flagged.
+  mkdir -p "$ws/voice" "$ws/assets/voice"
+  ffmpeg -loglevel error -y -f lavfi -i 'sine=f=220:d=0.6' -ar 48000 "$ws/assets/voice/v1.wav"
+  ffmpeg -loglevel error -y -f lavfi -i 'sine=f=330:d=0.9' -ar 48000 "$ws/assets/voice/v2.wav"
+  cat > "$ws/voice/script.json" <<'JSON'
+{ "provider": "kokoro", "lines": [
+  { "id": "v1", "track": "story-cut", "t": 0.1, "text": "one" },
+  { "id": "v2", "track": "story-cut", "mark": "flash", "text": "two" } ] }
+JSON
+  out="$(cd "$ws" && node "$dir/voice.mjs" place story-cut)"; echo "  voice.mjs place: $(printf '%s' "$out" | tr -d '\n ')"
+  # shellcheck disable=SC2016 # the backticks are JavaScript template strings
+  node -e '
+    const r = JSON.parse(process.argv[1]); const fit = require(process.argv[2]);
+    const fail = (m) => { console.error("❌ voice.mjs place: " + m); process.exit(1); };
+    if (fit[1].start !== 1.17) fail(`the line on mark "flash" starts at ${fit[1].start}, expected 1.17 (1.5 s at 3x after 1 s)`);
+    if (r.fits || !r.short.some((s) => s.id === "v2")) fail("v2 (0.9 s from 1.17 s in a 1.8 s cut) should be short of room");
+  ' "$out" "$ws/voice/story-cut-fit.json"
+  [ -s "$ws/assets/audio/story-cut-voice.wav" ] || { echo "❌ voice.mjs place did not write the voice track" >&2; exit 1; }
+
+  # edl.mjs: a 4 s take with three "words" (tones) and quiet between; keep the middle word and a sped-up wait.
+  ffmpeg -loglevel error -y -f lavfi -i 'color=c=gray:s=320x180:r=30:d=4' \
+    -f lavfi -i "aevalsrc='if(between(t,0.2,0.8)+between(t,1.3,2.0)+between(t,2.6,3.2),0.3*sin(2*PI*300*t),0)':s=48000:d=4" \
+    -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$ws/raw/t1.mp4"
+  printf '%s\n' '[{"text":"One.","start":0.2,"end":0.8},{"text":"two.","start":1.3,"end":2.0},{"text":"three","start":2.6,"end":3.2}]' > "$ws/raw/t1.words.json"
+  mkdir -p "$ws/cut"
+  printf '%s\n' '{"out":"talk","keep":[{"take":"t1","from":1.5,"to":1.8},{"take":"t1","from":3.2,"to":4.0,"speed":4}]}' > "$ws/cut/edl.json"
+  out="$(cd "$ws" && node "$dir/edl.mjs")"; echo "  edl.mjs: $(printf '%s' "$out" | tr -d '\n ')"
+  # shellcheck disable=SC2016 # the backticks are JavaScript template strings
+  node -e '
+    const r = JSON.parse(process.argv[1]); const seg = require(process.argv[2]).segments;
+    const fail = (m) => { console.error("❌ edl.mjs: " + m); process.exit(1); };
+    if (Math.abs(seg[0].from - 1.25) > 0.03) fail(`the piece should start 50 ms before "two." (1.25), not ${seg[0].from}`);
+    if (Math.abs(seg[0].to - 2.08) > 0.03) fail(`the piece should end 80 ms after "two." (2.08), not ${seg[0].to}`);
+    if (r.flagged.length) fail("joins at sentence ends in quiet should not be flagged");
+    if (Math.abs(r.rendered - r.duration) > 0.1) fail(`the clip is ${r.rendered} s, the plan ${r.duration} s`);
+  ' "$out" "$ws/assets/data/talk.json"
+
+  echo "✅ cut.mjs, srctime.mjs, peaks.mjs, sfx.mjs, voice.mjs place and edl.mjs work on test clips"
 }
 
 step_ci-steps() {

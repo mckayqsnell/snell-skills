@@ -36,3 +36,10 @@
   margin-bottom: 22px; }
 .accent { background: linear-gradient(100deg, var(--accent-a), var(--accent-b) 55%, var(--accent-c));
   -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.08em; }
+/* Recorded mode: the user's face in a round bubble over the stage (kit.face), and a soft patch that hides the webcam
+   where it was baked into the recording (inside .cam, so it zooms with the screen). */
+.face { position: absolute; left: 40px; top: 760px; border-radius: 50%; overflow: hidden; opacity: 0; z-index: 5;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 4px rgba(255,255,255,.9); transform-origin: 50% 50%; }
+.face video { position: absolute; left: 0; top: 0; max-width: none; }
+.face-cover { position: absolute; backdrop-filter: blur(22px) saturate(.7); -webkit-backdrop-filter: blur(22px) saturate(.7);
+  background: color-mix(in srgb, var(--ground-2) 45%, transparent); }

@@ -206,7 +206,18 @@ jobs:
                 sudo rm -f /var/lib/man-db/auto-update
                 get_ffmpeg() { sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null; }
                 get_ffmpeg || { sudo apt-get update -qq && get_ffmpeg; } ;;
-              Windows) choco install ffmpeg -y --no-progress >/dev/null ;;
+              Windows)
+                # Choco's output stays visible: a failed package download still exits 0.
+                # Its community feed sometimes times out (504), so winget is the fallback.
+                choco install ffmpeg -y --no-progress || true
+                shims=$(cygpath -u "${ChocolateyInstall:-C:\\ProgramData\\chocolatey}")/bin
+                links=$(cygpath -u "$LOCALAPPDATA")/Microsoft/WinGet/Links
+                export PATH="$shims:$links:$PATH"
+                if ! command -v ffmpeg >/dev/null; then
+                  winget install --id Gyan.FFmpeg -e --silent --disable-interactivity \
+                    --accept-source-agreements --accept-package-agreements
+                fi
+                { cygpath -w "$shims"; cygpath -w "$links"; } >> "$GITHUB_PATH" ;;
               macOS) brew install --quiet ffmpeg ;;
             esac
           fi

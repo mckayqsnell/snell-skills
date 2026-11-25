@@ -25,7 +25,7 @@ const copy = (from, to) => {
   fs.mkdirSync(path.dirname(to), { recursive: true });
   fs.copyFileSync(from, to);
 };
-for (const f of ['recorder.mjs', 'find-playwright.mjs', 'cut.mjs', 'sheet.mjs', 'sfx.mjs', 'peaks.mjs', 'srctime.mjs', 'cleanup.mjs', 'scenes.example.mjs']) {
+for (const f of ['recorder.mjs', 'find-playwright.mjs', 'cut.mjs', 'sheet.mjs', 'sfx.mjs', 'sfx-packs.mjs', 'peaks.mjs', 'srctime.mjs', 'cleanup.mjs', 'scenes.example.mjs', 'voice.mjs', 'voice_mlx.py', 'edl.mjs', 'cutplan.mjs']) {
   copy(path.join(here, f), path.join(ws, 'recorder', f));
 }
 copy(path.join(here, 'demo-kit.js'), path.join(ws, 'assets', 'demo-kit.js'));
