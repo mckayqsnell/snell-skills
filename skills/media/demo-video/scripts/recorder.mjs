@@ -24,6 +24,15 @@ function rng(seed) {
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Chrome if it is installed, then Edge on Windows (always there), then Playwright's own Chromium (the only one on
+// Linux on ARM). The last error is the useful one: it says how to install that Chromium or its libraries.
+export async function launchBrowser({ channel = 'chrome', ...opts } = {}) {
+  for (const ch of [channel, process.platform === 'win32' && 'msedge'].filter(Boolean)) {
+    try { return await chromium.launch({ ...opts, channel: ch }); } catch { /* try the next one */ }
+  }
+  return chromium.launch(opts);
+}
+
 // Headless Chrome sends screencast frames at CSS-pixel size unless the whole browser runs at a forced scale factor
 // (a context deviceScaleFactor alone gives 1280-wide frames). The window is sized from a first guess (headless keeps
 // ~87 px for an invisible toolbar on macOS and Linux); where the OS frame differs, as on Windows, launch() pins the
@@ -33,10 +42,7 @@ const q = (p) => p.replace(/'/g, "'\\''");
 const LOCAL = /^(https?:\/\/)?(localhost|127\.0\.0\.1|\[::1\]|[^/]+\.(test|localhost))([:/]|$)/.test(process.env.APP_URL || 'http://localhost');
 export async function launch({ width = 1280, height = 720, dpr = 2.5, headless = true, theme, storageState, channel = 'chrome', toolbar = 87, bypassCSP = false, ignoreHTTPSErrors } = {}) {
   const args = ['--hide-scrollbars', `--force-device-scale-factor=${dpr}`, `--window-size=${width},${height + (headless ? toolbar : 0)}`];
-  let browser;
-  try { browser = await chromium.launch({ channel, headless, args }); } catch {
-    browser = await chromium.launch({ headless, args }); // no Chrome installed: Playwright's own Chromium
-  }
+  const browser = await launchBrowser({ channel, headless, args });
   // Certificate errors are ignored only for a local dev server (pass ignoreHTTPSErrors: true for another self-signed host).
   // bypassCSP: pass true only when addStyleTag is blocked by a strict CSP.
   const context = await browser.newContext({ ignoreHTTPSErrors: ignoreHTTPSErrors ?? LOCAL, bypassCSP, viewport: null, colorScheme: theme, storageState });

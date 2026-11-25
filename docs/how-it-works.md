@@ -325,10 +325,11 @@ concurrency:
 
 The rest of CI is `scripts/check.sh`, split into parallel jobs: plugin and
 skills (validate, listing, frontmatter, markdownlint), scripts and scrub,
-the kit, the changeset rule, and a demo-video smoke test with ffmpeg. The
-demo-video smoke test runs on Windows too, where it also reads every kind of
-`playwright-cli` shim, finds Playwright through pnpm's `.cmd` shim, and
-records a short real take with `recorder.mjs`. An
+the kit, the changeset rule, and a demo-video smoke test. The demo-video
+test runs on Linux, Windows and macOS: `check-setup.mjs` must name that OS's
+setup file and report ready, then it cuts a test clip, reads every kind of
+`playwright-cli` shim, finds Playwright through pnpm's shim (`.cmd` on
+Windows), and records a short real take with `recorder.mjs`. An
 **All checks** job at the end is green only when every other job passed or
 was skipped. The "Protect main" ruleset requires it: `main` takes changes
 only through a pull request whose All checks passed, and it can't be

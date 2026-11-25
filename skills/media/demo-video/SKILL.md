@@ -7,21 +7,17 @@ description: Make a polished, hands-free demo video of an app the user built, wi
 
 You make a demo video of the user's app with no hands on the mouse. A script drives a real browser like a person, records clean takes with no OS cursor, and logs every move. The edit plays the app full-screen, draws its own smooth cursor and aims gentle zooms from that log. Two critics review the cut before the user sees it.
 
-**This skill's folder** holds `scripts/` (copied into each video's workspace), `platforms/` (the tools for each kind of app) and `references/` (the edit and the review). Use its full path when you run commands from elsewhere.
+**This skill's folder** holds `scripts/` (copied into each video's workspace), `os/` (setup for macOS, Windows and Linux), `platforms/` (the tools for each kind of app) and `references/` (the edit and the review). Use its full path when you run commands from elsewhere.
 
 **The scripts are a head start, not a contract.** Run them first: they usually just work. If one breaks (a Playwright, `playwright-cli` or HyperFrames version that renamed or dropped something, an app the script didn't expect), read the error, check that tool's docs for the version installed here (`node recorder/find-playwright.mjs` prints the path and version, then context7), and fix the workspace copy in `recorder/` or write your own script for the same job. Keep what each script is for: the event log format (`raw/<clip>.events.json`) that `cut.mjs` and `demo-kit.js` read, 3200 px frames, a closed browser at the end. Note what you changed in `NOTES.md`; never edit the skill's own copies.
 
 **Tell the user up front, in one line:** a demo video takes a while and uses a fair number of tokens (recording, rendering, and two critic sub-agents).
 
-## 1. Check the tools
+## 1. Check the machine and the tools
 
-| Tool | Check | If missing |
-|---|---|---|
-| ffmpeg (with ffprobe) | `ffmpeg -version` | Ask, then install: `winget install Gyan.FFmpeg` (Windows; open a new terminal after, so the PATH change shows up), `brew install ffmpeg` (macOS), or the system package (Linux). |
-| Playwright | `node <skill>/scripts/find-playwright.mjs` from the app's folder prints a path | Ask before installing anything. `npm install -g @playwright/cli` is the lightest. |
-| HyperFrames | the `hyperframes:hyperframes` skill is listed | Suggest `claude plugin marketplace add heygen-com/hyperframes`, then `claude plugin install hyperframes@hyperframes`. Until then, offer **Quick** mode. |
+Run `node <skill>/scripts/check-setup.mjs` from the app's folder, so it finds the app's own Playwright (quote the path: Windows user folders often have spaces). It prints the OS, the one setup file to read (`os/macos.md`, `os/windows.md` or `os/linux.md`), and `ok` or `MISSING` for ffmpeg, Playwright and a browser it really starts, each with the fix for this OS. Read only that OS file and follow it: it says how to install what's missing (ask the user first) and what is different on that OS. Run the check again until it prints `ready: yes`.
 
-**On Windows**, Claude Code usually runs commands in Git Bash, where the commands in this skill work as written; the `node …` commands also work in PowerShell. Quote every path: Windows user folders often have spaces (`C:\Users\First Last`). The scripts use Node's path tools and need no `sh`.
+HyperFrames is a Claude plugin, not a system tool: check that the `hyperframes:hyperframes` skill is listed. If not, suggest `claude plugin marketplace add heygen-com/hyperframes`, then `claude plugin install hyperframes@hyperframes`; until then, offer **Quick** mode.
 
 **Full** mode (HyperFrames) is the default: zooms, captions, cards and sound in a real edit. **Quick** mode uses only Playwright's own cursor, chapter cards and overlays plus ffmpeg: plainer, faster, no plugin.
 
@@ -65,7 +61,7 @@ Open on the strongest moment, not on an empty form. End on a claim and an end ca
 1. Make the workspace next to the repo, `<parent of repo>/<repo>-demo-video/`. `node <skill>/scripts/setup.mjs <app-repo> [name] --print-path` prints it (`[name]` overrides the folder name). A hosted app with no repo: pass the folder it should go in and a name (`setup.mjs ~/Videos <app>-demo-video`). Full mode: run `init` on that path first (the exact command is in [`references/hyperframes.md`](references/hyperframes.md) "Set up"), then `node <skill>/scripts/setup.mjs <app-repo>`. Quick mode: just `setup.mjs`. It never overwrites files.
 2. Write `recorder/scenes.mjs` from `recorder/scenes.example.mjs` and the shot list. Before the long take, run a 10 s test take of the trickiest beat and check its marks and boxes arrived in `raw/<clip>.events.json`. Prefer **one long take** through the whole story: the edit then moves the camera between beats instead of hard-cutting, and the app's state carries over.
 3. Run it: `node recorder/scenes.mjs story`. It prints the engine, frame width, frames and marks.
-4. **The take passes** when `raw/<clip>.events.json` shows `frameWidth` 3200 (for a 1280-wide page at 2.5×), every mark you expected, and no `timeout` mark. Then look at a contact sheet: `node recorder/sheet.mjs raw/story.mp4 sheets/story.png 0 <end> 1 6 320`. A wrong screen, a stuck spinner or an error toast means a retake, not a fix in the edit. A `missing-box` mark means a zoom target matched nothing: fix the locator and retake.
+4. **The take passes** when `raw/<clip>.events.json` shows `frameWidth` 3200 (for a 1280-wide page at 2.5×), every mark you expected, and no `timeout` mark. Then look at a contact sheet: `node recorder/sheet.mjs raw/story.mp4 sheets/story.png 0 <end> 1 6 320` (from 0 s to the take's length, which the take prints, one frame a second, 6 across, 320 px tiles). A wrong screen, a stuck spinner or an error toast means a retake, not a fix in the edit. A `missing-box` mark means a zoom target matched nothing: fix the locator and retake.
 
 ## 7. Cut, then compose
 
