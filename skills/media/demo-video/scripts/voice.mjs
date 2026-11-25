@@ -49,7 +49,8 @@ function hfCache(env = process.env) {
   if (env.HF_HUB_CACHE) return env.HF_HUB_CACHE;
   return path.join(env.HF_HOME || path.join(HOME, '.cache', 'huggingface'), 'hub');
 }
-const cached = (id) => fs.existsSync(path.join(hfCache(), `models--${id.replace('/', '--')}`, 'snapshots'));
+// a model counts as downloaded when its snapshot or its blobs are there (a shared store can keep only the blobs)
+const cached = (id) => ['snapshots', 'blobs'].some((d) => { try { return fs.readdirSync(path.join(hfCache(), `models--${id.replace('/', '--')}`, d)).length > 0; } catch { return false; } });
 // HyperFrames CLI: HYPERFRAMES_CLI is the plugin's scripts/plugin-cli.mjs (what the hyperframes skill runs), else npx.
 function hf(args, o) {
   const cli = process.env.HYPERFRAMES_CLI;
@@ -137,6 +138,7 @@ function refFor(voice, dir) {
   }
   return null;
 }
+const KEY_HINT = 'no ElevenLabs key: set ELEVENLABS_API_KEY, or put ELEVENLABS_API_KEY=... in ~/.config/snell-skills/local.env';
 function mlx(provider, jobs, dir) {
   if (process.platform !== 'darwin' || process.arch !== 'arm64') throw new Error(`${provider} runs on Apple Silicon Macs only; use kokoro or elevenlabs here`);
   const py = pythonPath();
@@ -161,13 +163,13 @@ async function generate(cfg, jobs, dir) {
     const style = p === 'fish' && cfg.style ? `[${cfg.style}] ` : '';
     const base = ref || (p === 'ming' ? (cfg.instruct ? { instruct: cfg.instruct, use_zero_spk_emb: true } : { voice: cfg.voice || 'US_Emma' }) : {});
     if (p === 'fish' && !ref && !style) throw new Error('fish needs a voice to copy ("ming:US_Emma", "me" or a .wav) or a style');
-    mlx(p, jobs.map((j) => ({ ...base, name: j.name, text: style + j.text, seed: j.seed, ...(cfg.speed && p === 'ming' ? { speed: cfg.speed } : {}) })), dir);
-    return {};
+    const rows = mlx(p, jobs.map((j) => ({ ...base, name: j.name, text: style + j.text, seed: j.seed, ...(cfg.speed && p === 'ming' ? { speed: cfg.speed } : {}) })), dir);
+    return { per_line: rows.map((r) => ({ name: r.name, seconds: r.seconds, took: r.took })), peak_gb: Math.max(0, ...rows.map((r) => r.peak_gb || 0)) };
   }
   if (p === 'elevenlabs') {
     if (cfg.voice === 'me' || /\.wav$/.test(cfg.voice || '')) throw new Error('a recording of a voice never goes to ElevenLabs from this script: clone it in the ElevenLabs app yourself and use that voice id');
     const key = elevenKey();
-    if (!key) throw new Error('no ElevenLabs key: set ELEVENLABS_API_KEY, or put ELEVENLABS_API_KEY=... in ~/.config/snell-skills/local.env');
+    if (!key) throw new Error(KEY_HINT);
     if (!cfg.voice) throw new Error('elevenlabs needs a voice id ("voice" in voice/script.json); `samples elevenlabs` lists your voices');
     for (const j of jobs) {
       const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(cfg.voice)}/with-timestamps?output_format=mp3_44100_128`, {
@@ -199,7 +201,7 @@ async function check() {
     kokoro: { ok: kokoroOk, license: 'Apache-2.0', note: 'HyperFrames tts; about 330 MB on first use; needs kokoro-onnx and soundfile in the voice venv or HYPERFRAMES_PYTHON' },
     ming: { ok: mac && mlxOk, cached: cached(MODELS.ming.id), download_gb: MODELS.ming.gb, ram_gb: MODELS.ming.ram, license: MODELS.ming.license },
     fish: { ok: mac && mlxOk && ramGb >= 32, cached: cached(MODELS.fish.id), download_gb: MODELS.fish.gb, ram_gb: MODELS.fish.ram, license: MODELS.fish.license },
-    elevenlabs: { ok: Boolean(elevenKey()), note: 'key found: yes/no only, never shown' },
+    elevenlabs: { ok: Boolean(elevenKey()), note: 'the key is never shown, only whether there is one' },
   };
   if (!mac) { out.ming.why = 'needs an Apple Silicon Mac'; out.fish.why = 'needs an Apple Silicon Mac'; }
   else if (!mlxOk) {
@@ -207,15 +209,16 @@ async function check() {
     out.setup = [`uv venv --python 3.12 ${venv}`, `uv pip install --python ${venv}/bin/python mlx-audio==0.6.8 soundfile kokoro-onnx`];
     out.setup_note = 'Ask the user first. About 1 GB of Python packages; each model downloads on first use (sizes above). An existing mlx-audio venv works too: set DEMO_VOICE_PYTHON to its python.';
   }
+  if (!out.elevenlabs.ok) out.elevenlabs.why = 'no key: set ELEVENLABS_API_KEY, or put it in ~/.config/snell-skills/local.env';
   if (mac && ramGb < 32) out.fish.why = `needs 32 GB of memory; this Mac has ${ramGb}`;
-  out.offer = ['kokoro', out.ming.ok || mac ? 'ming' : null, mac && ramGb >= 32 ? 'fish' : null, 'elevenlabs'].filter(Boolean);
+  out.offer = ['kokoro', out.ming.ok || mac ? 'ming' : null, mac && ramGb >= 32 ? 'fish' : null, out.elevenlabs.ok ? 'elevenlabs' : null].filter(Boolean);
   console.log(JSON.stringify(out, null, 1));
 }
 
 async function samples(provider, list, text) {
   if (provider === 'elevenlabs' && !list) {
     const key = elevenKey();
-    if (!key) throw new Error('no ElevenLabs key');
+    if (!key) throw new Error(KEY_HINT);
     const res = await fetch('https://api.elevenlabs.io/v1/voices', { headers: { 'xi-api-key': key } });
     if (!res.ok) throw new Error(`ElevenLabs said ${res.status}`);
     const { voices } = await res.json();
@@ -267,7 +270,7 @@ async function make() {
     }
   });
   const t0 = Date.now();
-  await generate(cfg, jobs, raw);
+  const stats = await generate(cfg, jobs, raw);
   const report = [];
   for (const l of lines) {
     const cands = [];
@@ -293,7 +296,7 @@ async function make() {
   const prev = fs.existsSync(takesFile) ? readJson(takesFile) : {};
   for (const r of report) prev[r.id] = r;
   fs.writeFileSync(takesFile, JSON.stringify(prev, null, 1) + '\n');
-  console.log(JSON.stringify({ lines: report.length, takes, provider: cfg.provider, took_s: Math.round((Date.now() - t0) / 1000) }));
+  console.log(JSON.stringify({ lines: report.length, takes, provider: cfg.provider, took_s: Math.round((Date.now() - t0) / 1000), ...stats }));
 }
 
 // A line's start on the track: t (track time), or at / mark (source time in the raw take) mapped through the cut.
@@ -317,8 +320,9 @@ export function fit(placed, duration) {
   placed.forEach((p, i) => {
     const next = placed[i + 1];
     const room = (next ? next.start : duration) - p.start;
-    const need = +(p.seconds + (next ? gap : 0.1) - room).toFixed(2);
-    out.push({ id: p.id, start: +p.start.toFixed(2), end: +(p.start + p.seconds).toFixed(2), room: +room.toFixed(2), ...(need > 0 ? { short_by: need } : {}) });
+    // compared unrounded, and rounded up, so moving a line by short_by is always enough
+    const need = p.seconds + (next ? gap : 0.1) - room;
+    out.push({ id: p.id, start: +p.start.toFixed(2), end: +(p.start + p.seconds).toFixed(2), room: +room.toFixed(2), ...(need > 1e-6 ? { short_by: Math.ceil(need * 100 - 1e-6) / 100 } : {}) });
   });
   return out;
 }

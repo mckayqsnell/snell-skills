@@ -15,6 +15,8 @@ You make a demo video of the user's app with no hands on the mouse. A script dri
 
 **Headless only.** Drive the app with the recorder's headless browser. Never use a browser pane, Playwright MCP, Chrome extension or computer-use tool for takes or checks: those open windows on the user's screen.
 
+**Nothing leaves the machine** but what the user turned on (ElevenLabs, a uisfx pack download). Skip the HyperFrames skill's `events` and `usage` reports: this skill wins over it here.
+
 **Tell the user up front, in one line:** a demo video takes a while and uses a fair number of tokens (recording, rendering, and two critic sub-agents).
 
 ## 1. Check the machine and the tools
@@ -74,7 +76,7 @@ With a voiceover, write `voice/script.json` now, from the shot list (one line pe
 ## 7. Cut, then compose
 
 - **Cut:** `node recorder/cut.mjs story story-cut "0-4.5@1,4.5-20@6,20-31@1,31.2~0.5"`. Waiting runs at 3–6× (faster reads as a glitch); the hero action and anything the viewer reads runs at 1×, and a beat the viewer must read gets at least 2 s on screen; `t~hold` freezes a frame (under a zoom-through, so the pressed button stays on screen). The cut writes the clip and the event log with its times moved to match.
-- **Sound:** `node recorder/sfx.mjs story-cut` places key ticks and clicks on the right frames. With a uisfx pack: `node recorder/sfx-packs.mjs get soft` once, then `sfx.mjs story-cut --pack soft`. Named moments get their own cue: `rec.mark('sfx:success')` in the take, or `--at "success@12.4"`. Animation impacts: find the real frame with `node recorder/peaks.mjs`; DOM signals often fire early.
+- **Sound:** `node recorder/sfx.mjs story-cut` places key ticks and clicks on the right frames. With a uisfx pack: `node recorder/sfx-packs.mjs get soft` once, then `sfx.mjs story-cut --pack soft`. Named moments get their own cue: `rec.mark('sfx:success')` in the take, right after the app's signal with no wait in between, or `--at "success@12.4"` (a time in the cut). If it lands off the frame, check with a 20 fps strip and shift it in the label: `sfx:success+0.5`, `sfx:connect-0.3`. Animation impacts: find the real frame with `node recorder/peaks.mjs`; DOM signals often fire early.
 - **Voice:** `node recorder/voice.mjs place story-cut` after every cut; fix each `short_by` with a longer hold, then place again.
 - **Compose:** Full mode → [`references/hyperframes.md`](references/hyperframes.md). Quick mode → [`references/quick.md`](references/quick.md).
 

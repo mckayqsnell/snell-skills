@@ -4,8 +4,9 @@
 // lands on the exact frame the picture does. Writes assets/audio/<cut>-ui.wav.
 // Sounds: HyperFrames' own by default, from assets/sfx/ (key-press.mp3, click-soft.mp3; copy them from the media-use
 // skill's audio/assets/sfx/). --pack <name> uses a uisfx pack from assets/sfx/uisfx/<name>/ (recorder/sfx-packs.mjs).
-// Named cues: a mark in the take labelled "sfx:<cue>" (rec.mark('sfx:success')) plays that cue on its frame, and
-// --at adds cues at cut times. A cue is looked up in the pack first, then in assets/sfx/<cue>.mp3.
+// Named cues: a mark in the take labelled "sfx:<cue>" (rec.mark('sfx:success')) plays that cue on its frame;
+// "sfx:success+0.5" or "sfx:connect-0.3" shifts it by that many seconds. --at adds cues at times in the CUT
+// (not the raw take, unlike "at" in voice/script.json). A cue is looked up in the pack first, then in assets/sfx/<cue>.mp3.
 // --no-ui leaves out the clicks and keys (a recorded video with its own sound keeps only the named cues).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,7 +50,10 @@ for (const e of clip.events || []) {
   // light arrives before sound: each hit lands ~1 frame after its picture
   if (ui && e.type === 'key') hits.push({ file: keyFile, t: e.t + 0.016, vol: GAIN * (0.55 + rand() * 0.25), rate: 0.94 + rand() * 0.12 });
   if (ui && e.type === 'down') hits.push({ file: clickFile, t: e.t + 0.016, vol: GAIN * 0.5, rate: 1 });
-  if (e.type === 'mark' && typeof e.label === 'string' && e.label.startsWith('sfx:')) cue(e.label.slice(4), e.t + 0.016);
+  if (e.type === 'mark' && typeof e.label === 'string' && e.label.startsWith('sfx:')) {
+    const [, c, shift] = e.label.slice(4).match(/^(.+?)([+-]\d*\.?\d+)?$/) || [];
+    if (c) cue(c, e.t + 0.016 + Number(shift || 0));
+  }
 }
 for (const part of (opt('--at', '') || '').split(',').filter(Boolean)) {
   const [c, t] = part.split('@');

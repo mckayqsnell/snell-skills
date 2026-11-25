@@ -10,7 +10,7 @@ A voice that talks over the demo. Only when the user said yes in step 2. `record
 | Voice | What it is | Needs | Cost and license |
 |---|---|---|---|
 | **Ming-3.0** (default on a Mac) | Clear and natural. 5 tested presets (`US_Emma`, `US_James`, `US_Stella`, `UK_George`, `UK_Charlotte`), a voice made from a written description, or a copy of the user's voice | Apple Silicon, about 6 GB download, 4–5 GB memory | Free, MIT |
-| **Fish Drama 3** | The best-sounding free voice (Artificial Analysis open-weights leader, Nov 2026). Copies a voice: a Ming preset or the user's own | Apple Silicon with 32 GB or more, 22 GB download, about 28 GB memory while it runs | Free to try. Business use is free only under $500k a year in revenue; say this before offering it for work videos |
+| **Fish Drama 3** | The best-sounding free voice (Artificial Analysis open-weights leader, Nov 2026). Copies a voice: a Ming preset or the user's own | Apple Silicon with 32 GB or more, 22 GB download, about 28 GB in MLX (about 36 GB for the whole process) while it runs | Free to try. Business use is free only under $500k a year in revenue; say this before offering it for work videos |
 | **Kokoro** | Small and fast, a little flatter. 8 good English voices (`af_heart`, `bm_george`, …) | Any OS, about 330 MB | Free, Apache-2.0 |
 | **ElevenLabs** | The best overall, and paid | `ELEVENLABS_API_KEY` | The free plan (10k characters a month) is for personal use with credit to ElevenLabs; work videos need a paid plan |
 
@@ -28,7 +28,7 @@ A voice that talks over the demo. Only when the user said yes in step 2. `record
 The user can have the demo read in their own voice without recording the whole thing:
 
 1. They read the paragraph below for 15 to 20 seconds, in a quiet room, about a hand's width from the mic, at their normal pace. On a Mac: QuickTime → New Audio Recording, or `ffmpeg -f avfoundation -i ":0" -t 20 -ac 1 voice/me.wav`.
-2. Save it as `voice/me.wav`, and what they said, word for word, as `voice/me.txt`.
+2. Save it as `voice/me.wav`, and what they said, word for word, as `voice/me.txt`. From a longer recording, cut 15–20 s of clean talk with no long pause: `ffmpeg -ss <start> -t 18 -i take.mov -vn -ac 1 -ar 48000 voice/me.wav`, run `npx hyperframes transcribe voice/me.wav`, and put what it heard in `me.txt` (fix only words it got plainly wrong). Delete any longer audio you pulled out of their recording when you are done.
 3. Set `"voice": "me"` with `fish` (closest copy) or `ming`.
 
 > Hi, thanks for joining. In the next minute I'll walk you through a small tool that saves a lot of clicking, and I think you're going to like it.
@@ -57,7 +57,7 @@ The edit fits the voice, not the other way round. Write `voice/script.json` from
 
 1. `node recorder/voice.mjs make` makes 2 takes of every line (Kokoro: 1), trims the silence, levels each to −18 LUFS, transcribes it, and keeps the take that says the words and fits. It writes `assets/voice/<id>.wav` and `<id>.words.json` (word times, for captions). A line with `warn` dropped or swapped words: listen, reword it, or spell it out with `say`, then `make --only <id>`. Whisper sometimes mishears a short line that was fine: if it sounds right in the transcript of the full mix, keep it.
 2. Rough times on Apple Silicon: Ming about 3× faster than real time after a 3 s load; Fish 1–2× real time after a 10 s load; Kokoro under 1 s a line. Each model loads once per `make`.
-3. After each cut: `node recorder/voice.mjs place <track>`. It puts each line at its time, checks that every line ends 0.25 s before the next starts, and writes `assets/audio/<track>-voice.wav` and `voice/<track>-fit.json`. A line that is `short_by` some seconds needs room: hold its beat longer (a freeze `t~hold`, or a slower span in the cut), or shorten the line. Then make and place again until `fits` is true.
+3. After each cut: `node recorder/voice.mjs place <track>` (a card has no cut data: `place title --duration 3`). It puts each line at its time, checks that every line ends 0.25 s before the next starts, and writes `assets/audio/<track>-voice.wav` and `voice/<track>-fit.json`. A line that is `short_by` some seconds needs room: hold its beat longer (a freeze `t~hold`, or a slower span in the cut), or shorten the line. Then make and place again until `fits` is true.
 4. Play `assets/audio/<track>-voice.wav` as an `<audio>` from that scene's start, next to the UI sounds.
 
 ## Mix

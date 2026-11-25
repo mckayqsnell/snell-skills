@@ -1,7 +1,8 @@
 // Cleans up after a demo run: node <workspace>/recorder/cleanup.mjs [--dry-run]. It works on the workspace it lives in,
 // wherever you run it from, and refuses to run unless that folder has the demo-video.json setup.mjs wrote.
 // - Closes the browsers this run's playwright-cli sessions opened (only sessions named in .demo-run.json).
-// - Deletes scratch: raw/*.frames/, review/scratch/, sheets/, HyperFrames snapshots, and every path listed under
+// - Deletes scratch: raw/*.frames/, review/scratch/, sheets/, HyperFrames snapshots, .playwright-cli/, voice/takes/
+//   (the voice takes that lost), and every path listed under
 //   "scratch" in .demo-run.json.
 // Keeps raw takes, cuts, the composition and renders: the user decides about those.
 //
@@ -50,7 +51,7 @@ for (const s of run.sessions) {
   done.push(`closed session ${s}`);
 }
 // HyperFrames keeps snapshot PNGs here; its check's warm-up Chrome exits on its own a few minutes later.
-const scratch = [...run.scratch, 'review/scratch', 'sheets', '.hyperframes/artifacts/snapshots'];
+const scratch = [...run.scratch, 'review/scratch', 'sheets', '.hyperframes/artifacts/snapshots', '.playwright-cli', 'voice/takes', 'voice/samples/raw'];
 if (fs.existsSync(path.join(ROOT, 'raw'))) {
   for (const f of fs.readdirSync(path.join(ROOT, 'raw'))) if (f.endsWith('.frames')) scratch.push(path.join('raw', f));
 }

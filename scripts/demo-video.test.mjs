@@ -37,6 +37,10 @@ test('fit: a line that runs into the next says by how much', () => {
   assert.equal(r[0].short_by, 0.75);
   assert.equal(r[1].short_by, undefined);
   assert.equal(fit([{ id: 'v1', start: 9, seconds: 2 }], 10)[0].short_by, 1.1);
+  // rounded up from the unrounded gap: moving the next line by short_by is always enough
+  const tiny = fit([{ id: 'v1', start: 0, seconds: 2.252 }, { id: 'v2', start: 2.5, seconds: 1 }], 10);
+  assert.equal(tiny[0].short_by, 0.01);
+  assert.equal(fit([{ id: 'v1', start: 0, seconds: 2.25 }, { id: 'v2', start: 2.5, seconds: 1 }], 10)[0].short_by, undefined);
 });
 
 test('elevenKey: env first, then local.env; never from anywhere else', () => {
