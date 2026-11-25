@@ -13,6 +13,8 @@ You make a demo video of the user's app with no hands on the mouse. A script dri
 
 **Pick the path.** The call names a video file or a folder of takes, or the user says they recorded the demo themselves: that is **recorded mode**. Do step 1, then follow [`references/recorded.md`](references/recorded.md), then step 9. Asked how to record one: show [`references/recording-guide.md`](references/recording-guide.md). Everything else is the hands-free path below.
 
+**Headless only.** Drive the app with the recorder's headless browser. Never use a browser pane, Playwright MCP, Chrome extension or computer-use tool for takes or checks: those open windows on the user's screen.
+
 **Tell the user up front, in one line:** a demo video takes a while and uses a fair number of tokens (recording, rendering, and two critic sub-agents).
 
 ## 1. Check the machine and the tools
@@ -27,7 +29,7 @@ HyperFrames is a Claude plugin, not a system tool: check that the `hyperframes:h
 
 Ask before you record, like a good producer: in menu rounds (`AskUserQuestion` when you have it), each question with your suggested pick first and one line on what each option costs. Round 1 is the goal, the length and what to show; round 2 is the sound (voice, sounds, music) once you know the story. Scale it to the app: 2–3 questions for a small app, more for a big one, and for a big one suggest the `grilling` skill. Skip any question the call or the repo already answers.
 
-- **Length.** Given in the call: it wins. Plain call: add up how long each feature takes to show (3–6 s for a click-and-see feature, 10–20 s for a hero flow that builds something) plus about 8 s of title and end cards, and cap it at 2.5 min. A small app honestly lands at 30–45 s; don't pad it. Ask only when the app has more than 8 features worth showing.
+- **Length.** Given in the call: it wins. Plain call: add up how long each feature takes to show (3–6 s for a click-and-see feature, 10–20 s for a hero flow that builds something) plus about 8 s of title and end cards, and cap it at 2.5 min. A small app honestly lands at 30–45 s; don't pad it. Never cut below the sum for the features the user said must show: a 20 s film that drops them is a fail, not a tight edit. Ask only when the app has more than 8 features worth showing.
 - **Who watches,** and what they should think at the end (one sentence; it becomes the goal line in `SPEC.md`).
 - **Voiceover** (opt-in, always ask): none (the default: captions carry it); an AI voice; or the user's own voice, copied from a 20-second recording. Run `node <skill>/scripts/voice.mjs check` first and offer only what this machine can run, with sizes and costs: [`references/voice.md`](references/voice.md).
 - **UI sounds:** HyperFrames' own soft clicks and keys (the default); a uisfx pack instead (12 packs, free: `soft`, `glass`, `minimal`, `mechanical`, `organic`, `studio`, `zen`, `dreamy`, `rubber`, `arcade`, `scifi`, `cinematic`), downloaded fresh from GitHub when chosen; or silence.
@@ -65,7 +67,7 @@ With a voiceover, write `voice/script.json` now, from the shot list (one line pe
 ## 6. Record the takes
 
 1. Make the workspace next to the repo, `<parent of repo>/<repo>-demo-video/`. `node <skill>/scripts/setup.mjs <app-repo> [name] --print-path` only prints that path and makes nothing (`[name]` overrides the folder name); the same command without `--print-path` makes it. A hosted app with no repo: pass the folder it should go in and a name (`setup.mjs ~/Videos <app>-demo-video`). Full mode: run `init` on that path first (the exact command is in [`references/hyperframes.md`](references/hyperframes.md) "Set up"), then `node <skill>/scripts/setup.mjs <app-repo>`. Quick mode: just `setup.mjs`. It never overwrites files.
-2. Write `recorder/scenes.mjs` from `recorder/scenes.example.mjs` and the shot list. Before the long take, run a 10 s test take of the trickiest beat and check its marks and boxes arrived in `raw/<clip>.events.json`. Prefer **one long take** through the whole story: the edit then moves the camera between beats instead of hard-cutting, and the app's state carries over.
+2. Write `recorder/scenes.mjs` from `recorder/scenes.example.mjs` and the shot list. Before the long take, run a 10 s test take of the trickiest beat and check its marks and boxes arrived in `raw/<clip>.events.json`. Prefer **one long take** through the whole story: the edit then moves the camera between beats instead of hard-cutting, and the app's state carries over. An app or demo server that remembers state (a name typed last time, a failed run) must start fresh for every take: restart it or use its reset first.
 3. Run it: `node recorder/scenes.mjs story`. It prints the engine, frame width, frames and marks.
 4. **The take passes** when `raw/<clip>.events.json` shows `frameWidth` 3200 (for a 1280-wide page at 2.5×), every mark you expected, and no `timeout` mark. Then look at a contact sheet: `node recorder/sheet.mjs raw/story.mp4 sheets/story.png 0 <end> 1 6 320` (from 0 s to the take's length, which the take prints, one frame a second, 6 across, 320 px tiles). A wrong screen, a stuck spinner or an error toast means a retake, not a fix in the edit. A `missing-box` mark means a zoom target matched nothing: fix the locator and retake.
 
@@ -82,6 +84,6 @@ Follow [`references/critics.md`](references/critics.md): two critic sub-agents (
 
 ## 9. Hand over and clean up
 
-1. Make the hand-over sheet from the final render, before cleanup: `node recorder/sheet.mjs renders/<app>-demo.mp4 renders/<app>-sheet.png 0 <end> 1 6 320`. Give the user the MP4 path, that sheet, the length, and one line on the storyline you picked. Offer the HyperFrames desktop app for edits (Full mode).
+1. Make the hand-over sheet from the final render, before cleanup: `node recorder/sheet.mjs renders/<app>-demo.mp4 renders/<app>-sheet.png 0 <end> 1 6 320`. Give the user the MP4 path, that sheet, the length, and one line on the storyline you picked. Ask them to listen once: the critics measure the sound but can't hear it. Offer the HyperFrames desktop app for edits (Full mode).
 2. Clean up, even when a step failed: `node recorder/cleanup.mjs` closes this run's browser sessions and deletes scratch (frame folders, `sheets/`, `review/scratch/`, HyperFrames snapshots, anything you listed with `--add-scratch`). Stop any server you started, and the HyperFrames preview unless the user is editing in it (`preview --stop`, run the way `references/hyperframes.md` says). Close every tab you opened in the user's Chrome. Close only what this run opened: another project's preview or server stays.
 3. Ask before deleting anything worth running again: the scene script, raw takes and the composition stay unless the user says so.

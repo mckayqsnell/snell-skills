@@ -22,8 +22,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const HOME = os.homedir();
 
 export const MODELS = {
-  ming: { id: 'mlx-community/Ming-3.0-tts-0.5B-bf16', gb: 2, ram: 4, license: 'MIT' },
-  fish: { id: 'mlx-community/fish-audio-drama-3-4bit', gb: 22, ram: 28, license: 'Fish Audio Research License: free for business use only under $500k a year in revenue; above that it needs a paid license from Fish Audio' },
+  ming: { id: 'mlx-community/Ming-3.0-tts-0.5B-bf16', gb: 6, ram: 5, license: 'MIT' },
+  fish: { id: 'mlx-community/fish-audio-drama-3-4bit', gb: 22, ram: 28, license: 'Fish Audio Community License: free for business use only under $500k a year in revenue; above that it needs a paid license from Fish Audio' },
 };
 export const VOICES = {
   kokoro: ['af_heart', 'af_nova', 'af_sky', 'am_adam', 'am_michael', 'bf_emma', 'bf_isabella', 'bm_george'],
