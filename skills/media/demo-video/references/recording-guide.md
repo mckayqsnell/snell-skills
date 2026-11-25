@@ -13,7 +13,7 @@ Show this to the user when they ask how to record one, or before they record. Ke
 
 | Tool | Set it up like this |
 |---|---|
-| **OBS** (free, any OS) | Settings → Output → Recording: MKV (a crash doesn't lose the file), 60 fps, constant frame rate. Put the webcam in a corner as a Video Capture source. For a separate webcam file, add the Source Record plugin to the webcam source. |
+| **OBS** (free, any OS) | Settings → Output → Recording: MKV (a crash doesn't lose the file), 60 fps, constant frame rate. Put the webcam in a corner as a Video Capture source. For a separate webcam file, add the Source Record plugin to the webcam source. Put the mic on its own audio track too (Output → Recording → Audio Track 2), so your voice can be cleaned without the computer's sounds. |
 | **Loom** | Screen and camera, full screen. Download the MP4 when done. The face is baked in, which is fine. |
 | **Cap** (free, Mac and Windows) | Studio mode. The project folder keeps the screen and `camera.mp4` apart; give the agent both. |
 | **Screen Studio** (Mac) | Export, or "Extract raw recording files" to keep the camera apart. |
@@ -22,7 +22,7 @@ Show this to the user when they ask how to record one, or before they record. Ke
 ## While you record
 
 - Talk to one person, as if they sat next to you. Normal pace.
-- **Pause for a breath between points.** The cut can only join where you pause.
+- **Pause for about a second between points.** The cut can only join where you pause, and a full second leaves room for a clean join.
 - **Made a mistake? Say "cut that",** pause, and start the sentence again. The agent finds those and drops the bad try.
 - During a wait (a build, a page loading) stay quiet or say what's happening; the wait gets sped up.
 - Long is fine. Ten minutes in a few takes is normal; the agent finds the best minute or two.

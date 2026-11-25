@@ -17,7 +17,7 @@
 //   kit.src(t, take)                                 cut time of SOURCE time t in the raw take (through the speed
 //                                                    ramps), so re-timing a ramp never knocks a shot off its target;
 //                                                    take names the take in a cut of several (edl.mjs)
-//   kit.face(tl, el, { rect, corner, size, at, until, moves })   the user's face in a round bubble (recorded mode)
+//   kit.face(tl, el, { rect, corner, size, at, until, moves, full, cover })   the user's face in a bubble (recorded mode)
 (function () {
   var W = 1920; var H = 1080;
   // 16:9 like the page, so the base shot shows the whole app with nothing cropped (at 1 CSS px per frame px).
@@ -144,7 +144,9 @@
     // The user's face in a round bubble that never zooms with the screen. el: .face holding a <video> (the same
     // clip, or the separate webcam clip). rect: where the webcam sits in the recording (CSS px), when it is baked in;
     // a .face-cover inside .cam then hides that spot, so the face never shows twice. Leave rect out for a separate
-    // webcam clip. corner tl|tr|bl|br, size in frame px, at/until: when it shows, moves: [[t, corner], ...].
+    // webcam clip. corner tl|tr|bl|br, size in frame px, at/until: when it shows (until defaults to 0.3 s before the
+    // clip ends, so no empty ring is left), moves: [[t, corner], ...], full: [[from, to], ...] spans where the face
+    // fills the frame (a separate webcam file only: a baked-in webcam is too small), cover: 'solid' for a plain patch.
     function face(tl, el, o) {
       o = o || {};
       var D = o.size || 260; var M = o.margin == null ? 40 : o.margin; var vid = el.querySelector('video');
@@ -158,13 +160,21 @@
         vid.style.left = (-(r.x * S * k) - (r.w * S * k - D) / 2) + 'px';
         vid.style.top = (-(r.y * S * k) - (r.h * S * k - D) / 2) + 'px';
         var cover = q('.face-cover');
+        if (cover && o.cover === 'solid') { cover.style.backdropFilter = 'none'; cover.style.webkitBackdropFilter = 'none'; cover.style.background = 'var(--ground-2)'; }
         if (cover) { cover.style.left = (r.x * S) + 'px'; cover.style.top = (r.y * S) + 'px'; cover.style.width = (r.w * S) + 'px'; cover.style.height = (r.h * S) + 'px'; }
       } else if (vid) { vid.style.width = '100%'; vid.style.height = '100%'; vid.style.objectFit = 'cover'; }
       var at = o.at || 0; var p = spot(o.corner || 'bl');
       tl.set(el, { left: p.left, top: p.top, opacity: 0, scale: 0.85 }, 0);
       tl.to(el, { opacity: 1, scale: 1, duration: 0.45, ease: 'expo.out' }, at);
       (o.moves || []).forEach(function (m) { var s = spot(m[1]); tl.to(el, { left: s.left, top: s.top, duration: 0.8, ease: 'power2.inOut' }, m[0]); });
-      if (o.until != null) tl.to(el, { opacity: 0, scale: 0.9, duration: 0.3, ease: 'power2.in' }, o.until);
+      // full frame: the bubble grows from the frame's centre until its circle covers every corner, then goes back
+      (o.full || []).forEach(function (f) {
+        var back = spot(o.corner || 'bl'); var big = Math.hypot(W, H) / D;
+        tl.to(el, { left: (W - D) / 2, top: (H - D) / 2, scale: big, duration: 0.6, ease: 'power3.inOut' }, f[0]);
+        tl.to(el, { left: back.left, top: back.top, scale: 1, duration: 0.6, ease: 'power3.inOut' }, f[1]);
+      });
+      var until = o.until != null ? o.until : (clip && clip.duration ? clip.duration - 0.3 : null);
+      if (until != null) tl.to(el, { opacity: 0, scale: 0.9, duration: 0.3, ease: 'power2.in' }, until);
     }
 
     return { shot: shot, cursor: cursor, caption: caption, src: src, face: face, frame: frame, clip: clip };

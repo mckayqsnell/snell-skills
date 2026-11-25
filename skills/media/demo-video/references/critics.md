@@ -1,6 +1,6 @@
 # The critics
 
-Before you start them, make the labelled whole-video sheet once yourself: `node recorder/sheet.mjs <render> review/sheet-all.png 0 <end> 0.5 6 320`. The critics then use only ffmpeg, so two of them never open browsers at once.
+Before you start them, make the labelled whole-video sheet once yourself: `node recorder/sheet.mjs <render> review/sheet-all.png 0 <end> 0.5 6 320` (a step of 1 instead of 0.5 for a video over 60 s, or the sheet gets too tall to read). The critics then use only ffmpeg, so two of them never open browsers at once.
 
 Two critic sub-agents review every render with fresh eyes: they see what is in the frames, not what you meant. Run them in parallel on the same render. A video over 2 minutes, or one with a lot of sound, gets a third critic: frame, legibility and sound (palette, type, brand, captions at 360 px, where every sound lands).
 
@@ -14,7 +14,7 @@ Two critic sub-agents review every render with fresh eyes: they see what is in t
 > You are reviewing a rendered product demo, `<render path>` (1920×1080, 60 fps, <length> s), of `<app>` for `<audience>`. Goal: `<the SPEC goal line>`. User choices (never contest these): `<music choice, length range, must show, must hide>`. A fix must keep the film inside the agreed length. Your lens: `<lens>`. Read `<files>` first.
 >
 > You can't play video, so look at real frames. From `<workspace>`:
-> - Start with the labelled whole-video sheet at `review/sheet-all.png` (2 fps; the time of each tile is in its corner).
+> - Start with the labelled whole-video sheet at `review/sheet-all.png` (2 fps, or 1 fps for a video over 60 s; the time of each tile is in its corner).
 > - For close looks, make ffmpeg strips: `ffmpeg -y -ss <from> -t <len> -i <video> -vf "fps=<n>,scale=320:-2,tile=6x<rows>" -frames:v 1 review/scratch/<name>.png`. Tile i (from 0, left to right, top to bottom) is at `<from> + i/<n>` s. Use 15–30 fps for moves, cuts and impacts.
 > - `ffmpeg -ss <t> -i <video> -frames:v 1 review/scratch/<name>.png`: one full-size frame, to judge legibility.
 > - Sound, which you can't hear: `node <SKILLS>/hyperframes/scripts/plugin-cli.mjs audio <video> --json` (onsets, loudness; the lead fills in the real path), and `ffmpeg -i <video> -af silencedetect=n=-50dB:d=1.5 -f null -` for dead stretches.

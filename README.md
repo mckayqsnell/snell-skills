@@ -112,6 +112,8 @@ In your agent:
 
 To use `keep`, set `MY_SKILLS_KNOWLEDGE_DIR` in your shell profile to the folder where kept pages should go.
 
+demo-video reads two optional settings for its voiceover. `ELEVENLABS_API_KEY` turns on ElevenLabs; set it in your shell, or put the line `ELEVENLABS_API_KEY=...` in `~/.config/snell-skills/local.env` (outside the plugin, so updates never wipe it). `DEMO_VOICE_PYTHON` points at an mlx-audio Python you already have. Without them the skill uses the free local voices, and it says how to set either up when you ask for it.
+
 ### 3. That's it.
 
 ## The skills

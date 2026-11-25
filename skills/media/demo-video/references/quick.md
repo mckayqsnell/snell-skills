@@ -40,4 +40,4 @@ try {
 ffmpeg -y -i raw/quick.webm -vf "fps=60,scale=1920:-2:flags=lanczos,format=yuv420p" -c:v libx264 -preset slow -crf 16 -movflags +faststart renders/quick.mp4
 ```
 
-Trim waits with `recorder/cut.mjs` first if you recorded with `recorder.mjs` instead (Quick mode can still use it: `engine` and the log work the same, the cursor just comes from `showActions`). Add music, when asked, with ffmpeg: `-i music.mp3 -filter_complex "[1:a]volume=0.35,afade=t=out:st=<end-2>:d=2[a]" -map 0:v -map "[a]" -shortest`.
+Trim waits with `recorder/cut.mjs` first if you recorded with `recorder.mjs` instead (Quick mode can still use it: `engine` and the log work the same, the cursor just comes from `showActions`). Add music, when asked, with ffmpeg: `-i music.mp3 -filter_complex "[1:a]volume=0.35,afade=t=out:st=<end-2>:d=2[a]" -map 0:v -map "[a]" -shortest`. A voiceover works here too: make and place it with [`voice.md`](voice.md) (`place <track> --duration <length of the video>`), then lay `assets/audio/<track>-voice.wav` on with `-i <voice.wav> -map 0:v -map 1:a -c:v copy -shortest`, or `amix` it with the music after ducking the music under it ([`voice.md`](voice.md) "Mix").

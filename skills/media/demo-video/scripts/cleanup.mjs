@@ -51,7 +51,7 @@ for (const s of run.sessions) {
   done.push(`closed session ${s}`);
 }
 // HyperFrames keeps snapshot PNGs here; its check's warm-up Chrome exits on its own a few minutes later.
-const scratch = [...run.scratch, 'review/scratch', 'sheets', '.hyperframes/artifacts/snapshots', '.playwright-cli', 'voice/takes', 'voice/samples/raw'];
+const scratch = [...run.scratch, 'review/scratch', 'sheets', '.hyperframes/artifacts/snapshots', '.playwright-cli', 'voice/takes', 'voice/samples/raw', 'sfx-listen'];
 if (fs.existsSync(path.join(ROOT, 'raw'))) {
   for (const f of fs.readdirSync(path.join(ROOT, 'raw'))) if (f.endsWith('.frames')) scratch.push(path.join('raw', f));
 }

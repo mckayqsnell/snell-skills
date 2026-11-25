@@ -6,10 +6,10 @@ The user talked through their app while recording the screen, maybe with their f
 
 ## 1. Bring the takes in
 
-1. Make the workspace as in SKILL.md step 6.1 (`setup.mjs <folder of the takes> <name>-demo-video`, plus `init` first in Full mode).
+1. Make the workspace as in SKILL.md step 6.1, with no name: `setup.mjs <folder of the takes>` puts it beside that folder as `<folder>-demo-video`, never inside the user's recordings (plus `init` first in Full mode).
 2. Link each take into `raw/` as `t1`, `t2`, … in the order they were recorded (file time): `ln -s "<take>" raw/t1.mov` (on Windows, copy). A separate webcam file for a take (OBS Source Record, Cap's `camera.mp4`, Screen Studio's raw files) goes in as `raw/t1.cam.mp4`. Loom and most others bake the face into the screen: that is fine.
 3. `ffprobe` each take. Note its size and frame rate. If `avg_frame_rate` differs from `r_frame_rate` (a variable frame rate, common from phones and QuickTime), make a constant one first: `ffmpeg -i <take> -r 60 -c:v libx264 -crf 16 -c:a aac raw/t1.mp4`.
-4. `node recorder/cutplan.mjs transcribe` writes `raw/<take>.words.json` for every take (local; a few seconds a take), then `node recorder/cutplan.mjs text` writes `cut/transcript.md`: every sentence with its take and times, long pauses, fillers, and redos ("cut that", "let me start over") marked.
+4. `node recorder/cutplan.mjs transcribe` writes `raw/<take>.words.json` for every take (local; a few seconds a take) and says which model heard it. If it warns that the word times are coarse, offer a better engine (`npx hyperframes models install parakeet`; ask first, it is a download), then `transcribe --force`. Then `node recorder/cutplan.mjs text` writes `cut/transcript.md`: every sentence with its take and times, long pauses, fillers, and redos ("cut that", "let me start over") marked.
 5. Look at every take: `node recorder/sheet.mjs raw/t1.mov sheets/t1.png 0 <end> 3 6 320` (a frame every 3 s). Note where the webcam sits (measure its box on a full frame), and anything private on screen: tokens, keys, customer names, other people's email. Those need a blur or a cut; ask the user.
 
 ## 2. Interview the user
@@ -32,11 +32,14 @@ Write `cut/edl.json` from `cut/transcript.md` and the vital features ([`edl.mjs`
 - Order by the story: pieces may come from any take, in any order, as long as cause comes before effect.
 - Give each piece that starts a chapter a `label` ("Build a pipeline"): it becomes the chapter caption.
 
-Then `node recorder/edl.mjs --check`. It snaps every edge to the quietest point near a word edge, prints what each piece says from first to last word, and flags joins inside a phrase. Fix every flag, or say in `SPEC.md` why it stays.
+Then `node recorder/edl.mjs --check`. It snaps every edge to the quietest point near a word edge, prints what each piece says from first to last word, and flags joins inside a phrase, any edge that still lands in sound, and speech inside a sped-up piece. Fix every flag, or say in `SPEC.md` why it stays.
+
+- Word times from a transcript drift (0.3–0.8 s is common), so the sound decides. When a flag says an edge lands in sound, look at the levels around it (`ffmpeg -ss <t-0.5> -t 1 -i <take> -af astats=metadata=1:reset=1,ametadata=print:key=lavfi.astats.Overall.RMS_level -f null -` prints one level per frame), pick the quiet spot by hand, and set `"exact": true` on that piece so the edges stay as written.
+- Give the reasons for what you left out in `"drop": [{ "take": "t1", "from": 73, "to": 80, "why": "names a customer" }]`: the plan page shows them.
 
 ## 4. The user approves the plan
 
-`node recorder/cutplan.mjs page` writes `cut/plan.html`: each piece with a frame, its times, what it says, its flags, and the total length. Open it for the user and wait for "looks good" or changes. Change `cut/edl.json` and make the page again until they approve. Nothing is cut before that.
+`node recorder/cutplan.mjs page` writes `cut/plan.html`: each piece with a frame, its times, what it says, its flags, the total length, and what was left out and why. Open it for the user and wait for "looks good" or changes. Change `cut/edl.json` and make the page again until they approve. Nothing is cut before that.
 
 ## 5. Cut
 
@@ -58,15 +61,15 @@ Then `node recorder/edl.mjs --check`. It snaps every edge to the quietest point 
   <video id="talk-video" class="clip screen-video" data-start="0" data-duration="98.4" src="assets/clips/talk.mp4" muted playsinline></video>
   <div class="face-cover"></div>                       <!-- hides the face baked into the recording -->
 </div></div>
-<div class="face"><video id="face-video" class="clip" data-start="0" data-duration="98.4" src="assets/clips/talk.mp4" muted playsinline></video></div>
+<div class="face" data-layout-allow-overflow><video id="face-video" class="clip" data-start="0" data-duration="98.4" src="assets/clips/talk.mp4" muted playsinline></video></div>
 <script>
   kit.face(tl, root.querySelector('.face'), { rect: { x: 0, y: 0, w: 286, h: 161 }, corner: 'bl', size: 280, at: 0.4,
     moves: [[kit.src(57.2, 't2'), 'br']] });         // out of the way of a zoom on the left
 </script>
 ```
 
-  `rect` is the webcam's box in the recording (measure it); leave out `rect` and `.face-cover` and point the bubble's video at `talk-cam.mp4` for a separate webcam file. Put the bubble in the corner the action is not in, and move it (`moves`) before a zoom would put the action under it. Snapshot every zoom to check the face never shows twice and never covers what the voice talks about.
-- Title card over the first 2–3 s (the title line and the app's logo), and a 0.6 s dissolve into the end card after the last word.
+  `rect` is the webcam's box in the recording (measure it); leave out `rect` and `.face-cover` and point the bubble's video at `talk-cam.mp4` for a separate webcam file. Put the bubble in the corner the action is not in, and move it (`moves`) before a zoom would put the action under it. Snapshot every zoom to check the face never shows twice and never covers what the voice talks about. The bubble leaves 0.3 s before the clip ends (`until` to change it). If the blurred patch reads as a smudge, `cover: 'solid'`. With a separate webcam file, the face can fill the frame for the intro and the sign-off: `full: [[0, 3.2], [95.5, 98.4]]`.
+- **Title card:** start the cut with a muted lead-in of about 3 s (`"mute": true` on a first piece of a calm screen) so no words play under the title, and keep the title to 8 words or fewer. **End card:** after the last word, a muted tail of about 1 s, then a 0.6 s dissolve into the card; the clip must not end under the dissolve.
 - Captions from their words, if they wanted them: follow the hyperframes skill's captions reference with `clip.words`.
 - Sound: no UI clicks (`sfx.mjs <cut> --no-ui` only for named cues such as a whoosh into a card). Music, if any, is a ducked bed under the voice ([`voice.md`](voice.md) "Mix"). Master to −16 LUFS, true peak under −1.5 dB.
 

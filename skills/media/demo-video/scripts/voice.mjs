@@ -52,7 +52,7 @@ function hfCache(env = process.env) {
 // a model counts as downloaded when its snapshot or its blobs are there (a shared store can keep only the blobs)
 const cached = (id) => ['snapshots', 'blobs'].some((d) => { try { return fs.readdirSync(path.join(hfCache(), `models--${id.replace('/', '--')}`, d)).length > 0; } catch { return false; } });
 // HyperFrames CLI: HYPERFRAMES_CLI is the plugin's scripts/plugin-cli.mjs (what the hyperframes skill runs), else npx.
-function hf(args, o) {
+export function hf(args, o) {
   const cli = process.env.HYPERFRAMES_CLI;
   return cli ? run(process.execPath, [cli, ...args], o) : run('npx', ['--yes', 'hyperframes', ...args], { shell: process.platform === 'win32', ...o });
 }
@@ -108,11 +108,15 @@ function finish(src, out) {
   fs.rmSync(tmp, { force: true });
   return probeSeconds(out);
 }
-function transcribe(wav) {
+// Word times for any audio or video file, through HyperFrames transcribe (16 kHz mono first: what both of its
+// engines want, and a much smaller file). transcribe.last holds the engine and model that heard it.
+export function transcribe(file) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dv-words-'));
   try {
-    fs.copyFileSync(wav, path.join(dir, 'a.wav'));
-    hf(['transcribe', 'a.wav', '--json', '-d', '.'], { cwd: dir });
+    run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vn', '-ac', '1', '-ar', '16000', path.join(dir, 'a.wav')]);
+    const out = String(hf(['transcribe', 'a.wav', '--json', '-d', '.'], { cwd: dir }) || '');
+    const done = out.split('\n').filter((l) => l.startsWith('{"ok"')).map((l) => JSON.parse(l)).pop();
+    transcribe.last = done ? { engine: done.engine, model: done.model } : {};
     const words = readJson(path.join(dir, 'transcript.json'));
     return words.map((w) => ({ text: w.text, start: w.start, end: w.end }));
   } catch (e) {
@@ -255,7 +259,7 @@ async function samples(provider, list, text) {
   fs.writeFileSync(path.join(ROOT, 'voice', 'samples.html'), samplesPage(all, text));
   console.log(`listen: ${path.join(ROOT, 'voice', 'samples.html')}`);
 }
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function samplesPage(all, text) {
   const rows = all.map((s) => `<li><b>${esc(s.voice)}</b> <small>${esc(s.provider)} · ${s.seconds}s</small><audio controls preload="none" src="${esc(s.file)}"></audio></li>`).join('\n');
   return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voice samples</title>
