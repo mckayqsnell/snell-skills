@@ -32,7 +32,7 @@ See [scripts/check.sh](scripts/check.sh) for what each step checks.
 
 1. Make a folder at `skills/<group>/<name>/` with a `SKILL.md` inside. The
    `name:` in its frontmatter must match the folder name.
-2. Use an existing group (`html` or `tools`) if one fits. A new group also
+2. Use an existing group (`html`, `tools` or `design`) if one fits. A new group also
    needs a line in the `"skills"` list in `.claude-plugin/plugin.json`, or
    the Claude Code plugin will not load it.
 3. No personal paths. Anything machine-specific goes in a gitignored
