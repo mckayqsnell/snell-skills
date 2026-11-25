@@ -211,18 +211,19 @@ Start from `explain-template.html`. It is a starter, not a layout: pick the part
 <ol class="recap"><li>One takeaway, one sentence.</li></ol>
 ```
 
-**Hover terms.** Define a word where it is used. It gets a light dotted line. Hover, Tab or a tap shows a small card with the meaning, and Escape closes it. The page adds the ids and the aria. In print, the meaning shows in small type in brackets after the word.
+**Hover terms.** The only way to define a word. The word stays in the sentence, tinted orange with an orange dotted line. Hover, Tab or a tap shows a card: the word as a heading (the page adds it), the meaning, then one example. Escape closes it. The page adds the ids and the aria. In print, the meaning and example show in small type in brackets after the word.
 
 ```html
-<p>Each copy has a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How long the cache keeps a copy.</span></abbr>, so old data goes away.</p>
-<p>The cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one.</span></dfn>.</p>
+<p>Sign-in uses OAuth with <abbr class="term">PKCE<span class="term-def"><b>Proof Key for Code Exchange.</b> An extra step in OAuth sign-in, so a stolen sign-in code is useless on its own. <span class="term-eg">The app sends a hash of a random secret first, then the secret itself when it trades the code for a token.</span></span></abbr>.</p>
+<p>Each write tool takes an <dfn class="term">idempotency key<span class="term-def">A unique ID sent with a request, so sending it twice does the work only once. <span class="term-eg">A retry with key 7f3a… gets the first pipeline back instead of making a second one.</span></span></dfn>.</p>
 ```
 
 - `<abbr class="term">` for an acronym: start the card with what the letters stand for, in `<b>`. `<dfn class="term">` for any other term.
-- Only for real jargon this reader wouldn't know. Never for basic words like app, ticket or deploy (see "Writing" in HOUSE-STYLE.md).
-- Define a term once, where it first shows up, and put it in the glossary too.
+- **Every card ends with one `<span class="term-eg">` example,** taken from this page's topic: a real name, number, file or step from the work, not a textbook case. The page adds the "e.g." label; don't write it.
+- **Only real jargon** this reader wouldn't know (see "Writing" in HOUSE-STYLE.md). For the default engineer reader, a page has 0 to 5 hover terms; the checker warns above 8.
+- Define a term once, where it first shows up. Never a box or a line of its own under the paragraph: there is no such part.
+- Glossary: only when the page has 5 or more hover terms. Then a folded Glossary section at the end lists them.
 - The checker counts a hover term as explained everywhere on the page. It scores the card's words as their own sentence.
-- Fallback for the one term a whole section is about: `<p class="vocab"><dfn>TTL</dfn>What it means, in one line.</p>`.
 
 **Questions you might have.** Near the end, after the recap: 4–8 questions a sharp reader would ask next (an edge case, "why not X?", what breaks). Each is a `<details class="q">` that opens to a short answer and one evidence line: a `path:line` or a source link (a pointer to a drawing only on top of one). No input boxes.
 

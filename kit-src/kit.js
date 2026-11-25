@@ -374,7 +374,7 @@
     flows.forEach(function (f) { if (!seen.has(f.svg)) { seen.set(f.svg, false); watch(f.svg, function (v) { seen.set(f.svg, v); if (v && !looping) { looping = true; requestAnimationFrame(tick); } }); } });
   }
 
-  /* ---------- hover terms: a dotted word that shows its meaning on hover, focus or tap ---------- */
+  /* ---------- hover terms: a dotted word that shows its meaning and an example on hover, focus or tap ---------- */
   var terms = $$('.term').filter(function (t) { return $(':scope > .term-def', t); });
   var lastPointer = 'mouse', canHover = matchMedia('(hover: hover)');
   document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || 'mouse'; }, true);
@@ -393,6 +393,12 @@
     var card = $(':scope > .term-def', t);
     if (!card.id) card.id = 'term-def-' + (i + 1);
     card.setAttribute('role', 'tooltip');
+    if (!$(':scope > .term-name', card)) {       /* the card's heading: the word itself, so the card reads on its own */
+      var word = '';
+      t.childNodes.forEach(function (n) { if (n !== card) word += n.textContent; });
+      var nm = document.createElement('span'); nm.className = 'term-name'; nm.setAttribute('aria-hidden', 'true');
+      nm.textContent = word.trim(); card.insertBefore(nm, card.firstChild);
+    }
     if (!t.hasAttribute('tabindex')) t.tabIndex = 0;
     t.addEventListener('mouseenter', function () { t.classList.toggle('shut', false); placeTerm(t); });
     t.addEventListener('mouseleave', function () { t.classList.toggle('shut', false); });

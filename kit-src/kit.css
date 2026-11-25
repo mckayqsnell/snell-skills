@@ -88,6 +88,11 @@ main { min-width: 0; max-width: 760px; }
 .why ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
 
 section { padding-top: 64px; }
+/* Flow: every block in a section gets a gap above it, so a note never sits on a table, a figure on a heading.
+   More above a sub-heading, less under one. Parts that set their own margin-top (one class) keep it. */
+section > * + :not(h2) { margin-top: 14px; }
+section > * + :is(h3, h4) { margin-top: 30px; }
+section > :is(h3, h4) + * { margin-top: 8px; }
 .section-intro { color: var(--muted); margin-top: 10px; }
 section[data-fold] > h2 { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .fold-btn { all: unset; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none; border-radius: 8px; color: var(--muted); cursor: pointer; }
@@ -141,7 +146,8 @@ section.folded > h2::after { content: attr(data-folded-hint); flex-basis: 100%; 
 .step-body { display: grid; gap: 10px; min-width: 0; padding-top: 3px; }
 .step-body code, .check-line code { white-space: normal; }
 .who { font: 600 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; vertical-align: middle; margin-left: 6px; }
-ul.tight { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+:where(ul.tight) { margin: 0; }   /* no weight, so the section flow gap above still applies */
+ul.tight { padding-left: 20px; display: grid; gap: 4px; }
 .check-line { font-size: 14.5px; background: var(--go-soft); border-radius: 8px; padding: 7px 12px; max-width: var(--measure); overflow-wrap: anywhere; }
 .check-line b { color: var(--go); font: 700 11.5px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; margin-right: 6px; }
 .steps.phases .step::before { content: "P" counter(step); font-size: 13px; }
@@ -300,10 +306,11 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 .layer.real > .lk { color: var(--ink); }
 .layer.breaks { background: var(--sunk); }
 .layer.breaks > .lk { color: var(--muted); }
-/* Hover term: a word defined where it is used. A light dotted line under it; hover, keyboard focus
-   or a tap shows a small card with the meaning. The script adds the ids, aria and Escape. */
-.term { font-style: normal; position: relative; cursor: help; text-decoration: underline dotted; text-decoration-color: color-mix(in srgb, var(--muted) 75%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 4px; border-radius: 3px; }
-.term:hover, .term.open { text-decoration-color: var(--accent); }
+/* Hover term: a word defined where it is used. An orange-tinted word with an orange dotted line, so it
+   reads as "point here". Hover, keyboard focus or a tap shows a card with the meaning and one example.
+   The script adds the card's heading, the ids, the aria and Escape. */
+.term { font-style: normal; position: relative; cursor: help; color: color-mix(in oklab, var(--accent) 70%, var(--ink)); text-decoration: underline dotted; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 4px; border-radius: 3px; }
+.term:hover, .term.open { color: var(--accent); }
 .term:focus { outline: none; }
 .term:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .term-def { display: none; position: absolute; z-index: 40; left: var(--term-dx, 0px); top: calc(100% + 8px); width: max-content; max-width: min(300px, calc(100vw - 32px)); white-space: normal;
@@ -313,6 +320,11 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
   /* display: none while hidden, so a closed card never widens the page; allow-discrete keeps the fade in and out. */
   transition: opacity var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease), display var(--motion-fast) allow-discrete; }
 .term-def b:first-child { font-weight: 650; }
+/* The card: the word as a heading (the page script adds it), the meaning, then one example from this page's topic. */
+.term-def { max-width: min(340px, calc(100vw - 32px)); padding: 11px 14px 12px; }
+.term-name { display: block; font: 700 16.5px/1.3 var(--font-display); color: var(--ink); margin-bottom: 3px; }
+.term-eg { display: block; margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.term-eg::before { content: "e.g."; font: 600 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-right: 7px; }
 .term.up > .term-def { top: auto; bottom: calc(100% + 8px); }
 /* an invisible bridge over the 8 px gap: moving the pointer onto the card keeps it open */
 .term-def::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
@@ -321,9 +333,6 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 .term:focus-visible > .term-def, .term.open > .term-def { display: block; opacity: 1; transform: translateY(0); }
 @starting-style { .term:hover > .term-def, .term:focus-visible > .term-def, .term.open > .term-def { opacity: 0; transform: translateY(4px); } }
 .term.shut > .term-def { display: none !important; }
-/* A term that is the whole point of a section can still get its own line (the older .vocab part). */
-.vocab { border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 15.5px; max-width: var(--measure); margin-top: 14px; }
-.vocab dfn { font-style: normal; font-weight: 700; font-family: var(--font-display); margin-right: 6px; }
 /* The bigger idea: ties a detail to something that holds elsewhere too. */
 .idea { border: 1.5px dashed var(--go); background: var(--go-soft); border-radius: var(--radius); padding: 12px 16px; font-size: 15.5px; max-width: var(--measure); margin-top: 14px; }
 .idea > b:first-child { display: block; font: 600 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--go); margin-bottom: 2px; }
@@ -460,8 +469,12 @@ svg.scene-svg .reveal.shown { opacity: 1; }
   .term { text-decoration: none; outline: none !important; }
   .term-def, .term.shut > .term-def { position: static; display: inline !important; opacity: 1; transform: none; box-shadow: none; border: 0; background: none; padding: 0; width: auto; max-width: none; font-size: .8em; color: var(--muted); }
   .term-def::before { content: " ("; position: static; height: auto; } .term-def::after { content: ")"; }
+  .term { color: inherit; }
+  .term-name { display: none; }
+  .term-eg { display: inline; margin: 0; padding: 0; border: 0; font-size: inherit; }
+  .term-eg::before { content: "; e.g. "; font: inherit; letter-spacing: 0; text-transform: none; color: inherit; margin: 0; }
   h2, h3, h4, .part { break-after: avoid; }
-  .fig, .note, .layers, .vocab, .idea, .worked, .pair > div, .decision, .prog li, table tr, .codeblock, .q { break-inside: avoid; }
+  .fig, .note, .layers, .idea, .worked, .pair > div, .decision, .prog li, table tr, .codeblock, .q { break-inside: avoid; }
   .vw, .vw.is-full { position: static !important; overflow: visible; border: 0; }
   .vw-stage { overflow: visible !important; max-height: none !important; height: auto !important; aspect-ratio: auto !important; }
   .vw-pan { position: static !important; transform: none !important; width: 100% !important; height: auto !important; }

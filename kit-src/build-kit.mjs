@@ -168,8 +168,7 @@ export function buildKit(OUT) {
     <div class="layer real"><span class="lk">The real thing</span><p>A cache keeps a copy of slow-to-get data in fast memory, so the next read skips the slow trip.</p></div>
     <div class="layer breaks"><span class="lk">Where the picture breaks</span><p>A sticky note never goes stale on its own. A cache copy can: the real number changes and the note does not.</p></div>
   </div>`;
-  const hoverTerm = `<p style="margin:0">Each cached copy carries a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How many seconds the cache keeps a copy before it throws it away.</span></abbr>. When two writers race, the cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one, even if the older one held more data.</span></dfn>, so a slow writer can undo a fast one.</p>`;
-  const vocab = `<p class="vocab" style="margin:0"><dfn>TTL</dfn>"Time to live": how many seconds the cache keeps a copy before it throws it away.</p>`;
+  const hoverTerm = `<p style="margin:0">Each cached copy carries a <abbr class="term">TTL<span class="term-def"><b>Time to live.</b> How many seconds the cache keeps a copy before it throws it away. <span class="term-eg">A TTL of 60 means a price read at 9:00:00 is served until 9:01:00, then read again.</span></span></abbr>. When two writers race, the cache uses <dfn class="term">last write wins<span class="term-def">The newest write replaces the older one, even if the older one held more data. <span class="term-eg">Writer A saves 3 fields at 9:00:01, writer B saves 1 field at 9:00:02: only B's 1 field is kept.</span></span></dfn>, so a slow writer can undo a fast one.</p>`;
   const idea = `<div class="idea" style="margin:0"><b>Bigger idea</b>Every cache trades freshness for speed. The only question is how stale you can stand.</div>`;
   const pair = `<div class="pair" style="margin:0"><div><h4>Cache hit</h4><p>The copy is there. Answer in about 1 ms.</p></div><div><h4>Cache miss</h4><p>No copy. Go to the database (about 40 ms), then keep a copy.</p></div></div>`;
   const worked = `<div class="worked" style="margin:0"><b>100 reads of the same page</b><ol><li>First read: miss, 40 ms.</li><li>Next 99 reads: hits, 1 ms each = 99 ms.</li></ol><p class="res">139 ms in all, against 4,000 ms with no cache.</p></div>`;
@@ -244,8 +243,7 @@ export function buildKit(OUT) {
         <div class="part">Explain</div><h2>Parts for explain pages</h2>
         <p class="section-intro">Pick the ones the topic needs. Two explain pages should not look the same.</p>
         ${demo('ELI5 layers', layers, 'For the core ideas: the picture, the real thing, then where the picture breaks.')}
-        ${demo('Hover term', hoverTerm, 'The main way to define a word. Point at a dotted word, Tab to it, or tap it on a phone: a small card shows what it means. Escape closes it. In print the meaning shows in brackets after the word. Define only real jargon, and spell out every acronym the first time. The term also goes in the glossary.')}
-        ${demo('Term on its own line', vocab, 'A fallback, for the one term a whole section is about. Most terms should be hover terms.')}
+        ${demo('Hover term', hoverTerm, 'The only way to define a word. The word is tinted orange with an orange dotted line. Point at it, Tab to it, or tap it on a phone: a card shows the word, what it means and one example. Escape closes it. In print the meaning shows in brackets after the word. Define only real jargon (0 to 5 a page for an engineer), and spell out every acronym the first time except ones every engineer knows (API, PR, CI, MCP, AWS).')}
         ${demo('Bigger idea', idea)}
         ${demo('Side by side', pair, 'Two things compared. Stacks on a phone.')}
         ${demo('Worked example', worked, 'Real numbers, one line each, the result last.')}

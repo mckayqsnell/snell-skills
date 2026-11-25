@@ -10,7 +10,7 @@ Instructions for an AI agent that makes HTML pages: plans, explainers, reviews. 
 |---|---|---|
 | `HOUSE-STYLE.md` | This file. The rules. | Always, first. |
 | `PARTS.md` | Every part: its classes and a markup snippet. About 5 KB. | Always. Copy markup from here. |
-| `explain-template.html` | A starter for explain pages: header, one concept, recap, likely questions, glossary. Not a fixed layout. | Copy only. |
+| `explain-template.html` | A starter for explain pages: header, one concept, recap, likely questions, and a glossary when there are 5+ hover terms. Not a fixed layout. | Copy only. |
 | `page.html` | A plain starter for any other page (a review, report or guide): header, one open section, one folded section with a table. | Copy only. |
 | `template.html` | An empty plan page with every part. **Copy it; don't read it whole.** The fonts are packed in, so it is about 180 KB. | Copy only. Read just the `<body>` if you must. |
 | `house-style.html` | Every part and drawing, live, with code to copy. For people. | Open in a browser to look. |
@@ -43,11 +43,11 @@ Write the way plainlanguage.gov says: talk to the reader, keep it short, use com
 - Short sentences. Most under 20 words.
 - Active voice: "The script checks the page", not "The page is checked".
 - One idea per sentence. One topic per paragraph.
-- Common words. If you must use a technical term, define it where it first shows up with a hover term (see PARTS.md).
-- **Know the reader.** By default the reader is a software engineer (`vocab.reader: engineer` in `settings.md`). They know app, ticket, deploy, endpoint, cache, branch and the like. **Never define basic engineering words.** Define only real jargon this reader wouldn't know: a word from a field they may not work in ("quorum", "backpressure"), or a word this project made up.
-- **Always spell out an acronym the first time,** in a hover term: `<abbr class="term">`, with the words the letters stand for at the start of the card. Skip the ones every engineer knows (API, URL, HTML). `--verbose` lists the acronyms nothing spells out.
+- Common words. If you must use a technical term, define it where it first shows up with a hover term (see PARTS.md). A hover term is the only way to define a word: never a box or a line of its own.
+- **Know the reader.** By default the reader is a competent software engineer (`vocab.reader: engineer` in `settings.md`). They know app, ticket, deploy, endpoint, cache, branch, cron, migration, webhook, schema, queue and the like. **Never define basic engineering words.** Define only real jargon this reader wouldn't know: a word from a field they may not work in ("quorum", "backpressure"), or a word this project made up ("connector grant"). Most pages need 0 to 5 hover terms. The checker warns above 8: past that, the page is defining things the reader knows.
+- **Spell out every acronym the first time,** in a hover term: `<abbr class="term">`, with the words the letters stand for at the start of the card. The one exception is acronyms every engineer knows: API, URL, PR, CI, MCP, AWS, SQL, JSON, HTTP, CLI, UI, DB, AI and the like (the full list is `ACRONYMS_KNOWN` in `vocab-check.mjs`). Anything else gets a card, even fairly common ones like SDK, OAuth or JWT. The checker lists the acronyms nothing spells out.
 - **A non-technical reader** (a `for:"…"` page for someone who doesn't write code): put `<meta name="vocab-reader" content="general">` in the page. Then everyday software words count as hard words too, so define them or use plainer words.
-- The checker counts a term in a hover term, `<dfn>` or `<abbr>` as explained everywhere on the page, plurals too. A glossary entry alone counts for nothing: the glossary helps the reader look back, it doesn't explain anything where the word is used.
+- The checker counts a term in a hover term, `<dfn>` or `<abbr>` as explained everywhere on the page, plurals too. A glossary entry alone counts for nothing: the glossary helps the reader look back, it doesn't explain anything where the word is used. Add a glossary only when a page has 5 or more hover terms.
 - No filler words. `vocab-check.mjs --verbose` lists any it finds.
 - Headings say what the section is about, in plain words.
 - Numbers as digits: "3 files", "15 KB", "2 days".
@@ -115,13 +115,13 @@ Color means something. Use at most 3 hues in one drawing (teal, violet, ochre, r
 
 ## Check before you hand over
 
-If you have a browser (Playwright, or the agent's own browser), open the page and check:
+If you have a browser, open the page headless and check. Prefer `playwright-cli` with your own `-s=<name>` session, which is headless by default; a browser that opens a window on the user's screen is a last resort. Check:
 
 1. Desktop light, desktop dark, a wide screen (1600 px or more), and phone at 390 px. Nothing scrolls sideways except drawings and code in their own box.
 2. No console errors.
 3. Pick an option and type a note: the response text changes and quotes the note with `> `.
 4. Open one drawing with Expand, and press Play on any scene. Packets move, the right part lights up, and Escape closes the view.
-5. Point at a hover term: its card shows, and goes away when you move off. Tab to it and press Escape: the card closes.
+5. Point at a hover term: its card shows the word, the meaning and an example, and goes away when you move off. Tab to it and press Escape: the card closes.
 6. Look at the screenshots yourself. A passing script is not the same as a page that reads well.
 
 Don't install a browser on the user's machine without asking. No browser? Read the page through yourself: `<title>` set, one `<h1>`, every color a variable, every `getElementById` matches an id, nothing loaded from a web URL. Then hand over and say you checked it by reading.

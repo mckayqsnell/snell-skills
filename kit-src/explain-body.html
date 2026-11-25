@@ -5,7 +5,7 @@
   </nav>
   <main>
     <!-- A STARTER, NOT A LAYOUT. Pick the parts the topic needs from PARTS.md and put them in the order that teaches best.
-         Two explain pages should not look the same. Always keep: the header, the concept sections, the recap, the likely questions, the glossary.
+         Two explain pages should not look the same. Always keep: the header, the concept sections, the recap, the likely questions. A glossary only with 5+ hover terms.
          The figure below is one shape among many: a scene with Play, isometric 3D, moving data, a picture of the mechanism. -->
     <div class="topbar">
       <span class="tag">Explain · for {{me / who}} · {{DATE}}</span>
@@ -29,8 +29,9 @@
         <div class="layer real"><span class="lk">The real thing</span><p>{{The real term and what it does, in plain words.}}</p></div>
         <div class="layer breaks"><span class="lk">Where the picture breaks</span><p>{{One way the picture is wrong, so it doesn't mislead later.}}</p></div>
       </div>
-      <!-- Hover terms: only real jargon this reader wouldn't know; spell out every acronym the first time. Never basic words like app or ticket. Each one also goes in the glossary. -->
-      <p>{{A sentence that uses}} <dfn class="term">{{term}}<span class="term-def">{{What it means, in one line.}}</span></dfn> {{where it first shows up.}}</p>
+      <!-- Hover terms: the only way to define a word. Only real jargon this reader wouldn't know (0-5 a page for an engineer); never basic words like app, cron or migration.
+           Spell out every acronym the first time, except ones every engineer knows (API, PR, CI, MCP, AWS...). Every card ends with one example from this topic. -->
+      <p>{{A sentence that uses}} <dfn class="term">{{term}}<span class="term-def">{{What it means, in one line.}}<span class="term-eg">{{One example from this topic: a real name, number or step.}}</span></span></dfn> {{where it first shows up.}}</p>
       <figure class="fig"><div class="fig-box">{{SVG}}</div><figcaption>{{What to notice.}}</figcaption><p class="swipe">Swipe sideways to see the whole drawing.</p></figure>
       <div class="idea"><b>Bigger idea</b>{{How this detail ties to something that holds elsewhere too.}}</div>
     </section>
@@ -53,6 +54,7 @@
       </div>
     </section>
 
+    <!-- GLOSSARY: only when the page has 5 or more hover terms. Otherwise delete this section. -->
     <section id="glossary" data-toc="Glossary" data-fold="closed" data-hint="{{N}} terms">
       <div class="part">Words</div>
       <h2>Glossary</h2>

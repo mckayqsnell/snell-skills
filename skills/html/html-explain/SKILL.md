@@ -64,10 +64,10 @@ Mix them. Use what this topic needs and skip the rest. **Two explain pages shoul
 - **Sections that each say one idea.** The `h2` is the takeaway as a plain sentence ("A cache trades freshness for speed"), not a label ("Caching"). 3–7 of them is usual.
 - **A worked example with numbers** when the topic has numbers. Made-up numbers are fine if the example says so.
 - **Facts checked** (step 3), with sources in a folded "Sources" section when you looked anything up.
-- **Terms:** a hover term (`<dfn class="term">` or `<abbr class="term">`, see PARTS.md) where a term first shows up, and the same term in the glossary. Define only real jargon this reader wouldn't know. **Never define basic engineering words** (app, ticket, deploy, endpoint): the default reader is a software engineer. **Always spell out an acronym the first time,** unless every engineer knows it (API, URL). The word check counts a term as explained only where it is defined in place, not for being in the glossary.
+- **Terms: hover cards only, and few of them.** The reader is a competent software engineer. Never define basic engineering words (app, ticket, deploy, endpoint, cron, migration, webhook). Define only real jargon from another field (backpressure, quorum) and words this project made up, each as a hover term where it first shows up (`<dfn class="term">` or `<abbr class="term">`, see PARTS.md). Every card ends with one `<span class="term-eg">` example from this page's topic. Spell out every acronym the first time, except the ones every engineer knows (API, URL, PR, CI, MCP, AWS, SQL and the like); SDK, OAuth or JWT still get a card. Most pages need 0 to 5 terms. Never a box or a line of its own for a term. The word check counts a term as explained only where it is defined in place.
 - **Say where it simplifies.** Every picture, drawing or scene leaves something out. Say what, in one line near it, so it doesn't mislead later.
 - **A bigger idea** (`.idea`) when a detail ties to something that holds elsewhere.
-- **End with:** a recap (3–5 takeaways), then "Questions you might have", then the glossary (folded).
+- **End with:** a recap (3–5 takeaways), then "Questions you might have". Add a folded glossary only when the page has 5 or more hover terms.
 
 ### Questions you might have
 
@@ -79,10 +79,10 @@ Near the end, answer what a sharp reader would ask next. Write 4–8 questions: 
 
 ## 5. Check, then hand over
 
-1. **Browser check** if you have one: desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. Also a wide screen (1600 px or more). No console errors, no sideways scroll except drawings and code in their own box. Press Play on a scene and watch it to the end. Open one drawing with Expand. Open one question. Point at a hover term, then Tab to one and press Escape. Look at the screenshots yourself.
+1. **Browser check, headless,** if you have one (`playwright-cli -s=<name>`, headless by default; not a browser that opens a window on the user's screen): desktop light, desktop dark (emulate the dark color scheme, or pick Dark in the page's gear), phone at 390 px (resize the viewport). Serve the folder on localhost if `file://` is blocked. Also a wide screen (1600 px or more). No console errors, no sideways scroll except drawings and code in their own box. Press Play on a scene and watch it to the end. Open one drawing with Expand. Open one question. Point at a hover term (the card shows the word, the meaning and an example), then Tab to one and press Escape. Look at the screenshots yourself.
 2. **No browser?** Don't install one without asking. Read it through instead: `<title>` set, one `<h1>`, every color a variable, no `{{` left, no web URLs. Say you checked it by reading.
 3. **Placeholders:** `grep -n '{{' <page>` prints nothing.
-4. **Words:** `node kit/vocab-check.mjs <page> --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80). For `for:"…"` a non-technical reader, aim higher.
+4. **Words:** `node kit/vocab-check.mjs <page> --level <N>` must pass, where N is `vocab.level` in `settings.md` (default 80). For `for:"…"` a non-technical reader, aim higher. Fix every `WARN` it prints: more than 8 hover terms, a card with no example, or an old `.vocab` box.
 5. **Can't fix something?** Say it in one sentence and hand over anyway.
 6. **Open it** (`open` on Mac, `xdg-open` on Linux, `start` on Windows). No screen: print the path. Tell the user the path in one line.
 
