@@ -54,7 +54,12 @@ const cached = (id) => ['snapshots', 'blobs'].some((d) => { try { return fs.read
 // HyperFrames CLI: HYPERFRAMES_CLI is the plugin's scripts/plugin-cli.mjs (what the hyperframes skill runs), else npx.
 export function hf(args, o) {
   const cli = process.env.HYPERFRAMES_CLI;
-  return cli ? run(process.execPath, [cli, ...args], o) : run('npx', ['--yes', 'hyperframes', ...args], { shell: process.platform === 'win32', ...o });
+  if (cli) return run(process.execPath, [cli, ...args], o);
+  // On Windows npx is a .cmd that Node only starts through cmd.exe, which would read "&" or "|" in a line's text as
+  // shell syntax: run npm's own npx-cli.js with node instead, and use the shell only if it isn't there.
+  const npxCli = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npx-cli.js');
+  if (process.platform === 'win32' && fs.existsSync(npxCli)) return run(process.execPath, [npxCli, '--yes', 'hyperframes', ...args], o);
+  return run('npx', ['--yes', 'hyperframes', ...args], { shell: process.platform === 'win32', ...o });
 }
 
 // The ElevenLabs key: the environment first, then ~/.config/snell-skills/local.env. Never printed, logged or copied.
