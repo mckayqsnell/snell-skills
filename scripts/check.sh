@@ -330,6 +330,7 @@ JSON
   { "id": "v2", "track": "story-cut", "mark": "flash", "text": "two" } ] }
 JSON
   out="$(cd "$ws" && node "$dir/voice.mjs" place story-cut)"; echo "  voice.mjs place: $(printf '%s' "$out" | tr -d '\n ')"
+  # shellcheck disable=SC2016 # the backticks are JavaScript template strings
   node -e '
     const r = JSON.parse(process.argv[1]); const fit = require(process.argv[2]);
     const fail = (m) => { console.error("❌ voice.mjs place: " + m); process.exit(1); };
@@ -346,6 +347,7 @@ JSON
   mkdir -p "$ws/cut"
   printf '%s\n' '{"out":"talk","keep":[{"take":"t1","from":1.5,"to":1.8},{"take":"t1","from":3.2,"to":4.0,"speed":4}]}' > "$ws/cut/edl.json"
   out="$(cd "$ws" && node "$dir/edl.mjs")"; echo "  edl.mjs: $(printf '%s' "$out" | tr -d '\n ')"
+  # shellcheck disable=SC2016 # the backticks are JavaScript template strings
   node -e '
     const r = JSON.parse(process.argv[1]); const seg = require(process.argv[2]).segments;
     const fail = (m) => { console.error("❌ edl.mjs: " + m); process.exit(1); };
