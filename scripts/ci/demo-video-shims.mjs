@@ -12,6 +12,9 @@ const cli = ['@playwright', 'cli', 'cli.js'];
 const cases = [
   ['sh shim (pnpm, macOS/Linux)', path.join(root, 'bin', 'playwright-cli'),
     'exec node  "$basedir/../node_modules/@playwright/cli/cli.js" "$@"', path.join(root, 'node_modules', ...cli)],
+  ['sh shim (newer pnpm, $basedir_abs and a cmd-shim-target comment)', path.join(root, 'node_modules', '.bin', 'playwright-cli'),
+    'basedir_abs=$(cd "$basedir" && pwd)\nif [ -x "$basedir/node" ]; then\n  exec "$basedir/node"  "$basedir_abs/../.pnpm/@playwright+cli@0.1.22/node_modules/@playwright/cli/playwright-cli.js" "$@"\nfi\n# cmd-shim-target=../.pnpm/@playwright+cli@0.1.22/node_modules/@playwright/cli/playwright-cli.js\n',
+    path.join(root, 'node_modules', '.pnpm', '@playwright+cli@0.1.22', 'node_modules', '@playwright', 'cli', 'playwright-cli.js')],
   ['npm install -g .cmd shim', path.join(root, 'playwright-cli.cmd'),
     '@ECHO off\r\nSET dp0=%~dp0\r\nIF EXIST "%dp0%\\node.exe" (\r\n  SET "_prog=%dp0%\\node.exe"\r\n)\r\n"%_prog%"  "%dp0%\\node_modules\\@playwright\\cli\\cli.js" %*\r\n',
     path.join(root, 'node_modules', ...cli)],

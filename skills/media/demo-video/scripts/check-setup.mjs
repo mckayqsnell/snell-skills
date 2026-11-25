@@ -96,10 +96,12 @@ export async function checkSetup() {
     if (b.ok && m.os === 'linux' && m.arch === 'arm64') {
       const set = process.env.HYPERFRAMES_BROWSER_PATH;
       const ok = Boolean(set && fs.existsSync(set));
-      checks.push({ name: 'hyperframes-browser', ok, detail: set ? `${set}${ok ? '' : ' (no such file)'}` : 'not set (no Chrome download for Linux on ARM)', fix: ok ? null : `export HYPERFRAMES_BROWSER_PATH="${b.chromiumPath}"` });
+      // Only Full mode (HyperFrames) needs it, so it never blocks "ready".
+      checks.push({ name: 'hyperframes-browser', fullOnly: true, ok, detail: set ? `${set}${ok ? '' : ' (no such file)'}` : 'not set (no Chrome download for Linux on ARM)', fix: ok ? null : `export HYPERFRAMES_BROWSER_PATH="${b.chromiumPath}"` });
     }
   }
-  return { machine: m, read: m.file, quickMode: Boolean(quickOk), ready: checks.every((c) => c.ok), checks };
+  return { machine: m, read: m.file, quickMode: Boolean(quickOk), ready: checks.every((c) => c.ok || c.fullOnly),
+    fullModeReady: checks.every((c) => c.ok), checks };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) {
@@ -107,7 +109,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process
   if (process.argv.includes('--json')) { console.log(JSON.stringify(r, null, 1)); } else {
     console.log(`os: ${r.machine.os} — ${r.machine.label}`);
     console.log(`read: ${path.join(path.dirname(here), r.read)}`);
-    for (const c of r.checks) console.log(`${c.ok ? 'ok  ' : 'MISSING'} ${c.name}: ${c.detail}${c.fix ? `\n        fix: ${c.fix}` : ''}`);
-    console.log(r.ready ? 'ready: yes' : 'ready: no (ask the user before installing anything)');
+    for (const c of r.checks) console.log(`${c.ok ? 'ok  ' : c.fullOnly ? 'FULL MODE NEEDS' : 'MISSING'} ${c.name}: ${c.detail}${c.fix ? `\n        fix: ${c.fix}` : ''}`);
+    console.log(r.ready ? `ready: yes${r.fullModeReady ? '' : ' (Full mode also needs the line above)'}` : 'ready: no (ask the user before installing anything)');
   }
 }

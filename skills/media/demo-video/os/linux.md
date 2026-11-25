@@ -4,7 +4,7 @@ Setup for Linux, including WSL and containers. `check-setup.mjs` sent you here; 
 
 ## Install what's missing
 
-Ask the user before you install anything. Steps that need `sudo` only work if it runs without a password (`sudo -n true`). If it asks for one, give the user the exact command to run themselves (in Claude Code they can type `! <command>`), and wait.
+Ask the user before you install anything. A fix line that starts with `sudo` needs root. If `sudo -n true` works, run it. If sudo asks for a password, give the user the exact command to run themselves (in Claude Code they can type `! <command>`), and wait. If you're already root (common in a container), the check leaves `sudo` off. If there's no `sudo` and you aren't root, ask the user to run the line as root.
 
 | Missing | Install |
 |---|---|
@@ -12,7 +12,7 @@ Ask the user before you install anything. Steps that need `sudo` only work if it
 | playwright | `npm install -g @playwright/cli`. If npm's global folder needs root, use the app's own Playwright, or set `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to PATH. |
 | browser, not installed | `playwright-cli install-browser chromium`, as the user, not with sudo: the browser goes in the user's own cache. |
 | browser, missing libraries | The fix line from `check-setup.mjs`. It runs Playwright's own `install-deps` as root for the system libraries only (it uses apt, so Ubuntu and Debian). On another distro, install the library the line names with its package manager. |
-| hyperframes-browser (ARM only) | Google has no Chrome download for Linux on ARM, so HyperFrames can't fetch one. Use Playwright's: run the `export HYPERFRAMES_BROWSER_PATH=…` line from `check-setup.mjs` in the same command as each `npx hyperframes` call (each command starts a fresh shell). |
+| hyperframes-browser (ARM only, Full mode only) | Google has no Chrome download for Linux on ARM, so HyperFrames can't fetch one. It doesn't block `ready: yes`, since recording and Quick mode don't need it. For Full mode, use Playwright's Chromium: run the `export HYPERFRAMES_BROWSER_PATH=…` line from `check-setup.mjs` in the same command as each `npx hyperframes` call (each command starts a fresh shell). |
 
 Run `node <skill>/scripts/check-setup.mjs` again until it prints `ready: yes`.
 

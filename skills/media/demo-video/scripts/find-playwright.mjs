@@ -35,10 +35,12 @@ function cliBin() {
   return (WIN && lines.find((l) => /\.cmd$/i.test(l))) || lines[0] || null;
 }
 
-// The .js file a shim starts. npm on macOS/Linux links straight to it; pnpm writes a sh shim ("$basedir/…");
+// The .js file a shim starts. npm on macOS/Linux links straight to it; pnpm writes a sh shim ("$basedir/…" or "$basedir_abs/…");
 // npm and pnpm on Windows write a .cmd shim ("%dp0%\…" or "%~dp0\…").
 export function shimTarget(shimPath, text) {
-  const m = text.match(/"\$basedir\/([^"]*@playwright\/cli\/[^"]*\.js)"/)
+  // Newer pnpm also writes the target as a comment: "# cmd-shim-target=../.pnpm/…/playwright-cli.js".
+  const m = text.match(/^# cmd-shim-target=(.*@playwright[\\/]cli[\\/].*\.js)\s*$/m)
+    || text.match(/"\$basedir(?:_abs)?\/([^"]*@playwright\/cli\/[^"]*\.js)"/)
     || text.match(/"%~?dp0%?\\?([^"]*@playwright[\\/]cli[\\/][^"]*\.js)"/i);
   return m ? path.resolve(path.dirname(shimPath), m[1].split(/[\\/]/).join(path.sep)) : null;
 }

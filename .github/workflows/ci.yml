@@ -218,17 +218,8 @@ jobs:
           WANT_OS: ${{ matrix.os }}
         run: |
           set -euo pipefail
-          node scripts/ci/demo-video-os.mjs
           node skills/media/demo-video/scripts/check-setup.mjs
-          node skills/media/demo-video/scripts/check-setup.mjs --json > "$RUNNER_TEMP/setup.json"
-          node -e '
-            const r = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
-            const bad = [];
-            if (r.machine.os !== process.env.WANT_OS) bad.push(`os is ${r.machine.os}, want ${process.env.WANT_OS}`);
-            if (r.read !== `os/${process.env.WANT_OS}.md`) bad.push(`read is ${r.read}`);
-            if (!r.ready) bad.push("not ready: " + r.checks.filter((c) => !c.ok).map((c) => c.name).join(", "));
-            if (bad.length) { console.error(bad.join("; ")); process.exit(1); }
-          ' "$RUNNER_TEMP/setup.json"
+          node scripts/ci/demo-video-os.mjs --want "$WANT_OS"
 
       # Skips with a note when the demo-video skill is not in the branch.
       - name: Cut a test clip and map its times
