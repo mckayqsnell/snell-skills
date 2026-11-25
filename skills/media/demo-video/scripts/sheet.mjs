@@ -1,12 +1,12 @@
 // Contact sheet with time labels, so a reviewer can name exact moments.
 //   node recorder/sheet.mjs <video> <out.png> <from> <to> <step> [cols] [tileWidth]
 //   node recorder/sheet.mjs <video> <out.png> --at 1.2,3.4,5 [cols] [tileWidth]
-// Labels are drawn by a headless page because Homebrew's ffmpeg often has no drawtext filter.
+// Labels are drawn by a headless page because many ffmpeg builds (Homebrew's among them) have no drawtext filter.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { chromium } from './recorder.mjs';
+import { launchBrowser } from './recorder.mjs';
 
 const [video, out, a, b, c, colsArg, wArg] = process.argv.slice(2);
 let times; let cols; let w;
@@ -27,8 +27,7 @@ const imgs = times.map((t, i) => {
 });
 const html = `<body style="margin:0;background:#444;display:grid;grid-template-columns:repeat(${cols},${w}px);gap:4px;padding:4px;width:max-content">
 ${imgs.map((i) => `<div style="position:relative"><img src="${i.src}" style="width:${w}px;display:block"><span style="position:absolute;right:6px;bottom:6px;background:#000c;color:#fff;font:600 18px Arial;padding:2px 6px">${i.t.toFixed(2)}s</span></div>`).join('')}</body>`;
-let browser;
-try { browser = await chromium.launch({ channel: 'chrome', headless: true }); } catch { browser = await chromium.launch({ headless: true }); }
+const browser = await launchBrowser({ headless: true });
 try {
 const page = await browser.newPage({ viewport: { width: cols * (w + 4) + 4, height: 400 } });
 await page.setContent(html); await page.waitForTimeout(200);

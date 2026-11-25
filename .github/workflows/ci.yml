@@ -143,17 +143,36 @@ jobs:
           set -euo pipefail
           bash scripts/check.sh --only changeset
 
+  # demo-video on the three OSes people run it on: check-setup.mjs must name the
+  # right OS file and report ready, the cut test, finding playwright-cli through
+  # its shims (Windows has no `sh`), and a real recorded take at 3200x1800.
   demo-video:
-    name: demo-video scripts smoke test
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    name: demo-video on ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Linux, runner: ubuntu-24.04, os: linux }
+          - { name: Windows, runner: windows-2025, os: windows }
+          - { name: macOS, runner: macos-15, os: macos }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
     permissions:
       contents: read
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Check out the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Set up pnpm (version from package.json "packageManager")
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          cache: true
 
       - name: Set up Node.js
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
@@ -162,24 +181,81 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      # Skips man-db's slow index rebuild, and only refreshes the package
-      # lists if the runner's copy is too old to install from.
-      - name: Install ffmpeg (Ubuntu package)
+      # Only @playwright/cli (pinned in pnpm-lock.yaml) is used here: no install scripts needed.
+      - name: Install dependencies (exact versions, no install scripts)
         if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
         run: |
           set -euo pipefail
+          pnpm install --frozen-lockfile --ignore-scripts
+          # pnpm's playwright-cli shim on PATH for the steps below, the way a global install is.
+          if [ "$RUNNER_OS" = Windows ]; then cygpath -w "$PWD/node_modules/.bin"; else printf '%s\n' "$PWD/node_modules/.bin"; fi >> "$GITHUB_PATH"
+
+      # The install line os/<os>.md gives, skipped when the runner image has ffmpeg.
+      - name: Install ffmpeg
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+        run: |
+          set -euo pipefail
           if ! command -v ffmpeg >/dev/null; then
-            sudo rm -f /var/lib/man-db/auto-update
-            get_ffmpeg() { sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null; }
-            get_ffmpeg || { sudo apt-get update -qq && get_ffmpeg; }
+            case "$RUNNER_OS" in
+              Linux)
+                # Skips man-db's slow index rebuild, and only refreshes the package
+                # lists if the runner's copy is too old to install from.
+                sudo rm -f /var/lib/man-db/auto-update
+                get_ffmpeg() { sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null; }
+                get_ffmpeg || { sudo apt-get update -qq && get_ffmpeg; } ;;
+              Windows) choco install ffmpeg -y --no-progress >/dev/null ;;
+              macOS) brew install --quiet ffmpeg ;;
+            esac
           fi
           ffmpeg -hide_banner -version | head -1
+
+      - name: check-setup.mjs names this OS and is ready
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        env:
+          WANT_OS: ${{ matrix.os }}
+        run: |
+          set -euo pipefail
+          node skills/media/demo-video/scripts/check-setup.mjs
+          node scripts/ci/demo-video-os.mjs --want "$WANT_OS"
 
       # Skips with a note when the demo-video skill is not in the branch.
       - name: Cut a test clip and map its times
         run: |
           set -euo pipefail
           bash scripts/check.sh --only demo-video
+
+      # Every shim format (npm -g, pnpm, sh) is read as text; then, from an empty
+      # folder, find the Playwright behind pnpm's real shim (as a global install is found).
+      - name: Find playwright-cli through its shim
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        run: |
+          set -euo pipefail
+          node scripts/ci/demo-video-shims.mjs
+          finder="$PWD/skills/media/demo-video/scripts/find-playwright.mjs"
+          cd "$RUNNER_TEMP"
+          found="$(node "$finder")"
+          echo "$found"
+          case "$found" in *playwright-core*) ;; *) echo "find-playwright.mjs did not find playwright-core" >&2; exit 1 ;; esac
+
+      # A real 1 s take at the skill's default 1280x720 at 2.5x in headless Chrome (on
+      # every runner image): the page size, frames, the ffmpeg concat list, the MP4 and
+      # the event log. Then cleanup.
+      - name: Record a short take, then clean up
+        if: hashFiles('skills/media/demo-video/scripts/*.mjs') != ''
+        run: |
+          set -euo pipefail
+          take="$PWD/scripts/ci/demo-video-take.mjs"
+          node skills/media/demo-video/scripts/setup.mjs "$RUNNER_TEMP" take-ws >/dev/null
+          ws="$RUNNER_TEMP/take-ws"
+          cd "$RUNNER_TEMP"
+          node "$take" "$ws"
+          node "$ws/recorder/cleanup.mjs" --add-session ci-take
+          out="$(node "$ws/recorder/cleanup.mjs")"
+          echo "$out"
+          case "$out" in *"could not close"*) exit 1 ;; esac
 
   workflows:
     name: Lint workflows (actionlint, zizmor)

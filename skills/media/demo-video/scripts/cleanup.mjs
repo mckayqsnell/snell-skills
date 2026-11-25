@@ -10,8 +10,10 @@
 //   node recorder/cleanup.mjs --add-scratch <path>   a one-off file or folder to delete at the end
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+
+const SAFE_SESSION = /^[\w.-]+$/;
 
 const ROOT = fs.realpathSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..'));
 if (!fs.existsSync(path.join(ROOT, 'demo-video.json'))) {
@@ -22,6 +24,10 @@ const read = () => (fs.existsSync(LIST) ? JSON.parse(fs.readFileSync(LIST, 'utf8
 const [flag, value] = process.argv.slice(2);
 
 if (flag === '--add-session' || flag === '--add-scratch') {
+  if (!value) { console.error(`${flag} needs a value`); process.exit(1); }
+  if (flag === '--add-session' && !SAFE_SESSION.test(value)) {
+    console.error(`session names may use only letters, digits, ".", "_" and "-": ${JSON.stringify(value)}`); process.exit(1);
+  }
   const run = read(); const key = flag === '--add-session' ? 'sessions' : 'scratch';
   if (!run[key].includes(value)) run[key].push(value);
   fs.writeFileSync(LIST, JSON.stringify(run, null, 1));
@@ -31,8 +37,16 @@ if (flag === '--add-session' || flag === '--add-scratch') {
 const dry = flag === '--dry-run';
 const run = read();
 const done = [];
+// Windows starts playwright-cli through its .cmd shim, which Node runs only through a shell,
+// so the session name goes into a command line: only plain names are allowed.
+function closeSession(s) {
+  if (process.platform === 'win32') execSync(`playwright-cli -s=${s} close`, { stdio: 'ignore' });
+  else execFileSync('playwright-cli', [`-s=${s}`, 'close'], { stdio: 'ignore' });
+}
 for (const s of run.sessions) {
-  if (!dry) { try { execFileSync('playwright-cli', [`-s=${s}`, 'close'], { stdio: 'ignore' }); } catch { /* already closed */ } }
+  if (!SAFE_SESSION.test(s)) { done.push(`skipped session ${JSON.stringify(s)}: not a plain name`); continue; }
+  // playwright-cli exits 0 for a session that is already closed, so a failure here is real (not on PATH, say).
+  if (!dry) { try { closeSession(s); } catch (e) { done.push(`could not close session ${s}: ${e.code || e.message} (close it by hand)`); continue; } }
   done.push(`closed session ${s}`);
 }
 // HyperFrames keeps snapshot PNGs here; its check's warm-up Chrome exits on its own a few minutes later.

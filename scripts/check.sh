@@ -140,7 +140,7 @@ step_shellcheck() {
 step_node-syntax() {
   local files=() f out bad=0
   while IFS= read -r f; do files+=("$f"); done < <(git ls-files \
-    ':(glob)skills/**/scripts/*.mjs' ':(glob)skills/**/scripts/*.js' 'scripts/*.mjs')
+    ':(glob)skills/**/scripts/*.mjs' ':(glob)skills/**/scripts/*.js' ':(glob)scripts/**/*.mjs')
   for f in "${files[@]}"; do
     if ! out="$(node --check "$f" 2>&1)"; then
       printf '%s\n' "$out" >&2
@@ -239,7 +239,7 @@ step_demo-video() {
     echo "  skills/media/demo-video/ is not in this checkout, nothing to test"
     return 0
   fi
-  need_cmd ffmpeg "macOS: brew install ffmpeg; Ubuntu: apt-get install ffmpeg" || return 0
+  need_cmd ffmpeg "macOS: brew install ffmpeg; Ubuntu: apt-get install ffmpeg; Windows: winget install Gyan.FFmpeg" || return 0
   need_cmd ffprobe "comes with ffmpeg" || return 0
   # Not run: sheet.mjs draws its labels in a headless browser (Playwright).
   local ws="$SCRATCH/demo-video"
