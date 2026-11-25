@@ -10,9 +10,9 @@
 // --no-ui leaves out the clicks and keys (a recorded video with its own sound keeps only the named cues).
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { CLICK, KEY } from './sfx-packs.mjs';
+import { ffGraph } from './edl.mjs';
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -67,8 +67,6 @@ const out = path.join(ROOT, 'assets/audio', `${name}-ui.wav`);
 if (!hits.length) { console.log('no hits'); process.exit(0); }
 // ffmpeg reads each sound once and splits it, so a take with hundreds of keys stays one small command
 const files = [...new Set(hits.map((h) => h.file))];
-const args = ['-y', '-loglevel', 'error'];
-for (const f of files) args.push('-i', f);
 const uses = files.map((f) => hits.filter((h) => h.file === f).length);
 const split = files.map((f, i) => `[${i}:a]aresample=44100,asplit=${uses[i]}${Array.from({ length: uses[i] }, (_, k) => `[s${i}_${k}]`).join('')}`);
 const seen = files.map(() => 0);
@@ -77,16 +75,5 @@ const chains = hits.map((h, j) => {
   return `[s${i}_${k}]asetrate=44100*${h.rate.toFixed(3)},aresample=44100,volume=${h.vol.toFixed(3)},adelay=${Math.round(h.t * 1000)}:all=1[a${j}]`;
 });
 const graph = `${split.join(';')};${chains.join(';')};${hits.map((_, i) => `[a${i}]`).join('')}amix=inputs=${hits.length}:normalize=0,apad=whole_dur=${clip.duration}[out]`;
-const gf = path.join(ROOT, 'assets/audio', `.${name}-ui.filter`);
-fs.writeFileSync(gf, graph);
-const tail = ['-map', '[out]', '-t', String(clip.duration), '-ac', '2', '-ar', '44100', out];
-// the graph goes in a file (a long take is too long for one command line): ffmpeg 7+ reads it with -/filter_complex,
-// older ones with -filter_complex_script
-try {
-  try { execFileSync('ffmpeg', [...args, '-/filter_complex', gf, ...tail], { stdio: ['ignore', 'ignore', 'pipe'] }); }
-  catch (e) {
-    if (!/Unrecognized option|Option not found/.test(String(e.stderr))) throw e;
-    execFileSync('ffmpeg', [...args, '-filter_complex_script', gf, ...tail]);
-  }
-} finally { fs.rmSync(gf, { force: true }); }
+ffGraph(files, graph, ['-map', '[out]', '-t', String(clip.duration), '-ac', '2', '-ar', '44100', out], path.join(ROOT, 'assets/audio'));
 console.log(JSON.stringify({ out: path.relative(ROOT, out), hits: hits.length, pack: PACK || 'hyperframes', cues: hits.filter((h) => h.file !== keyFile && h.file !== clickFile).length }));

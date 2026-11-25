@@ -138,7 +138,9 @@ export function takeFile(take, root = ROOT) {
   return null;
 }
 const probe = (f) => JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_type,width,height,r_frame_rate:format=duration', '-of', 'json', f], { encoding: 'utf8' }));
-function ffGraph(inputs, graph, tail, scratch) {
+// ffmpeg with the filter graph in a file (a long cut is too long for one command line): ffmpeg 7+ reads it with
+// -/filter_complex, older ones with -filter_complex_script. Shared with sfx.mjs.
+export function ffGraph(inputs, graph, tail, scratch) {
   const gf = path.join(scratch, `.edl-${process.pid}.filter`);
   fs.writeFileSync(gf, graph);
   const args = ['-y', '-loglevel', 'error', ...inputs.flatMap((f) => ['-i', f])];
